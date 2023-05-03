@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+  comfy:
+    build:
+      dockerfile: Dockerfile.local
+      context: ./
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_ROOT_PASSWORD: password
+      POSTGRES_USER: comfy
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: comfy_shop
+    volumes:
+      - ../postgres/:/var/lib/postgresql
