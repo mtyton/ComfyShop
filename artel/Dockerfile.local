@@ -1,0 +1,36 @@
+# Use an official Python runtime based on Debian 10 "buster" as a parent image.
+FROM python:3.11.3-buster
+
+# Port used by this container to serve HTTP.
+EXPOSE 8000
+
+# Set environment variables.
+# 1. Force Python stdout and stderr streams to be unbuffered.
+# 2. Set PORT variable that is used by Gunicorn. This should match "EXPOSE"
+#    command.
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Install system packages required by Wagtail and Django.
+RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    libmariadbclient-dev \
+    libjpeg62-turbo-dev \
+    zlib1g-dev \
+    libwebp-dev \
+ && rm -rf /var/lib/apt/lists/*
+ 
+# Install the project requirements.
+COPY requirements.txt /
+RUN pip install -r /requirements.txt
+
+# Use /app folder as a directory where the source code is stored.
+WORKDIR /app
+
+# Copy the source code of the project into the container.
+COPY ./ /app
+
+# Collect static files.
+RUN python manage.py collectstatic --noinput --clear
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

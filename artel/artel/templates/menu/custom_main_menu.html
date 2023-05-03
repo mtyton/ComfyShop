@@ -1,14 +1,18 @@
-<ul>
-    {% for item in menu_items %}
-        <li class="{{ item.active_class }}">
-            <a href="{{ item.href }}">{{ item.text }}</a>
-            {% if item.sub_menu %}
-                <ul class="sub-menu">
-                    {% for sub_item in item.sub_menu.items %}
-                        <li class="{{ sub_item.active_class }}"><a href="{{ sub_item.href }}">{{ sub_item.text }}</a></li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        </li>
-    {% endfor %}
-</ul>
+{% load static %} 
+<div class="d-flex flex-column flex-shrink-0 p-3 mr-5" style="width: 280px;">
+    <svg class="bi me-2" width="40" height="32">
+        <img src="{% static 'images/las_ruinas_PL.png' %}"/>
+    </svg>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        {% for item in menu_items %}
+            <li class="nav-item">
+                <a href="{{ item.href }}" class="nav-link" aria-current="page">
+                    {{ item.text }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul> 
+    <hr>
+
+  </div>

@@ -31,4 +31,3 @@ class ProductConfig(models.Model):
 class Product(models.Model):
     template = models.ForeignKey(ProductTemplate, on_delete=models.CASCADE)
     config = models.ForeignKey(ProductConfig, on_delete=models.CASCADE)
-
