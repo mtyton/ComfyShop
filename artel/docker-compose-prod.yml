@@ -2,7 +2,7 @@ version: "3.8"
 services:
   comfy:
     build:
-      dockerfile: Dockerfile.local
+      dockerfile: Dockerfile
       context: ./
     ports:
       - "8000:8000"
