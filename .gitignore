@@ -138,3 +138,4 @@ GitHub.sublime-settings
 
 #postgres pass files
 *.my_pgpass
+*.sql

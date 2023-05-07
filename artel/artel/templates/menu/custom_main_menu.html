@@ -10,7 +10,7 @@
         <li class="{{ item.active_class }}">
             <a href="{{ item.href }}">{{ item.text }}</a>
             {% if item.has_children_in_menu %}
-                <button class="btn btn-toggle" data-target="#ddtoggle_{{ item.link_page.pk }}" data-toggle="collapse"
+                <button class="btn btn-toggle" data-bs-target="#ddtoggle_{{ item.link_page.pk }}" data-bs-toggle="collapse"
                     aria-expanded={% if item.active_class %}"true" {% else %} "false" {% endif %} 
                     aria-controls="#ddtoggle_{{ item.link_page.pk }}">
                     &or;
