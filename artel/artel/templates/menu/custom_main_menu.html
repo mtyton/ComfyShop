@@ -3,7 +3,7 @@
 
 
 <div class="d-flex flex-column flex-shrink-0 p-3 mr-5" style="width: 280px;">
-    <img src="{% static 'images/las_ruinas_PL.png' %}" class="rounded mx-auto d-block mt-3"/>
+    <img src="{% static 'images/icons/las_ruinas_PL.png' %}" class="rounded mx-auto d-block mt-3"/>
     <hr>
     <ul class="nav navbar-nav">
     {% for item in menu_items %}
@@ -13,8 +13,7 @@
                 <button class="btn btn-toggle" data-bs-target="#ddtoggle_{{ item.link_page.pk }}" data-bs-toggle="collapse"
                     aria-expanded={% if item.active_class %}"true" {% else %} "false" {% endif %} 
                     aria-controls="#ddtoggle_{{ item.link_page.pk }}">
-                    &or;
-                </button>
+                    <img src = "{% static 'images/icons/caret-down.svg' %}" alt="&or;"/>                </button>
                 {% sub_menu item  template="menu/custom_submenu.html" %}
             {% endif %}
         </li>       
