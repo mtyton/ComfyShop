@@ -10,38 +10,42 @@ from wagtail.admin.forms.models import WagtailAdminModelForm
 from store import models
 
 
-class ProductConfigAdmin(ModelAdmin):
-    model = models.ProductConfig
-    list_display = ("author__name", "color", "price")
-    search_fields = ("author__name", "color", "price")
+class ProductAuthorAdmin(ModelAdmin):
+    model = models.ProductAuthor
+    list_display = ("name", )
+
+
+class ProductCategoryAdmin(ModelAdmin):
+    model = models.ProductCategory
+    list_display = ("name", )
+
+
+class ProductCategoryParamAdmin(ModelAdmin):
+    model = models.ProductCategoryParam
+    list_display = ("key", "param_type")
 
 
 class ProductTemplateAdmin(ModelAdmin):
     model = models.ProductTemplate
-    list_display = ("title", )
-
-
-class ProductAdminForm(WagtailAdminModelForm):
-
-    template_title = fields.CharField()
-    template_code = fields.CharField()
-    template_description = fields.CharField()
-
-    class Meta:
-        fields = ("template_title", "template_code", "template_description")
-        model = models.Product
+    list_display = ("title", "code")
 
 
 class ProductAdmin(ModelAdmin):
     model = models.Product
-    form = ProductAdminForm
+    list_display = ("title", "price")
 
 
 class StoreAdminGroup(ModelAdminGroup):
     menu_label = "Store"
     menu_icon = 'folder-open-inverse'
     menu_order = 200
-    items = (ProductConfigAdmin, ProductTemplateAdmin, ProductAdmin)
-    
+    items = (
+        ProductAuthorAdmin, 
+        ProductCategoryAdmin, 
+        ProductCategoryParamAdmin,
+        ProductTemplateAdmin,
+        ProductAdmin
+    )
+
 
 modeladmin_register(StoreAdminGroup)
