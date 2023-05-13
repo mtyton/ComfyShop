@@ -6,11 +6,18 @@ from wagtail.admin.panels import (
     FieldPanel,
     InlinePanel
 )
-from wagtail.models import Orderable
+from wagtail.models import (
+    Orderable,
+    Page
+)
+from wagtail import fields as wagtail_fields
+from taggit.managers import TaggableManager
+from taggit.models import Tag
 
 
 class ProductAuthor(models.Model):
     name = models.CharField(max_length=255)
+    # TODO - add author contact data
 
     def __str__(self):
         return self.name
@@ -49,6 +56,8 @@ class ProductTemplate(ClusterableModel):
     title = models.CharField(max_length=255)
     code = models.CharField(max_length=255)
     description = models.TextField()
+
+    tags = TaggableManager()
     
     def __str__(self):
         return self.title
@@ -59,6 +68,7 @@ class ProductTemplate(ClusterableModel):
     panels = [
         FieldPanel("category"),
         FieldPanel("author"),
+        FieldPanel("family"),
         FieldPanel('title'),
         FieldPanel('code'),
         FieldPanel('description'),
@@ -74,13 +84,15 @@ class ProductImage(models.Model):
 
 
 class Product(ClusterableModel):
-    template = models.ForeignKey(ProductTemplate, on_delete=models.CASCADE)
+    template = models.ForeignKey(ProductTemplate, on_delete=models.CASCADE, related_name="products")
     price = models.FloatField()
+    available = models.BooleanField(default=True)
 
     panels = [
         FieldPanel("template"),
         FieldPanel("price"),
-        InlinePanel("param_values")
+        InlinePanel("param_values"),
+        InlinePanel("available")
     ]
 
     @property
@@ -92,3 +104,25 @@ class TemplateParamValue(models.Model):
     param = models.ForeignKey(ProductCategoryParam, on_delete=models.CASCADE)
     product = ParentalKey(Product, on_delete=models.CASCADE, related_name="param_values")
     value = models.CharField(max_length=255)
+
+
+class ProductListPage(Page):
+    # TODO add filters
+
+    description = wagtail_fields.RichTextField(blank=True)
+    tags = TaggableManager(blank=True)
+
+    def _get_items(self):
+        if self.tags:
+            return Product.objects.filter(available=True, template__tags__in=self.tags.all())
+        return Product.objects.filter(available=True)
+
+    def get_context(self, request):
+        context = super().get_context(request)
+        context["items"] = self._get_items()
+        return context
+
+    content_panels = Page.content_panels + [
+        FieldPanel("description"),
+        FieldPanel("tags")
+    ]

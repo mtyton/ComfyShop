@@ -1,0 +1,19 @@
+{% extends 'base.html'%}
+
+
+{% block content %}
+
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-sm">
+            {% include 'store/partials/product_card.html' %}
+        </div>
+        <div class="col-sm">
+            {% include 'store/partials/product_card.html' %}
+        </div>
+        <div class="col-sm">
+            {% include 'store/partials/product_card.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}
