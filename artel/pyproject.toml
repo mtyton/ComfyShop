@@ -1,5 +1,8 @@
+[tool.flake8]
+max-line-length = 120
+
 [tool.black]
-line-length = 79
+line-length = 119
 
 [tool.isort]
 profile = "black"
