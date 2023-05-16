@@ -1,4 +1,9 @@
 from django.db import models
+from django.core.paginator import (
+    Paginator,
+    EmptyPage
+)
+from django.conf import settings
 
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -6,13 +11,9 @@ from wagtail.admin.panels import (
     FieldPanel,
     InlinePanel
 )
-from wagtail.models import (
-    Orderable,
-    Page
-)
+from wagtail.models import Page
 from wagtail import fields as wagtail_fields
 from taggit.managers import TaggableManager
-from taggit.models import Tag
 
 
 class ProductAuthor(models.Model):
@@ -62,17 +63,14 @@ class ProductTemplate(ClusterableModel):
     def __str__(self):
         return self.title
 
-    def get_images(self):
-        return self.images.objects.all().values_list("image")
-
     panels = [
         FieldPanel("category"),
         FieldPanel("author"),
-        FieldPanel("family"),
         FieldPanel('title'),
         FieldPanel('code'),
         FieldPanel('description'),
-        InlinePanel("images")
+        InlinePanel("images"),
+        FieldPanel("tags"),
     ]
 
 
@@ -92,8 +90,15 @@ class Product(ClusterableModel):
         FieldPanel("template"),
         FieldPanel("price"),
         InlinePanel("param_values"),
-        InlinePanel("available")
+        FieldPanel("available")
     ]
+
+    @property
+    def main_image(self):
+        images = self.template.images.all()
+        print(images)
+        if images:
+            return images.first().image
 
     @property
     def title(self):
@@ -113,13 +118,24 @@ class ProductListPage(Page):
     tags = TaggableManager(blank=True)
 
     def _get_items(self):
-        if self.tags:
+        if self.tags.all():
             return Product.objects.filter(available=True, template__tags__in=self.tags.all())
         return Product.objects.filter(available=True)
 
     def get_context(self, request):
         context = super().get_context(request)
-        context["items"] = self._get_items()
+        items = self._get_items()
+        if not items:
+            return context
+        
+        paginator = Paginator(items, settings.PRODUCTS_PER_PAGE)
+        page_number = request.GET.get("page", 1)
+        try:
+            page = paginator.page(page_number)
+        except EmptyPage:
+            page = paginator.page(1)
+        context["items"] = page.object_list
+        context["page"] = page
         return context
 
     content_panels = Page.content_panels + [

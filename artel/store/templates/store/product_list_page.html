@@ -3,17 +3,28 @@
 
 {% block content %}
 
-<div class="container">
-    <div class="row mb-3">
-        <div class="col-sm">
-            {% include 'store/partials/product_card.html' %}
-        </div>
-        <div class="col-sm">
-            {% include 'store/partials/product_card.html' %}
-        </div>
-        <div class="col-sm">
-            {% include 'store/partials/product_card.html' %}
-        </div>
+<div class="container mb-3">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for item in items %}
+            <div class="col">
+                {% include 'store/partials/product_card.html' %}
+            </div>
+        {% endfor %}
     </div>
+
 </div>
+
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      <li class="page-item {% if not page.has_previous %} disabled {% endif %}">
+        <a class="page-link" href="?page={{page.number|add:-1}}" tabindex="-1" {% if not page.has_previous %}aria-disabled="true"{% endif %}>Previous</a>
+      </li>
+      {% for pg in page.paginator.get_elided_page_range %}
+        <li class="page-item {% if pg == page.number %}active{% endif %}"><a class="page-link" href="?page={{pg}}">{{pg}}</a></li>
+      {% endfor %}
+      <li class="page-item {% if not page.has_next %} disabled {% endif %}">
+        <a class="page-link" {% if not page.has_next %}aria-disabled="true"{% endif %} href="?page={{page.number|add:1}}">Next</a>
+      </li>
+    </ul>
+  </nav>
 {% endblock %}
