@@ -93,7 +93,7 @@ import dj_database_url as db_url
 
 DATABASES = {
     "default": db_url.parse(
-        os.environ.get("DATABASE_URL")
+        os.environ.get("DATABASE_URL", "postgres://comfy:password@db/comfy_shop")
     )
 }
 
