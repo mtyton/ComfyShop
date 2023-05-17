@@ -1,0 +1,15 @@
+<!-- basic interface to add produts, created for testing -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Store</title>
+</head>
+<body>
+    <h1>Welcome to My Store</h1>
+    <form action="{% url 'add_to_cart' %}" method="POST">
+        <input type="text" id="product_id" name="product_id">
+        {% csrf_token %}
+        <button type="submit">Add Item to Cart</button>
+    </form>
+</body>
+</html>

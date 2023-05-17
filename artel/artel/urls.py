@@ -1,18 +1,25 @@
 from django.conf import settings
 from django.urls import include, path
 from django.contrib import admin
+from django.views.generic import TemplateView
+
 
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
+from cart import views as cart_views
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
-    path("search/", search_views.search, name="search")
+    path("search/", search_views.search, name="search"),
+    path('cart/items/', cart_views.view_cart, name='cart_items'),
+    path('add_to_cart/', cart_views.add_to_cart, name='add_to_cart'),
+    path('remove_from_cart/', cart_views.remove_from_cart, name='remove_from_cart'),
+    path('', TemplateView.as_view(template_name='index.html'), name='index'),
 ]
 
 
