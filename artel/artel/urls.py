@@ -9,17 +9,19 @@ from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
-from cart import views as cart_views
+from store.views import CartItemView, CartView
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
-    path('cart/items/', cart_views.view_cart, name='cart_items'),
-    path('add_to_cart/', cart_views.add_to_cart, name='add_to_cart'),
-    path('remove_from_cart/', cart_views.remove_from_cart, name='remove_from_cart'),
+    path('cart/', CartView.as_view(), name='cart'),
+    path('cart/item/', CartItemView.as_view(), name='add_to_cart'),
+    path('cart/item/<int:cart_item_id>/', CartItemView.as_view(),
+         name='cart_item_remove'),
     path('', TemplateView.as_view(template_name='index.html'), name='index'),
+
 ]
 
 
@@ -29,7 +31,8 @@ if settings.DEBUG:
 
     # Serve static and media files from development server
     urlpatterns += staticfiles_urlpatterns()
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
 
 urlpatterns = urlpatterns + [
     # For anything not caught by a more specific rule above, hand over to

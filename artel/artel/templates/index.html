@@ -1,15 +1,64 @@
-<!-- basic interface to add produts, created for testing -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Store</title>
-</head>
-<body>
-    <h1>Welcome to My Store</h1>
-    <form action="{% url 'add_to_cart' %}" method="POST">
-        <input type="text" id="product_id" name="product_id">
+{% extends "base.html" %}
+    {% block content %}
+    <h1>Shopping Cart</h1>
+
+    <h2>Cart Items</h2>
+    <ul id="cart-items"></ul>
+
+    <h2>Add Item to Cart</h2>
+    <form id="add-to-cart-form" method="POST" action="/cart/item/">
         {% csrf_token %}
-        <button type="submit">Add Item to Cart</button>
+        <div>
+            <label for="id_product_id">Product ID:</label>
+            <input type="number" id="id_product_id" name="product_id" required>
+        </div>
+        <div>
+            <label for="id_quantity">Quantity:</label>
+            <input type="number" id="id_quantity" name="quantity" required>
+        </div>
+        <button type="submit">Add to Cart</button>
     </form>
-</body>
-</html>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Fetch cart items and display them on page load
+        $(document).ready(function() {
+            fetchCartItems();
+        });
+
+        // Add item to cart on form submission
+        $('#add-to-cart-form').on('submit', function(event) {
+            event.preventDefault();
+            const form = $(this);
+            const formData = new FormData(form[0]); // Serialize the form data correctly
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: formData, // Use the serialized form data
+                dataType: 'json',
+                processData: false, // Prevent jQuery from processing the data
+                contentType: false, // Let the browser set the content type
+                success: function(data) {
+                    alert(data.message);
+                    fetchCartItems();
+                }
+            });
+        });
+
+        // Fetch cart items and update the display
+        function fetchCartItems() {
+            fetch('/cart/')
+                .then(response => response.json())
+                .then(data => {
+                    const cartItems = data.cart_items;
+                    const cartItemsList = $('#cart-items');
+                    cartItemsList.empty();
+                    cartItems.forEach(item => {
+                        const li = $('<li>').text(`Product ID: ${item.product_id}, Quantity: ${item.quantity}`);
+                        cartItemsList.append(li);
+                        
+                    });
+                });
+        }
+    </script>
+    {% endblock %}
