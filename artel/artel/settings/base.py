@@ -90,7 +90,6 @@ WSGI_APPLICATION = "artel.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 import dj_database_url as db_url
 
-
 DATABASES = {
     "default": db_url.parse(
         os.environ.get("DATABASE_URL", "postgres://comfy:password@db/comfy_shop")
