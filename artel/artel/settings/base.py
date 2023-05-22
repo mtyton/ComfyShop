@@ -173,3 +173,6 @@ WAGTAILADMIN_BASE_URL = "http://example.com"
 
 # STORE SETTINGS
 PRODUCTS_PER_PAGE = 6
+
+# CART settings
+CART_SESSION_ID = 'cart'
