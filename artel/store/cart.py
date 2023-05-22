@@ -46,7 +46,7 @@ class SessionCart(BaseCart):
         if not self.session.get(settings.CART_SESSION_ID):
             self.session[settings.CART_SESSION_ID] = {}
 
-    def add_item(self, item_id, quantity):
+    def add_item(self, item_id: int, quantity: int) -> None:
         # TODO - add logging
         self.validate_item_id(item_id)
 
@@ -55,7 +55,7 @@ class SessionCart(BaseCart):
         else:
             self.update_item_quantity(item_id, quantity)
 
-    def remove_item(self, item_id):
+    def remove_item(self, item_id: int) -> None:
         self.validate_item_id(item_id)
         try:
             self.session[settings.CART_SESSION_ID].pop(item_id)
@@ -63,7 +63,7 @@ class SessionCart(BaseCart):
             # TODO - add logging
             ...
     
-    def update_item_quantity(self, item_id, change):
+    def update_item_quantity(self, item_id: int, change: int) -> None:
         self.validate_item_id(item_id)
         try:
             self.session[settings.CART_SESSION_ID][item_id] += change

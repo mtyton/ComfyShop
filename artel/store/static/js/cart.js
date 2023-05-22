@@ -17,6 +17,7 @@ $('#add-to-cart-form').on('submit', function(event) {
     });
 });
 
+
 // Fetch cart items and update the display
 function fetchCartItems() {
     fetch('/cart/')
