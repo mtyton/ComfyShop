@@ -19,7 +19,6 @@ class CartItemView(View):
     allowed_methods = ['POST', 'DELETE']
 
     def post(self, request):
-        try:
             product_id = request.POST.get('product_id')
             quantity = request.POST.get('quantity')
             cart = request.session.get('cart', {})
@@ -27,8 +26,6 @@ class CartItemView(View):
             request.session['cart'] = cart
 
             return JsonResponse({'message': 'Item added to cart.'})
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
 
     def delete(self, request, cart_item_id):
         cart = request.session.get('cart', {})

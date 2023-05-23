@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.urls import include, path
 from django.contrib import admin
-from django.views.generic import TemplateView
 
 
 from wagtail.admin import urls as wagtailadmin_urls
@@ -19,9 +18,7 @@ urlpatterns = [
     path('cart/', CartView.as_view(), name='cart'),
     path('cart/item/', CartItemView.as_view(), name='add_to_cart'),
     path('cart/item/<int:cart_item_id>/', CartItemView.as_view(),
-         name='cart_item_remove'),
-    path('', TemplateView.as_view(template_name='index.html'), name='index'),
-
+         name='cart_item_remove')
 ]
 
 

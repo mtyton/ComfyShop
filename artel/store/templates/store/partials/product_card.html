@@ -1,16 +1,24 @@
 {% load static %} 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/cart.js' %}"></script>
 
-
-  <div class="card h-100" style="width: 15rem;">
+<div class="card h-100" style="width: 15rem;">
     <div class="card-header">{{item.title}}</div>
     <div class="card-body">
       <img src="{{item.main_image.url}}" class="rounded mx-auto d-block" style="width: 10rem; height: 10 rem;">
       <p class="card-text">{{item.description}}</p>
-              
+
       <div class="text-end">
         <a href="#" class="btn btn-outline-primary">Details</a>
-        <a href="#" class="btn btn-outline-success">
-            <img src = "{% static 'images/icons/cart.svg' %}" alt="Koszyk"/>
+        <div class="quantity-input">
+          <label for="quantity">Quantity:</label>
+          <input type="number" id="quantity{{item.id}}" name="quantity" min="1" value="1">
+        </div>
+        <a href="#" class="btn btn-outline-success add-to-cart-button" 
+        data-product-id="{{ item.id }}"  
+        data-add-to-cart-url="{% url 'add_to_cart' %}"
+        data-csrf-token="{{ csrf_token }}">
+          <img src="{% static 'images/icons/cart.svg' %}" alt="Koszyk"/>
         </a>
       </div>
     </div>

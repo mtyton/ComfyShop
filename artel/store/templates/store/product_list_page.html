@@ -1,9 +1,19 @@
 {% extends 'base.html'%}
-
+{% load static %} 
+<script src="{% static 'js/cart.js' %}"></script>
 
 {% block content %}
 
 <div class="container mb-3">
+
+  <a href="#" class="btn btn-outline-success" id="cart-button">
+    <img src="{% static 'images/icons/cart.svg' %}" alt="Koszyk" />
+  </a>
+  
+    <div id="cart-dropdown" style="display: none;">
+      <ul id="cart-items"></ul>
+    </div>
+
     <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for item in items %}
             <div class="col">
