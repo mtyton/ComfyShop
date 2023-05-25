@@ -1,21 +1,6 @@
 version: "3.8"
 services:
-  comfy:
-    build:
-      dockerfile: Dockerfile
-      context: ./
-    restart: always
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./:/app
-    environment:
-      - SECRET_KEY
-      - DATABASE_URL
-      - DJANGO_SETTINGS_MODULE
-    env_file:
-      - .env
-    
+
   db:
     image: postgres
     restart: always
@@ -28,3 +13,31 @@ services:
       - ../postgres/:/var/lib/postgresql
     env_file:
       - .env
+
+  comfy:
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    restart: always
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./:/app
+    environment:
+      - SECRET_KEY
+      - DATABASE_URL
+      - DJANGO_SETTINGS_MODULE
+    env_file:
+      - .env
+    depends_on:
+    - db
+
+  web:
+    image: nginx
+    volumes:
+    - ../nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+    - "8000:80"
+    environment:
+    - NGINX_HOST=artel.tepewu.pl
+    - NGINX_PORT=80
