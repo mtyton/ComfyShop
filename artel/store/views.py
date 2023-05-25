@@ -1,5 +1,7 @@
 from django.http import JsonResponse
 from django.views import View
+from django.shortcuts import render
+import json
 
 
 class CartView(View):
@@ -29,8 +31,22 @@ class CartItemView(View):
 
     def delete(self, request, cart_item_id):
         cart = request.session.get('cart', {})
-        if cart_item_id in cart:
-            del cart[cart_item_id]
+        if str(cart_item_id) in cart:
+            del cart[str(cart_item_id)]
         request.session['cart'] = cart
 
-        return JsonResponse({'message': 'Item removed from cart.'})
+        return JsonResponse({'message': 'Item deleted from cart.'})
+
+
+class CartPageView(View):
+    template_name = 'store/cart.html'
+
+    def get(self, request):
+        cart_view = CartView()
+        cart_response = cart_view.get(request)
+        cart_data = json.loads(cart_response.content)
+
+        context = {
+            'cart_items': cart_data['cart_items']
+        }
+        return render(request, self.template_name, context)

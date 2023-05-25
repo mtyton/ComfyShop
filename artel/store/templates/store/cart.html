@@ -1,8 +1,21 @@
-{% extends "base.html" %}
-    {% block content %}
+{% load static %} 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/cart.js' %}"></script>
+
+{% block content %}
     <h1>Shopping Cart</h1>
 
     <h2>Cart Items</h2>
-    <ul id="cart-items"></ul>
-
-    {% endblock %}
+    <div id="cart">
+        <ul id="cart-items">
+            {% for item in cart_items %}
+                <li>
+                    Product ID: {{ item.product_id }}, 
+                    Quantity: 
+                    <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1" step="1" data-product-id="{{ item.product_id }}" data-csrf-token="{{ csrf_token }}">
+                    <a href="#" class="remove-from-cart-button" data-product-id="{{ item.product_id }}" data-csrf-token="{{ csrf_token }}">Remove</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

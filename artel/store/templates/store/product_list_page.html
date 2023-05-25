@@ -4,16 +4,14 @@
 
 {% block content %}
 
+<div id="add-to-cart-options" style="display: none;">
+  <p>Item added to cart.</p>
+  <p>What would you like to do?</p>
+  <button id="continue-shopping">Continue Shopping</button>
+  <button id="go-to-cart">Go to Cart</button>
+</div>
+
 <div class="container mb-3">
-
-  <a href="#" class="btn btn-outline-success" id="cart-button">
-    <img src="{% static 'images/icons/cart.svg' %}" alt="Koszyk" />
-  </a>
-  
-    <div id="cart-dropdown" style="display: none;">
-      <ul id="cart-items"></ul>
-    </div>
-
     <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for item in items %}
             <div class="col">
