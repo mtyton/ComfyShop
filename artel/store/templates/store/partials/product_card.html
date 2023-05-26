@@ -15,9 +15,9 @@
           <input type="number" id="quantity{{item.id}}" name="quantity" min="1" value="1">
         </div>
         <a href="#" class="btn btn-outline-success add-to-cart-button" 
-        data-product-id="{{ item.id }}"  
-        data-add-to-cart-url="{% url 'add_to_cart' %}"
-        data-csrf-token="{{ csrf_token }}">
+          data-product-id="{{ item.id }}"  
+          data-add-to-cart-url="{% url 'add_to_cart' %}"
+          data-csrf-token="{{ csrf_token }}">
           <img src="{% static 'images/icons/cart.svg' %}" alt="Koszyk"/>
         </a>
       </div>

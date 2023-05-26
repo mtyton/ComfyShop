@@ -1,5 +1,6 @@
 
 $(document).on('click', '.add-to-cart-button', function(event) {
+    
     event.preventDefault();
     const button = $(this);
     const formData = new FormData();
@@ -20,6 +21,7 @@ $(document).on('click', '.add-to-cart-button', function(event) {
         contentType: false, // Let the browser set the content type
         success: function(data) {
           // Show the options block
+          createShadedOverlay()
           $('#add-to-cart-options').show();
           button.prop('disabled', false);
         },
@@ -29,8 +31,26 @@ $(document).on('click', '.add-to-cart-button', function(event) {
       });
     });
 
+    function createShadedOverlay() {
+      const body = document.body;
+      const overlay = document.createElement('div');
+      overlay.classList.add('shaded-overlay');
+      body.appendChild(overlay);
+      const optionsdiv = document.getElementById('add-to-cart-options');
+      optionsdiv.classList.add('unshaded-overlay');
+      body.appendChild(optionsdiv);
+    }
+    
+    function removeShadedOverlay() {
+      const overlay = document.querySelector('.shaded-overlay');
+      if (overlay) {
+        overlay.remove();
+      }
+    }
+
     $('#continue-shopping').on('click', function(event) {
       event.preventDefault();
+      removeShadedOverlay();
       $('#add-to-cart-options').hide();
     });
     
@@ -67,6 +87,8 @@ $(document).on('click', '.add-to-cart-button', function(event) {
             quantityInput.dataset.csrfToken = csrf_token;
             li.appendChild(quantityInput);
             
+            li.appendChild(document.createTextNode(' '));
+
             const removeButton = document.createElement('a');
             removeButton.href = '#';
             removeButton.classList.add('remove-from-cart-button');
