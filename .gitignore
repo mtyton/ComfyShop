@@ -140,3 +140,6 @@ GitHub.sublime-settings
 *.my_pgpass
 *.sql
 artel/static/
+
+# media
+artel/media/*
