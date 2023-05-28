@@ -1,5 +1,8 @@
 from django.conf import settings
-from django.urls import include, path
+from django.urls import (
+    include, 
+    path
+)
 from django.contrib import admin
 
 
@@ -8,18 +11,13 @@ from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
-from store.views import CartItemView, CartView, CartPageView
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
-    path('store/cart/', CartPageView.as_view(), name='cartPage'),
-    path('cart/', CartView.as_view(), name='cart'),
-    path('cart/item/<int:cart_item_id>/', CartItemView.as_view(), name='cart_item_remove'),
-    path('cart/item/', CartItemView.as_view(), name='add_to_cart'),
-
+    path("store-app/", include("store.urls"))
 ]
 
 

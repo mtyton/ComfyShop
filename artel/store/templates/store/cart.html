@@ -1,21 +1,34 @@
-{% load static %} 
+{% extends 'base.html' %}
+{% load static %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{% static 'js/cart.js' %}"></script>
 
 {% block content %}
-    <h1>Shopping Cart</h1>
-
-    <h2>Cart Items</h2>
-    <div id="cart">
-        <ul id="cart-items">
-            {% for item in cart_items %}
-                <li>
-                    Product ID: {{ item.product_id }}, 
-                    Quantity: 
-                    <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1" step="1" data-product-id="{{ item.product_id }}" data-csrf-token="{{ csrf_token }}">
-                    <a href="#" class="remove-from-cart-button" data-product-id="{{ item.product_id }}" data-csrf-token="{{ csrf_token }}">Remove</a>
-                </li>
+    <section class="h-100">
+        <div class="container h-100 py-5">
+            <div class="row d-flex justify-content-center align-items-center">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-normal mb-0 text-black">Shopping Cart</h3>   
+                </div>
+            </div>
+            {% for item in cart.get_items %}
+                {% include 'store/partials/cart_item.html' %}
             {% endfor %}
-        </ul>
-    </div>
+
+            <div class="card ">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h5 class="fw-normal mb-0 text-black">To Pay: {{cart.total_price}}</h5>  
+                        </div>
+                        <div class="col-sm-6 text-end">
+                            <button type="button" class="btn btn-success btn-block btn-lg">Proceed to Pay</button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+    
 {% endblock %}

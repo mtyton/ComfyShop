@@ -65,7 +65,7 @@ $(document).on('click', '.add-to-cart-button', function(event) {
 
 
     function fetchCartItems(xcsrf_token){
-      fetch('/cart/')
+      fetch('/store/cart-action/list-products')
         .then(response => response.json())
         .then(data => {
           const cartItems = data.cart_items;

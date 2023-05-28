@@ -56,7 +56,7 @@ class ProductTemplate(ClusterableModel):
     author = models.ForeignKey(ProductAuthor, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     code = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     tags = TaggableManager()
     
@@ -82,6 +82,8 @@ class ProductImage(models.Model):
 
 
 class Product(ClusterableModel):
+    name = models.CharField(max_length=255, blank=True)
+    info = models.TextField(blank=True)
     template = models.ForeignKey(ProductTemplate, on_delete=models.CASCADE, related_name="products")
     price = models.FloatField()
     available = models.BooleanField(default=True)
@@ -90,7 +92,9 @@ class Product(ClusterableModel):
         FieldPanel("template"),
         FieldPanel("price"),
         InlinePanel("param_values"),
-        FieldPanel("available")
+        FieldPanel("available"),
+        FieldPanel("name"),
+        FieldPanel("info")
     ]
 
     @property
@@ -101,8 +105,16 @@ class Product(ClusterableModel):
             return images.first().image
 
     @property
+    def tags(self):
+        return self.template.tags.all()
+
+    @property
+    def description(self):
+        return self.info or self.template.description
+
+    @property
     def title(self):
-        return f"{self.template.title} - {self.price}"
+        return self.name or self.template.title
 
 
 class TemplateParamValue(models.Model):

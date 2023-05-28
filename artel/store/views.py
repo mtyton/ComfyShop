@@ -1,52 +1,52 @@
-from django.http import JsonResponse
-from django.views import View
-from django.shortcuts import render
-import json
+from typing import Any, Dict
+
+from django.views.generic import TemplateView
+from rest_framework.viewsets import ViewSet
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from store.cart import SessionCart
+from store.serializers import (
+    CartProductSerializer, 
+    CartProductAddSerializer
+)
 
 
-class CartView(View):
-    def get(self, request):
-        cart = request.session.get('cart', {})
-        cart_items = cart.items()
-        response_data = {
-            'cart_items': [{
-                'product_id': key,
-                'quantity': value
-            } for key, value in cart_items]
-        }
-        return JsonResponse(response_data)
-
-
-class CartItemView(View):
-    allowed_methods = ['POST', 'DELETE']
-
-    def post(self, request):
-            product_id = request.POST.get('product_id')
-            quantity = request.POST.get('quantity')
-            cart = request.session.get('cart', {})
-            cart[product_id] = quantity
-            request.session['cart'] = cart
-
-            return JsonResponse({'message': 'Item added to cart.'})
-
-    def delete(self, request, cart_item_id):
-        cart = request.session.get('cart', {})
-        if str(cart_item_id) in cart:
-            del cart[str(cart_item_id)]
-        request.session['cart'] = cart
-
-        return JsonResponse({'message': 'Item deleted from cart.'})
-
-
-class CartPageView(View):
+class CartView(TemplateView):
+    """
+        This view should simply render cart with initial data, it'll do that each refresh, for 
+        making actions on cart (using jquery) we will use CartActionView, which will 
+        be prepared to return JsonResponse.
+    """
     template_name = 'store/cart.html'
 
-    def get(self, request):
-        cart_view = CartView()
-        cart_response = cart_view.get(request)
-        cart_data = json.loads(cart_response.content)
 
-        context = {
-            'cart_items': cart_data['cart_items']
-        }
-        return render(request, self.template_name, context)
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["cart"] = SessionCart(self.request)
+        return context
+
+
+class CartActionView(ViewSet):
+    
+    @action(detail=False, methods=["get"], url_path="list-products")
+    def list_products(self, request):
+        # get cart items
+        cart = SessionCart(self.request)
+        items = cart.get_items()
+        serialzier = CartProductSerializer(instance=items, many=True)
+        return Response(serialzier.data)
+    
+    @action(detail=False, methods=["post"])
+    def add_product(self, request):
+        cart = SessionCart(self.request)
+        serializer = CartProductAddSerializer(data=request.POST)
+        if serializer.is_valid():
+            return Response(serializer.errors, status=400)
+        serializer.save(cart)
+
+        items = cart.get_items()
+        serialzier = CartProductSerializer(instance=items, many=True)
+        return Response(serialzier.data, status=201)
+    
+    # TODO - same for remove product

@@ -49,6 +49,8 @@ class SessionCart(BaseCart):
     def add_item(self, item_id: int, quantity: int) -> None:
         # TODO - add logging
         self.validate_item_id(item_id)
+        quantity = int(quantity)
+        item_id = int(item_id)
 
         if not self.session[settings.CART_SESSION_ID].get(item_id):
             self.session[settings.CART_SESSION_ID][item_id] = quantity
@@ -76,3 +78,10 @@ class SessionCart(BaseCart):
         for item_id, quantity in self.session[settings.CART_SESSION_ID].items():
             _items.append(CartItem(quantity=quantity, product=Product.objects.get(id=item_id)))
         return _items
+
+    @property
+    def total_price(self):
+        total = 0
+        for item in self.get_items():
+            total += item.product.price * int(item.quantity)
+        return total
