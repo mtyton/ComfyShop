@@ -28,10 +28,10 @@ class CartProductAddSerializer(serializers.Serializer):
 
     def validate_product_id(self, value):
         try:
-            self.product = Product.obejcts.get(id=value)
-        except Product.objects.DoesNotExist:
+            Product.objects.get(id=value)
+        except Product.DoesNotExist:
             raise serializers.ValidationError("Unable to add not existing product")
         return value
 
     def save(self, cart):
-        cart.add_item(self.product, self.validated_data["quantity"])
+        cart.add_item(self.validated_data["product_id"], self.validated_data["quantity"])

@@ -1,6 +1,4 @@
-{% load static %} 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="{% static 'js/cart.js' %}"></script>
+{% load static %}
 
 <div class="card h-100" style="width: 15rem;">
     <div class="card-header">{{item.title}}</div>
@@ -13,8 +11,10 @@
         </div>
         <div class="col text-end">
           <a href="#" class="btn btn-outline-success add-to-cart-button" 
-            data-product-id="{{ item.id }}"  
-            data-csrf-token="{{ csrf_token }}">
+            data-product-id="{{item.id}}"  
+            data-csrf-token="{{csrf_token}}"
+            data-add-to-cart-url={% url "cart-action-add-product" %}
+            >
             <img src="{% static 'images/icons/cart.svg' %}" alt="Koszyk"/>
           </a>
         </div>

@@ -34,19 +34,27 @@ class CartActionView(ViewSet):
         # get cart items
         cart = SessionCart(self.request)
         items = cart.get_items()
-        serialzier = CartProductSerializer(instance=items, many=True)
-        return Response(serialzier.data)
+        serializer = CartProductSerializer(instance=items, many=True)
+        return Response(serializer.data)
     
     @action(detail=False, methods=["post"])
     def add_product(self, request):
         cart = SessionCart(self.request)
         serializer = CartProductAddSerializer(data=request.POST)
-        if serializer.is_valid():
+        if not serializer.is_valid():
             return Response(serializer.errors, status=400)
         serializer.save(cart)
 
         items = cart.get_items()
-        serialzier = CartProductSerializer(instance=items, many=True)
-        return Response(serialzier.data, status=201)
+        serializer = CartProductSerializer(instance=items, many=True)
+        return Response(serializer.data, status=201)
     
-    # TODO - same for remove product
+    @action(detail=False, methods=["post"])
+    def remove_product(self, request):
+        cart = SessionCart(self.request)
+        product_id = request.POST.get("product_id")
+        cart.remove_item(product_id)
+
+        items = cart.get_items()
+        serializer = CartProductSerializer(instance=items, many=True)
+        return Response(serializer.data, status=201)

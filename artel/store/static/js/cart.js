@@ -4,10 +4,11 @@ $(document).on('click', '.add-to-cart-button', function(event) {
     event.preventDefault();
     const button = $(this);
     const formData = new FormData();
-    const productID = $(this).data('product-id');
-    const quantity = $('#quantity'+productID).val(); 
+    const productID = parseInt($(this).data('product-id'));
+    const quantity = parseInt($('#quantity'+productID).val()); 
     const addToCartURL = $(this).data('add-to-cart-url');
     const csrfToken = $(this).data('csrf-token');
+    console.log(productID);
     formData.append('product_id', productID);
     formData.append('quantity', quantity); // Serialize the form data correctly
     button.prop('disabled', true); 
@@ -107,15 +108,16 @@ $(document).on('click', '.add-to-cart-button', function(event) {
         const button = $(this);
         const productId = button.data('product-id');
         const csrfToken = button.data('csrf-token');
-    
+        const url = button.data('remove-from-cart-url');
         $.ajax({
-          type: 'DELETE',
-          url: '/cart/item/' + parseInt(productId) + '/',
+          type: 'POST',
+          url: url,
+          data: {"product_id": productId},
           headers: { 'X-CSRFToken': csrfToken },          
             dataType: 'json',
             success: function(data) {
-                alert(data.message);
-                fetchCartItems(csrfToken);
+                alert("Item has been removed");
+                location.reload();
             },
             error: function() {
                 alert("Error occurred while removing the item from the cart.");
