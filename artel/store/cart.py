@@ -87,3 +87,10 @@ class SessionCart(BaseCart):
         for item in self.get_items():
             total += item.product.price * int(item.quantity)
         return total
+    
+    def is_empty(self) -> bool:
+        return not bool(self.session[settings.CART_SESSION_ID].items())
+
+    def clear(self) -> None:
+        self.session[settings.CART_SESSION_ID] = {}
+        self.session.modified = True

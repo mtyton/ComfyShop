@@ -10,6 +10,6 @@ router.register("cart-action", store_views.CartActionView, "cart-action")
 
 urlpatterns = [
     path('cart/', store_views.CartView.as_view(), name='cart'),
-    # path('cart/item/<int:cart_item_id>/', store_views.CartItemView.as_view(), name='cart_item_remove'),
-    # path('cart/item/', store_views.CartItemView.as_view(), name='add_to_cart'),
+    path("order/", store_views.OrderView.as_view(), name="order"),
+    path("order/confirm/", store_views.OrderConfirmView.as_view(), name="order-confirm"),
 ] + router.urls
