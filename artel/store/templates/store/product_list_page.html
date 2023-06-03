@@ -3,12 +3,24 @@
 
 {% block content %}
 
-<div id="add-to-cart-options" style="display: none;">
-  <p>Item added to cart.</p>
-  <p>What would you like to do?</p>
-  <!-- What else should this contain? -->
-  <button id="continue-shopping">Continue Shopping</button>
-  <button id="go-to-cart">Go to Cart</button>
+<div class="modal" tabindex="-1" role="dialog" id="addToCartModal" aria-labelledby="addToCartLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Added to cart</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Item has been added to cart.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue shopping</button>
+        <a href="{% url 'cart' %}" class="btn btn-primary">Go to cart</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="container mb-3">
@@ -19,7 +31,6 @@
             </div>
         {% endfor %}
     </div>
-
 </div>
 
 <nav aria-label="Page navigation example">
@@ -35,4 +46,5 @@
       </li>
     </ul>
   </nav>
+  
 {% endblock %}

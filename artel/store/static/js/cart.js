@@ -22,8 +22,9 @@ $(document).on('click', '.add-to-cart-button', function(event) {
         contentType: false, // Let the browser set the content type
         success: function(data) {
           // Show the options block
-          createShadedOverlay()
-          $('#add-to-cart-options').show();
+          
+          //$('#addToCartModal').show();
+          //createShadedOverlay()
           button.prop('disabled', false);
         },
         error: function() {
@@ -37,7 +38,7 @@ $(document).on('click', '.add-to-cart-button', function(event) {
       const overlay = document.createElement('div');
       overlay.classList.add('shaded-overlay');
       body.appendChild(overlay);
-      const optionsdiv = document.getElementById('add-to-cart-options');
+      const optionsdiv = document.getElementById('addToCartModal');
       optionsdiv.classList.add('unshaded-overlay');
       body.appendChild(optionsdiv);
     }
@@ -48,18 +49,6 @@ $(document).on('click', '.add-to-cart-button', function(event) {
         overlay.remove();
       }
     }
-
-    $('#continue-shopping').on('click', function(event) {
-      event.preventDefault();
-      removeShadedOverlay();
-      $('#add-to-cart-options').hide();
-    });
-    
-    // Handle go to cart button click
-    $('#go-to-cart').on('click', function(event) {
-      event.preventDefault();
-      window.location.href = '/store/cart/';
-    });
     
     const cartButton = document.getElementById('cart-button');
     const cartDropdown = document.getElementById('cart-dropdown');
