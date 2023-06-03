@@ -4,6 +4,7 @@ from django.core.paginator import (
     EmptyPage
 )
 from django.conf import settings
+from django.core.validators import MinValueValidator
 
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -14,6 +15,7 @@ from wagtail.admin.panels import (
 from wagtail.models import Page
 from wagtail import fields as wagtail_fields
 from taggit.managers import TaggableManager
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class ProductAuthor(models.Model):
@@ -56,7 +58,7 @@ class ProductTemplate(ClusterableModel):
     author = models.ForeignKey(ProductAuthor, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     code = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     tags = TaggableManager()
     
@@ -82,6 +84,8 @@ class ProductImage(models.Model):
 
 
 class Product(ClusterableModel):
+    name = models.CharField(max_length=255, blank=True)
+    info = models.TextField(blank=True)
     template = models.ForeignKey(ProductTemplate, on_delete=models.CASCADE, related_name="products")
     price = models.FloatField()
     available = models.BooleanField(default=True)
@@ -90,7 +94,9 @@ class Product(ClusterableModel):
         FieldPanel("template"),
         FieldPanel("price"),
         InlinePanel("param_values"),
-        FieldPanel("available")
+        FieldPanel("available"),
+        FieldPanel("name"),
+        FieldPanel("info")
     ]
 
     @property
@@ -101,8 +107,16 @@ class Product(ClusterableModel):
             return images.first().image
 
     @property
+    def tags(self):
+        return self.template.tags.all()
+
+    @property
+    def description(self):
+        return self.info or self.template.description
+
+    @property
     def title(self):
-        return f"{self.template.title} - {self.price}"
+        return self.name or self.template.title
 
 
 class TemplateParamValue(models.Model):
@@ -142,3 +156,46 @@ class ProductListPage(Page):
         FieldPanel("description"),
         FieldPanel("tags")
     ]
+
+class CustomerData(models.Model):
+    name = models.CharField(max_length=255)
+    surname = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = PhoneNumberField()
+    street = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    zip_code = models.CharField(max_length=120)
+    country = models.CharField(max_length=120)
+
+    @property
+    def full_name(self):
+        return f"{self.name} {self.surname}"
+    
+    @property
+    def full_address(self):
+        return f"{self.street}, {self.zip_code} {self.city}, {self.country}"
+
+
+class OrderProductManager(models.Manager):
+    def create_from_cart(self, cart, order):
+        for item in cart:
+            self.create(
+                product=item.product,
+                order=order,
+                quantity=item.quantity
+            )
+
+
+class OrderProduct(models.Model):   
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="products")
+    quantity = models.IntegerField(validators=[MinValueValidator(1)])
+
+    objects = OrderProductManager()
+
+
+class Order(models.Model):
+    customer = models.ForeignKey(CustomerData, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    sent = models.BooleanField(default=False)
