@@ -4,14 +4,13 @@
 {% block content %}
 
 <div class="container mb-3">
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        {% for item in items %}
-            <div class="col">
-                {% include 'store/partials/product_card.html' %}
-            </div>
-        {% endfor %}
-    </div>
-
+  <div class="row row-cols-3 g-4">
+      {% for item in items %}
+          <div class="col-md-4">
+              {% include 'store/partials/product_card.html' %}
+          </div>
+      {% endfor %}
+  </div>
 </div>
 
 <nav aria-label="Page navigation example">
