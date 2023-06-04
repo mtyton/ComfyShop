@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "phonenumber_field",
 ]
 
 MIDDLEWARE = [
@@ -173,3 +175,6 @@ WAGTAILADMIN_BASE_URL = "http://example.com"
 
 # STORE SETTINGS
 PRODUCTS_PER_PAGE = 6
+
+# CART settings
+CART_SESSION_ID = 'cart'

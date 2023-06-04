@@ -1,0 +1,23 @@
+.shaded-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 5000;
+}
+
+.unshaded-overlay{
+    position: absolute;
+    top: 25%;
+    left: 35%;
+    width: 30%;
+    height: 30%;
+    background-color: rgb(255,255,255);
+    z-index: 9999;
+}
+
+.input-container {
+    max-width: 50px;
+  }

@@ -1,10 +1,30 @@
 {% extends 'base.html'%}
-
+{% load static %} 
 
 {% block content %}
 
-<div class="container mb-3">
-  <div class="row row-cols-3 g-4">
+<div class="modal" tabindex="-1" role="dialog" id="addToCartModal" aria-labelledby="addToCartLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Added to cart</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Item has been added to cart.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue shopping</button>
+        <a href="{% url 'cart' %}" class="btn btn-primary">Go to cart</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mb-3 mt-5">
+  <div class="row row-cols-3 g-4 mt-3">
       {% for item in items %}
           <div class="col-md-4">
               {% include 'store/partials/product_card.html' %}
@@ -26,4 +46,5 @@
       </li>
     </ul>
   </nav>
+  
 {% endblock %}

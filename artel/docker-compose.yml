@@ -13,6 +13,8 @@ services:
       - DATABASE_URL
     env_file:
       - .env
+    stdin_open: true
+    tty: true
   db:
     image: postgres
     restart: always

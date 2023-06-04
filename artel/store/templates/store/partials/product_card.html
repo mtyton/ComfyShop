@@ -1,22 +1,24 @@
 {% load static %}
 
+<div class="card h-100" style="width: 15rem;">
+    <div class="card-header">{{item.title}}</div>
+    <div class="card-body">
+      <img src="{{item.main_image.url}}" class="rounded mx-auto d-block" style="width: 10rem; height: 10 rem;">
 
-<div class="card h-100">
-  <div class="card-header">{{item.title}}</div>
-  <div class="card-body">
-      <img src="{{item.main_image.url}}" class="img-fluid rounded mx-auto d-block" style="width: 10rem; height: 15rem;" alt="{{item.title}}">
-      <p class="card-text">{{item.description}}</p>
-  </div>
-  <div class="card-footer container">
-          <div class="row justify-content-end ">
-              <div class="col-md-9 p-0 text-end text-truncate">
-                  <a href="#" class="btn btn-outline-primary">Details</a>
-              </div>
-              <div class="col-md-3 p-0 text-end">
-                  <a href="#" class="btn btn-outline-success">
-                      <img src="{% static 'images/icons/cart.svg' %}" alt="Koszyk" />
-                  </a>
-              </div>
+      <div class="row d-flex mt-3">
+        <div class="col">
+          <input type="number" id="quantity{{item.id}}" name="quantity" min="1" value="1" class="form-control form-control-sm">
+        </div>
+        <div class="col text-end">
+          <button class="btn btn-outline-success add-to-cart-button" 
+            data-product-id="{{item.id}}"  
+            data-csrf-token="{{csrf_token}}"
+            data-add-to-cart-url={% url "cart-action-add-product" %}
+            data-bs-toggle="modal" data-bs-target="#addToCartModal"
+          >
+              <img src="{% static 'images/icons/cart.svg' %}" alt="Koszyk"/>
+          </button>
+        </div>
       </div>
-  </div>
+    </div>
 </div>
