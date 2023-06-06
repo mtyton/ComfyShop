@@ -2,10 +2,10 @@
 
 <div class="card h-100" >
     <div class="card-header text-truncate">{{item.title}}</div>
-    <div class="card-body">
-      <img src="{{item.main_image.url}}" class="rounded mx-auto d-block" style="width: 10rem; height: 10 rem;">
+    <div class="card-body p-0">
+      <img src="{{item.main_image.url}}" class="img-fluid rounded mx-auto d-block" style="width: 10rem; height: 15rem;" alt="{{item.title}}">
 
-      <div class="row d-flex mt-3">
+      <div class="card-footer row d-flex mt-3">
         <div class="col">
           <input type="number" id="quantity{{item.id}}" name="quantity" min="1" value="1" class="form-control form-control-sm">
         </div>
@@ -16,7 +16,7 @@
             data-add-to-cart-url={% url "cart-action-add-product" %}
             data-bs-toggle="modal" data-bs-target="#addToCartModal"
           >
-              <img src="{% static 'images/icons/cart.svg' %}" alt="Koszyk"/>
+              <img src="{% static 'images/icons/cart.svg' %}" style="width: 1rem; height: 1rem;" alt="Koszyk"/>
           </button>
         </div>
       </div>
