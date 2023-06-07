@@ -20,7 +20,9 @@ from store.forms import CustomerDataForm
 from store.models import (
     CustomerData,
     Order,
-    OrderProduct
+    OrderProduct,
+    OrderDocument,
+    DocumentTemplate
 )
 
 
@@ -133,12 +135,23 @@ class OrderConfirmView(View):
     def post(self, request):
         customer_data = CustomerData.objects.get(id=self.request.session["customer_data_id"])
         cart = SessionCart(self.request)
-        order = Order.objects.create(
-            customer=customer_data,
+        order = Order.objects.create_from_cart(
+            cart, customer_data
         )
-        OrderProduct.objects.create_from_cart(order, cart)
-        cart.clear()
         self.request.session.pop("customer_data_id")
-        # TODO - to be tested
         # TODO - messages
         return HttpResponseRedirect(reverse("cart"))
+
+
+class SendMailView(View):
+    def get(self, request):
+        from django.core import mail
+        from django.http import HttpResponse
+        from django.conf import settings
+        r = mail.send_mail(
+            subject=f"Test",
+            message="Dokumenty dla Twojego zamówienia",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=["mateusz.tyton99@gmail.com"]
+        )
+        return HttpResponse(f"Mail sent: {r}")
