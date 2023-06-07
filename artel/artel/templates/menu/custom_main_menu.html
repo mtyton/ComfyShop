@@ -1,17 +1,18 @@
 {% load static %}
 {% load menu_tags %}
 {% load wagtailcore_tags %}
+{% load i18n %}
 
 <div class="d-flex flex-column flex-shrink-0 p-3 mr-5" style="width: 280px;">
     <img src="{% static 'images/icons/las_ruinas_PL.png' %}" class="rounded mx-auto d-block mt-3"/>
     <hr>
     <ul class="nav navbar-nav">
 
-        {% for translation in page.get_translations.live %}
-            <a href="{% pageurl translation %}" rel="alternate" hreflang="{{ translation.locale.language_code }}">
-                {{ translation.locale.language_name_local }}
-            </a>
-        {% endfor %}
+    {% for translation in page.get_translations.live %}
+        <a href= {% pageurl translation.specific %}{{translation.locale.language_code }} rel="alternate" hreflang="{{ translation.locale.language_code }}">
+            {{ translation.locale.language_code|language_name }}
+        </a>
+    {% endfor %}
 
     {% for item in menu_items %}
         <li class="{{ item.active_class }}">
