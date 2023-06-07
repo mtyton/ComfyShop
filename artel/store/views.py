@@ -139,6 +139,7 @@ class OrderConfirmView(View):
             cart, customer_data
         )
         self.request.session.pop("customer_data_id")
+        cart.clear()
         # TODO - messages
         return HttpResponseRedirect(reverse("cart"))
 

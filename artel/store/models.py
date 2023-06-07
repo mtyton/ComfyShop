@@ -187,7 +187,7 @@ class CustomerData(models.Model):
 
 class OrderProductManager(models.Manager):
     def create_from_cart(self, cart, order):
-        for item in cart:
+        for item in cart.get_items():
             self.create(
                 product=item.product,
                 order=order,
@@ -222,8 +222,8 @@ class OrderManager(models.Manager):
             order=order,
             template=receipt_template
         )
-        send_mail(agreement)
-        send_mail(receipt)
+        #send_mail(agreement)
+        #send_mail(receipt)
         return order
 
 
@@ -249,7 +249,7 @@ class DocumentTemplate(models.Model):
     name = models.CharField(max_length=255)
     file = models.FileField(upload_to="documents")
     doc_type = models.CharField(max_length=255, choices=DocumentTypeChoices.choices)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return self.name
