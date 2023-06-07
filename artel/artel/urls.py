@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.urls import (
-    include, 
+    include,
     path
 )
 from django.contrib import admin
@@ -9,6 +9,8 @@ from django.contrib import admin
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
+
+from django.conf.urls.i18n import i18n_patterns
 
 from search import views as search_views
 
@@ -20,6 +22,12 @@ urlpatterns = [
     path("store-app/", include("store.urls"))
 ]
 
+urlpatterns += i18n_patterns(
+    path('search/', search_views.search, name='search'),
+    path("", include(wagtail_urls)),
+    path("search/", search_views.search, name="search"),
+    path("store-app/", include("store.urls"))
+)
 
 if settings.DEBUG:
     from django.conf.urls.static import static

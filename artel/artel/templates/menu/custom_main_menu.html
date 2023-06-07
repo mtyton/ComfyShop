@@ -1,22 +1,29 @@
-{% load static %} 
+{% load static %}
 {% load menu_tags %}
-
+{% load wagtailcore_tags %}
 
 <div class="d-flex flex-column flex-shrink-0 p-3 mr-5" style="width: 280px;">
     <img src="{% static 'images/icons/las_ruinas_PL.png' %}" class="rounded mx-auto d-block mt-3"/>
     <hr>
     <ul class="nav navbar-nav">
+
+        {% for translation in page.get_translations.live %}
+            <a href="{% pageurl translation %}" rel="alternate" hreflang="{{ translation.locale.language_code }}">
+                {{ translation.locale.language_name_local }}
+            </a>
+        {% endfor %}
+
     {% for item in menu_items %}
         <li class="{{ item.active_class }}">
             <a href="{{ item.href }}">{{ item.text }}</a>
             {% if item.has_children_in_menu %}
                 <button class="btn btn-toggle" data-bs-target="#ddtoggle_{{ item.link_page.pk }}" data-bs-toggle="collapse"
-                    aria-expanded={% if item.active_class %}"true" {% else %} "false" {% endif %} 
+                    aria-expanded={% if item.active_class %}"true" {% else %} "false" {% endif %}
                     aria-controls="#ddtoggle_{{ item.link_page.pk }}">
                     <img src = "{% static 'images/icons/caret-down.svg' %}" alt="&or;"/>                </button>
                 {% sub_menu item  template="menu/custom_submenu.html" %}
             {% endif %}
-        </li>       
+        </li>
     {% endfor %}
     </ul>
 </div>
@@ -24,6 +31,3 @@
     <hr>
     <a href={% url 'cart' %} alt="Koszyk" > Koszyk </a>
 </div>
-
-    
-  
