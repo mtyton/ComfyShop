@@ -208,20 +208,21 @@ class OrderManager(models.Manager):
         order = self.create(customer=customer_data)
         OrderProduct.objects.create_from_cart(cart, order)
         # create proper documents
-        agreement_template = DocumentTemplate.objects.filter(
-            doc_type=DocumentTypeChoices.AGREEMENT
-        ).order_by("-created_at").first()
-        receipt_template = DocumentTemplate.objects.filter(
-            doc_type=DocumentTypeChoices.RECEIPT
-        ).order_by("-created_at").first()
-        agreement = OrderDocument.objects.create(
-            order=order,
-            template=agreement_template
-        )
-        receipt = OrderDocument.objects.create(
-            order=order,
-            template=receipt_template
-        )
+        # NOTE - this is temporary
+        # agreement_template = DocumentTemplate.objects.filter(
+        #     doc_type=DocumentTypeChoices.AGREEMENT
+        # ).order_by("-created_at").first()
+        # receipt_template = DocumentTemplate.objects.filter(
+        #     doc_type=DocumentTypeChoices.RECEIPT
+        # ).order_by("-created_at").first()
+        # agreement = OrderDocument.objects.create(
+        #     order=order,
+        #     template=agreement_template
+        # )
+        # receipt = OrderDocument.objects.create(
+        #     order=order,
+        #     template=receipt_template
+        # )
         #send_mail(agreement)
         #send_mail(receipt)
         return order
