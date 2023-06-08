@@ -74,10 +74,9 @@ class CartActionView(ViewSet):
         return Response(serializer.data, status=201)
 
     @action(detail=True, methods=["put"])
-    def update_product(self, request, product_id):
+    def update_product(self, request, pk):
         cart = SessionCart(self.request)
-        product_id = request.POST.get("product_id")
-        cart.update_item_quantity(product_id, request.PUT["quantity"])
+        cart.update_item_quantity(pk, int(request.data["quantity"]))
         items = cart.get_items()
         serializer = CartProductSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)

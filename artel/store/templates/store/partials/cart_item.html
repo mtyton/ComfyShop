@@ -18,7 +18,10 @@
           </button>
 
           <input id="form1" min="0" name="quantity" value="{{item.quantity}}" type="number"
-            class="form-control form-control-sm" />
+            class="form-control form-control-sm quantity-input" 
+            data-product-id="{{item.product.id}}"  
+            data-csrf-token="{{csrf_token}}"
+            data-update-cart-url="{% url 'cart-action-update-product' item.product.id %}"/>
 
           <button class="btn btn-link px-2"
             onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
