@@ -122,16 +122,18 @@ $(document).on('click', '.add-to-cart-button', function(event) {
       const productID = $(this).data('product-id');
       const newQuantity = input.val();
       const csrfToken = $(this).data('csrf-token');
+      const url = $(this).data("update-cart-url")
       formData.append('product_id', productID);
       formData.append('quantity', newQuantity);
-
+      console.log(input.val())
     
       $.ajax({
-        type: 'POST',
-        url: '/../../cart/item/',
+        type: 'PUT',
+        url: url,
         data: formData, // Use the serialized form data
         headers: { 'X-CSRFToken': csrfToken },
         dataType: 'json',
+        success: location.reload(),
         processData: false, // Prevent jQuery from processing the data
         contentType: false, // Let the browser set the content type        
       });

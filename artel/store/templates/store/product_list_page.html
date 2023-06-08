@@ -7,17 +7,17 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Added to cart</h5>
+        <h5 class="modal-title">Dodano do koszyka</h5>
         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" >
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>Item has been added to cart.</p>
+        <p>Przedmiot został dodany do koszyka.</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue shopping</button>
-        <a href="{% url 'cart' %}" class="btn btn-primary">Go to cart</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kontynuuj zakupy</button>
+        <a href="{% url 'cart' %}" class="btn btn-primary">Idź do koszyka</a>
       </div>
     </div>
   </div>
@@ -36,13 +36,13 @@
 <nav aria-label="Page navigation example">
     <ul class="pagination justify-content-center">
       <li class="page-item {% if not page.has_previous %} disabled {% endif %}">
-        <a class="page-link" href="?page={{page.number|add:-1}}" tabindex="-1" {% if not page.has_previous %}aria-disabled="true"{% endif %}>Previous</a>
+        <a class="page-link" href="?page={{page.number|add:-1}}" tabindex="-1" {% if not page.has_previous %}aria-disabled="true"{% endif %}>Poprzedni</a>
       </li>
       {% for pg in page.paginator.get_elided_page_range %}
         <li class="page-item {% if pg == page.number %}active{% endif %}"><a class="page-link" href="?page={{pg}}">{{pg}}</a></li>
       {% endfor %}
       <li class="page-item {% if not page.has_next %} disabled {% endif %}">
-        <a class="page-link" {% if not page.has_next %}aria-disabled="true"{% endif %} href="?page={{page.number|add:1}}">Next</a>
+        <a class="page-link" {% if not page.has_next %}aria-disabled="true"{% endif %} href="?page={{page.number|add:1}}">Następny</a>
       </li>
     </ul>
   </nav>

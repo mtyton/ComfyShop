@@ -66,14 +66,17 @@ class SessionCart(BaseCart):
             # TODO - add logging
             ...
     
-    def update_item_quantity(self, item_id: int, change: int) -> None:
+    def update_item_quantity(self, item_id: int, new_quantity: int) -> None:
         self.validate_item_id(item_id)
+        if new_quantity < 1:
+            self.remove_item(item_id)
+            return
         try:
-            self.session[settings.CART_SESSION_ID][str(item_id)] += change
+            self.session[settings.CART_SESSION_ID][str(item_id)] = new_quantity
             self.session.modified = True
         except KeyError:
             # TODO - add logging
-            self.add_item(item_id, change)
+            self.add_item(item_id, new_quantity)
 
     def get_items(self) -> List[CartItem]:
         _items = []
