@@ -65,7 +65,10 @@
                             <h5 class="fw-normal mb-0 text-black">To Pay: {{cart.total_price}}</h5>  
                         </div>
                         <div class="col-sm-6 text-end">
-                            <a href="" class="btn btn-success btn-block btn-lg">Confirm</a>
+                          <form action="" method="POST">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-success btn-block btn-lg" value="Confirm">
+                          </form>
                         </div>
                     </div>
                     

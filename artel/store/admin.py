@@ -35,6 +35,12 @@ class ProductAdmin(ModelAdmin):
     list_display = ("title", "price")
 
 
+
+class DocumentTemplateAdmin(ModelAdmin):
+    model = models.DocumentTemplate
+    list_display = ("name", "doc_type")
+
+
 class StoreAdminGroup(ModelAdminGroup):
     menu_label = "Store"
     menu_icon = 'folder-open-inverse'
@@ -44,7 +50,8 @@ class StoreAdminGroup(ModelAdminGroup):
         ProductCategoryAdmin, 
         ProductCategoryParamAdmin,
         ProductTemplateAdmin,
-        ProductAdmin
+        ProductAdmin,
+        DocumentTemplateAdmin
     )
 
 

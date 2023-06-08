@@ -1,3 +1,4 @@
+import pdfkit
 from django.db import models
 from django.core.paginator import (
     Paginator,
@@ -5,6 +6,10 @@ from django.core.paginator import (
 )
 from django.conf import settings
 from django.core.validators import MinValueValidator
+from django.template import (
+    Template,
+    Context
+)
 
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -16,6 +21,10 @@ from wagtail.models import Page
 from wagtail import fields as wagtail_fields
 from taggit.managers import TaggableManager
 from phonenumber_field.modelfields import PhoneNumberField
+
+from store.utils import (
+    send_mail
+)
 
 
 class ProductAuthor(models.Model):
@@ -178,7 +187,7 @@ class CustomerData(models.Model):
 
 class OrderProductManager(models.Manager):
     def create_from_cart(self, cart, order):
-        for item in cart:
+        for item in cart.get_items():
             self.create(
                 product=item.product,
                 order=order,
@@ -194,8 +203,76 @@ class OrderProduct(models.Model):
     objects = OrderProductManager()
 
 
+class OrderManager(models.Manager):
+    def create_from_cart(self, cart, customer_data):
+        order = self.create(customer=customer_data)
+        OrderProduct.objects.create_from_cart(cart, order)
+        # create proper documents
+        agreement_template = DocumentTemplate.objects.filter(
+            doc_type=DocumentTypeChoices.AGREEMENT
+        ).order_by("-created_at").first()
+        receipt_template = DocumentTemplate.objects.filter(
+            doc_type=DocumentTypeChoices.RECEIPT
+        ).order_by("-created_at").first()
+        agreement = OrderDocument.objects.create(
+            order=order,
+            template=agreement_template
+        )
+        receipt = OrderDocument.objects.create(
+            order=order,
+            template=receipt_template
+        )
+        #send_mail(agreement)
+        #send_mail(receipt)
+        return order
+
+
 class Order(models.Model):
     customer = models.ForeignKey(CustomerData, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     sent = models.BooleanField(default=False)
+
+    objects = OrderManager()
+
+    @property
+    def order_number(self) -> str:
+        return f"{self.id:06}/{self.created_at.year}"
+
+
+class DocumentTypeChoices(models.TextChoices):
+    AGREEMENT = "agreement"
+    RECEIPT = "receipt"
+
+
+class DocumentTemplate(models.Model):
+    name = models.CharField(max_length=255)
+    file = models.FileField(upload_to="documents")
+    doc_type = models.CharField(max_length=255, choices=DocumentTypeChoices.choices)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class OrderDocument(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="documents")
+    template = models.ForeignKey(DocumentTemplate, on_delete=models.CASCADE)
+    sent = models.BooleanField(default=False)
+
+    def get_document_context(self):
+        _context = {
+            "order": self.order,
+            "customer": self.order.customer,
+            "products": self.order.products.all(),
+        }
+        return Context(_context)
+
+    @property
+    def document(self):
+        with open(self.template.file.path, "rb") as f:
+            content = f.read()
+        template = Template(content)
+        context = self.get_document_context()
+        content = template.render(context)
+        return pdfkit.from_string(content, False)
