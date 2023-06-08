@@ -141,17 +141,3 @@ class OrderConfirmView(View):
         cart.clear()
         # TODO - messages
         return HttpResponseRedirect(reverse("cart"))
-
-
-class SendMailView(View):
-    def get(self, request):
-        from django.core import mail
-        from django.http import HttpResponse
-        from django.conf import settings
-        r = mail.send_mail(
-            subject=f"Test",
-            message="Dokumenty dla Twojego zamówienia",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=["mateusz.tyton99@gmail.com"]
-        )
-        return HttpResponse(f"Mail sent: {r}")
