@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-
+import json
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
@@ -25,9 +25,9 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 
 INSTALLED_APPS = [
     "home",
-    "store",
     "blog",
     "search",
+    "setup",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.embeds",
@@ -53,7 +53,18 @@ INSTALLED_APPS = [
     "phonenumber_field",
 ]
 
+SHOP_ENABLED = False
+if os.path.exists('config.json'):
+    with open(os.path.join(BASE_DIR, 'config.json'), 'r') as file:
+        config_data = json.load(file)
+    shop_enabled = config_data.get('shop_enabled', False)
+    if shop_enabled:
+        INSTALLED_APPS.append('store')
+        SHOP_ENABLED = True
+
+
 MIDDLEWARE = [
+    "setup.middleware.CheckSetupMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -75,6 +86,9 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                'setup.context_processors.logo_url',
+                'setup.context_processors.menu_position',
+                'setup.context_processors.store_enabled',
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",

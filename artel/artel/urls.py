@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.urls import (
-    include, 
+    include,
     path
 )
 from django.contrib import admin
@@ -12,14 +12,21 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
 
+from setup.views import setup_page as setup_view
+
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
-    path("store-app/", include("store.urls"))
+    path('setup/', setup_view, name='setup_page'),
 ]
 
+store_app_enabled = getattr(settings, 'SHOP_ENABLED', False)
+if store_app_enabled:
+    urlpatterns += [
+        path('store-app/', include('store.urls')),
+    ]
 
 if settings.DEBUG:
     from django.conf.urls.static import static
