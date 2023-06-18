@@ -7,6 +7,7 @@ from django.views.generic import (
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.contrib import messages
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -96,15 +97,16 @@ class OrderView(View):
     def get(self, request, *args, **kwargs):
         cart = SessionCart(self.request)
         if cart.is_empty():
-            # TODO - messages
+            messages.error(request, "Twój koszyk jest pusty")
             return HttpResponseRedirect(reverse("cart"))
         return render(request, self.template_name, self.get_context_data())
 
     def post(self, request, *args, **kwargs):
-        # TODO - messages
         cart = SessionCart(self.request)
         if cart.is_empty():
+            messages.error(request, "Twój koszyk jest pusty")
             return HttpResponseRedirect(reverse("cart"))
+        
         form = CustomerDataForm(request.POST)
         if not form.is_valid():
             context = self.get_context_data()
@@ -142,5 +144,5 @@ class OrderConfirmView(View):
         )
         request.session.pop("customer_data")
         cart.clear()
-        # TODO - messages
+        messages.success(request, "Zamówienie zostało złożone, sprawdź swój email.")
         return HttpResponseRedirect(reverse("cart"))
