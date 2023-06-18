@@ -35,10 +35,14 @@ class ProductAdmin(ModelAdmin):
     list_display = ("title", "price")
 
 
+class PaymentMethodAdmin(ModelAdmin):
+    model = models.PaymentMethod
+    list_display = ("name", "active")
+
 
 class DocumentTemplateAdmin(ModelAdmin):
     model = models.DocumentTemplate
-    list_display = ("name", "doc_type")
+    list_display = ("name", )
 
 
 class StoreAdminGroup(ModelAdminGroup):
@@ -51,7 +55,8 @@ class StoreAdminGroup(ModelAdminGroup):
         ProductCategoryParamAdmin,
         ProductTemplateAdmin,
         ProductAdmin,
-        DocumentTemplateAdmin
+        DocumentTemplateAdmin,
+        PaymentMethodAdmin
     )
 
 

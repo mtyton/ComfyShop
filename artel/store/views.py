@@ -13,16 +13,13 @@ from rest_framework.response import Response
 
 from store.cart import SessionCart
 from store.serializers import (
-    CartProductSerializer, 
+    CartSerializer, 
     CartProductAddSerializer
 )
 from store.forms import CustomerDataForm
 from store.models import (
-    CustomerData,
     Order,
-    OrderProduct,
-    OrderDocument,
-    DocumentTemplate
+    Product
 )
 
 
@@ -43,12 +40,13 @@ class CartView(TemplateView):
 
 class CartActionView(ViewSet):
     
+    # TODO - test this, currently not in use
     @action(detail=False, methods=["get"], url_path="list-products")
     def list_products(self, request):
         # get cart items
         cart = SessionCart(self.request)
         items = cart.get_items()
-        serializer = CartProductSerializer(instance=items, many=True)
+        serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=["post"])
@@ -58,27 +56,32 @@ class CartActionView(ViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
         serializer.save(cart)
-
         items = cart.get_items()
-        serializer = CartProductSerializer(instance=items, many=True)
+        serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)
     
     @action(detail=False, methods=["post"])
     def remove_product(self, request):
         cart = SessionCart(self.request)
         product_id = request.POST.get("product_id")
-        cart.remove_item(product_id)
+        try:
+            cart.remove_item(product_id)
+        except Product.DoesNotExist:
+            return Response({"error": "Product does not exist"}, status=400)
 
         items = cart.get_items()
-        serializer = CartProductSerializer(instance=items, many=True)
+        serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)
 
     @action(detail=True, methods=["put"])
     def update_product(self, request, pk):
         cart = SessionCart(self.request)
-        cart.update_item_quantity(pk, int(request.data["quantity"]))
+        try:
+            cart.update_item_quantity(pk, int(request.data["quantity"]))
+        except Product.DoesNotExist:
+            return Response({"error": "Product does not exist"}, status=404)
         items = cart.get_items()
-        serializer = CartProductSerializer(instance=items, many=True)
+        serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)
     
 
@@ -104,13 +107,12 @@ class OrderView(View):
             return HttpResponseRedirect(reverse("cart"))
         form = CustomerDataForm(request.POST)
         if not form.is_valid():
-            print(form.errors)
             context = self.get_context_data()
             context["form"] = form
             return render(request, self.template_name, context)
-        customer_data = form.save()
-        request.session["customer_data_id"] = customer_data.id
-        # TODO - add this page
+        customer_data = form.data
+        # TODO - add encryption
+        request.session["customer_data"] = customer_data
         return HttpResponseRedirect(reverse("order-confirm"))
 
 
@@ -118,7 +120,7 @@ class OrderConfirmView(View):
     template_name = "store/order_confirm.html"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        customer_data = CustomerData.objects.get(id=self.request.session["customer_data_id"])
+        customer_data = self.request.session["customer_data"]
         return {
             "cart": SessionCart(self.request),
             "customer_data": customer_data
@@ -132,12 +134,13 @@ class OrderConfirmView(View):
         return render(request, self.template_name, self.get_context_data())
 
     def post(self, request):
-        customer_data = CustomerData.objects.get(id=self.request.session["customer_data_id"])
+        customer_data = request.session["customer_data"]
         cart = SessionCart(self.request)
-        order = Order.objects.create_from_cart(
-            cart, customer_data
+        Order.objects.create_from_cart(
+            cart.get_items(), 
+            None, customer_data
         )
-        self.request.session.pop("customer_data_id")
+        request.session.pop("customer_data")
         cart.clear()
         # TODO - messages
         return HttpResponseRedirect(reverse("cart"))

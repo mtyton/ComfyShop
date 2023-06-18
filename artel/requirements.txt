@@ -8,3 +8,4 @@ phonenumbers==8.13.13
 django-phonenumber-field==7.1.0
 factory-boy==3.2.1
 pdfkit==1.0.0
+num2words==0.5.12

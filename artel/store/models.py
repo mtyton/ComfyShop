@@ -1,4 +1,8 @@
 import pdfkit
+import datetime
+
+from decimal import Decimal
+from typing import Any
 from django.db import models
 from django.core.paginator import (
     Paginator,
@@ -21,18 +25,42 @@ from wagtail.models import Page
 from wagtail import fields as wagtail_fields
 from taggit.managers import TaggableManager
 from phonenumber_field.modelfields import PhoneNumberField
+from num2words import num2words
 
 from store.utils import (
-    send_mail
+    notify_user_about_order,
+    notify_manufacturer_about_order
 )
 
 
-class ProductAuthor(models.Model):
-    name = models.CharField(max_length=255)
-    # TODO - add author contact data
+class PersonalData(models.Model):
+
+    class Meta:
+        abstract = True
+
+    name = models.CharField(max_length=255, blank=True)
+    surname = models.CharField(max_length=255, blank=True)
+    email = models.EmailField(blank=True)
+    phone = PhoneNumberField(blank=True)
+    street = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=255, blank=True)
+    zip_code = models.CharField(max_length=120, blank=True)
+    country = models.CharField(max_length=120, blank=True)
+
+    @property
+    def full_name(self):
+        return f"{self.name} {self.surname}"
+    
+    @property
+    def full_address(self):
+        return f"{self.street}, {self.zip_code} {self.city}, {self.country}"
+
+
+class ProductAuthor(PersonalData):
+    display_name = models.CharField(max_length=255, unique=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.display_name
 
 
 class ProductCategory(ClusterableModel):
@@ -111,13 +139,16 @@ class Product(ClusterableModel):
     @property
     def main_image(self):
         images = self.template.images.all()
-        print(images)
         if images:
             return images.first().image
 
     @property
     def tags(self):
         return self.template.tags.all()
+
+    @property
+    def author(self):
+        return self.template.author
 
     @property
     def description(self):
@@ -166,33 +197,22 @@ class ProductListPage(Page):
         FieldPanel("tags")
     ]
 
-class CustomerData(models.Model):
-    name = models.CharField(max_length=255)
-    surname = models.CharField(max_length=255)
-    email = models.EmailField()
-    phone = PhoneNumberField()
-    street = models.CharField(max_length=255)
-    city = models.CharField(max_length=255)
-    zip_code = models.CharField(max_length=120)
-    country = models.CharField(max_length=120)
-
-    @property
-    def full_name(self):
-        return f"{self.name} {self.surname}"
-    
-    @property
-    def full_address(self):
-        return f"{self.street}, {self.zip_code} {self.city}, {self.country}"
-
 
 class OrderProductManager(models.Manager):
-    def create_from_cart(self, cart, order):
-        for item in cart.get_items():
-            self.create(
-                product=item.product,
+    def create_from_cart(self, items: dict[str, Product|int], order: models.Model):
+        pks = []
+        for item in items:
+            if item["quantity"] < 1:
+                # TODO - logging
+                continue
+            
+            pk = self.create(
+                product=item["product"],
                 order=order,
-                quantity=item.quantity
-            )
+                quantity=item["quantity"]
+            ).pk
+            pks.append(pk)
+        return self.filter(pk__in=pks)
 
 
 class OrderProduct(models.Model):   
@@ -204,41 +224,107 @@ class OrderProduct(models.Model):
 
 
 class OrderManager(models.Manager):
-    def create_from_cart(self, cart, customer_data):
-        order = self.create(customer=customer_data)
-        OrderProduct.objects.create_from_cart(cart, order)
-        # create proper documents
-        # NOTE - this is temporary
-        # agreement_template = DocumentTemplate.objects.filter(
-        #     doc_type=DocumentTypeChoices.AGREEMENT
-        # ).order_by("-created_at").first()
-        # receipt_template = DocumentTemplate.objects.filter(
-        #     doc_type=DocumentTypeChoices.RECEIPT
-        # ).order_by("-created_at").first()
-        # agreement = OrderDocument.objects.create(
-        #     order=order,
-        #     template=agreement_template
-        # )
-        # receipt = OrderDocument.objects.create(
-        #     order=order,
-        #     template=receipt_template
-        # )
-        #send_mail(agreement)
-        #send_mail(receipt)
-        return order
+
+    def _get_order_number(self, author: ProductAuthor):
+        number_of_prev_orders = OrderProduct.objects.filter(
+            product__template__author=author
+        ).values("order").distinct().count()
+        number_of_prev_orders += 1
+        year = datetime.datetime.now().year
+        return f"{author.id}/{number_of_prev_orders:06}/{year}"
+
+    def create_from_cart(
+            self, cart_items: list[dict[str, str|dict]], 
+            payment_method: models.Model| None, 
+            customer_data: dict[str, Any]
+        ) -> models.QuerySet:
+        # split cart
+        orders_pks = []
+
+        payment_method = payment_method or PaymentMethod.objects.first()
+        agreement_template = DocumentTemplate.objects.get(doc_type=DocumentTypeChoices.AGREEMENT)
+        receipt_template = DocumentTemplate.objects.get(doc_type=DocumentTypeChoices.RECEIPT)
+
+        for item in cart_items:
+            author = item["author"]
+            author_products = item["products"]
+            
+            order = self.create(
+                payment_method=payment_method, 
+                order_number=self._get_order_number(author)
+            )
+            OrderProduct.objects.create_from_cart(author_products, order)
+            orders_pks.append(order.pk)
+            agreement = OrderDocument.objects.create(
+                order=order,
+                template=agreement_template
+            )
+            receipt = OrderDocument.objects.create(
+                order=order,
+                template=receipt_template
+            )
+            extra_document_kwargs = {
+                "customer_data": customer_data
+            }
+            default_kwargs ={
+                "docs": [
+                    agreement.generate_document(extra_document_kwargs), 
+                    receipt.generate_document(extra_document_kwargs)
+                ],
+                "order_number": order.order_number
+            }
+            user_kwargs = {
+                "customer_email": customer_data["email"],
+            }
+            user_kwargs.update(default_kwargs)
+            user_notified = notify_user_about_order(**user_kwargs)
+            manufacturer_kwargs = {
+                "manufacturer_email": author.email,
+            }
+            manufacturer_kwargs.update(default_kwargs)
+            manufacturer_notified = notify_manufacturer_about_order(**manufacturer_kwargs)
+            sent = user_notified and manufacturer_notified
+            agreement.sent = sent
+            receipt.sent = sent
+            agreement.save()
+            receipt.save()
+        return Order.objects.filter(pk__in=orders_pks)
+
+
+class PaymentMethod(models.Model):
+    name = models.CharField(max_length=255)
+
+    description = models.TextField(blank=True)
+    active = models.BooleanField(default=True)
 
 
 class Order(models.Model):
-    customer = models.ForeignKey(CustomerData, on_delete=models.CASCADE)
+    payment_method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     sent = models.BooleanField(default=False)
-
+    order_number = models.CharField(max_length=255, null=True)
+    
     objects = OrderManager()
 
     @property
-    def order_number(self) -> str:
-        return f"{self.id:06}/{self.created_at.year}"
+    def manufacturer(self) -> str:
+        return self.products.first().product.author
+
+    @property
+    def total_price(self) -> Decimal:
+        return sum(
+            [order_product.product.price * order_product.quantity 
+             for order_product in self.products.all()]
+        )
+
+    @property
+    def total_price_words(self) -> str:
+        return num2words(self.total_price, lang="pl", to="currency", currency="PLN")
+
+    @property
+    def payment_date(self) -> datetime.date:
+        return self.created_at.date() + datetime.timedelta(days=7)
 
 
 class DocumentTypeChoices(models.TextChoices):
@@ -249,7 +335,8 @@ class DocumentTypeChoices(models.TextChoices):
 class DocumentTemplate(models.Model):
     name = models.CharField(max_length=255)
     file = models.FileField(upload_to="documents")
-    doc_type = models.CharField(max_length=255, choices=DocumentTypeChoices.choices)
+    # there may be only one document of each type
+    doc_type = models.CharField(max_length=255, choices=DocumentTypeChoices.choices, unique=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
@@ -264,16 +351,19 @@ class OrderDocument(models.Model):
     def get_document_context(self):
         _context = {
             "order": self.order,
-            "customer": self.order.customer,
-            "products": self.order.products.all(),
+            "author": self.order.manufacturer,
+            "order_products": self.order.products.all(),
+            "payment_data": self.order.payment_method,
         }
         return Context(_context)
 
-    @property
-    def document(self):
-        with open(self.template.file.path, "rb") as f:
+    def generate_document(self, extra_context: dict = None):
+        extra_context = extra_context or {}
+        context = self.get_document_context()
+        context.update(extra_context)
+
+        with open(self.template.file.path, "r", encoding="utf-8") as f:
             content = f.read()
         template = Template(content)
-        context = self.get_document_context()
         content = template.render(context)
         return pdfkit.from_string(content, False)
