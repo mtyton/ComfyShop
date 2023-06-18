@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <section class="h-100">
+        <div class="container h-100 py-5">
+            <div class="row d-flex justify-content-center align-items-center">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-normal mb-0 text-black">Koszyk</h3>   
+                </div>
+            </div>
+            {% for group in cart.get_items %}
+                {% if group.products %}
+                    <h4>Wykonawca: {{group.author.display_name}}</h4>
+                    {% for item in group.products %}
+                        {% include 'store/partials/cart_item.html' %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+
+            <div class="card ">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h5 class="fw-normal mb-0 text-black">W sumie do zapłaty: {{cart.total_price}}</h5>  
+                        </div>
+                        <div class="col-sm-6 text-end">
+                            <a href="{% url 'order' %}" class="btn btn-success btn-block btn-lg">Dalej</a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+    
+{% endblock %}

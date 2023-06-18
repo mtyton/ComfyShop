@@ -1,5 +1,10 @@
 version: "3.8"
 services:
+  smtp-server:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"  
   comfy:
     build:
       dockerfile: Dockerfile.local
@@ -13,6 +18,8 @@ services:
       - DATABASE_URL
     env_file:
       - .env
+    stdin_open: true
+    tty: true
   db:
     image: postgres
     restart: always

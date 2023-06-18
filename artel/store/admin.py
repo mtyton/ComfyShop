@@ -35,6 +35,16 @@ class ProductAdmin(ModelAdmin):
     list_display = ("title", "price")
 
 
+class PaymentMethodAdmin(ModelAdmin):
+    model = models.PaymentMethod
+    list_display = ("name", "active")
+
+
+class DocumentTemplateAdmin(ModelAdmin):
+    model = models.DocumentTemplate
+    list_display = ("name", )
+
+
 class StoreAdminGroup(ModelAdminGroup):
     menu_label = "Store"
     menu_icon = 'folder-open-inverse'
@@ -44,7 +54,9 @@ class StoreAdminGroup(ModelAdminGroup):
         ProductCategoryAdmin, 
         ProductCategoryParamAdmin,
         ProductTemplateAdmin,
-        ProductAdmin
+        ProductAdmin,
+        DocumentTemplateAdmin,
+        PaymentMethodAdmin
     )
 
 

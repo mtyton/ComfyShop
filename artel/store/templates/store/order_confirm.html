@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <section class="h-100">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-normal mb-0 text-black">Twoje dane:</h3>   
+            </div>
+            <div class="card mb-2 py-5">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <p class="mb-0">Imię i Nazwisko</p>
+                    </div>
+                    <div class="col-sm-9">
+                      <p class="text-muted mb-0">{{customer_data.name}} {{customer_data.surname}}</p>
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <p class="mb-0">Email</p>
+                    </div>
+                    <div class="col-sm-9">
+                      <p class="text-muted mb-0">{{customer_data.email}}</p>
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <p class="mb-0">Numer telefonu</p>
+                    </div>
+                    <div class="col-sm-9">
+                      <p class="text-muted mb-0">{{customer_data.phone}}</p>
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <p class="mb-0">Adres</p>
+                    </div>
+                    <div class="col-sm-9">
+                      <p class="text-muted mb-0">
+                        {{customer_data.city}}, {{customer_data.zip_code}}<br/>
+                        {{customer_data.street}}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        </div>
+
+        <div class="container mt-5">
+            <div class="row d-flex justify-content-center align-items-center">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-normal mb-0 text-black">Zamówione przedmioty</h3>   
+                </div>
+            </div>
+            {% for group in cart.get_items %}
+              {% if group.products %}
+                <h4>Wykonawca: {{group.author.display_name}}</h4>
+                {% for item in group.products %}
+                  {% include 'store/partials/summary_cart_item.html' %}
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+
+            <div class="card ">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h5 class="fw-normal mb-0 text-black">Do zapłaty: {{cart.total_price}}</h5>  
+                        </div>
+                        <div class="col-sm-6 text-end">
+                          <form action="" method="POST">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-success btn-block btn-lg" value="Zamawiam">
+                          </form>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+    
+{% endblock %}

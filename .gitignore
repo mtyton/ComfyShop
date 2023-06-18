@@ -139,6 +139,7 @@ GitHub.sublime-settings
 #postgres pass files
 *.my_pgpass
 *.sql
+artel/static/
 
 # media
 artel/media/*
