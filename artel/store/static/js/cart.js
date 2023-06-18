@@ -133,7 +133,9 @@ $(document).on('click', '.add-to-cart-button', function(event) {
         data: formData, // Use the serialized form data
         headers: { 'X-CSRFToken': csrfToken },
         dataType: 'json',
-        success: location.reload(),
+        success: function(data) {
+          setTimeout(location.reload(), 500)
+        },
         processData: false, // Prevent jQuery from processing the data
         contentType: false, // Let the browser set the content type        
       });

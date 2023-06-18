@@ -2,23 +2,23 @@ from abc import (
     ABC,
     abstractmethod
 )
-from typing import List
+from typing import (
+    List,
+    Any
+)
 from dataclasses import dataclass
 from django.http.request import HttpRequest
 from django.conf import settings
 
-from store.models import Product
-
-
-@dataclass
-class CartItem:
-    product: Product
-    quantity: int
+from store.models import (
+    Product,
+    ProductAuthor
+)
 
 
 class BaseCart(ABC):
 
-    def validate_item_id(self, item_id):
+    def validate_and_get_product(self, item_id):
         return Product.objects.get(id=item_id)
 
     @abstractmethod
@@ -43,57 +43,76 @@ class SessionCart(BaseCart):
     def __init__(self, request: HttpRequest) -> None:
         super().__init__()
         self.session = request.session
-        if not self.session.get(settings.CART_SESSION_ID):
-            self.session[settings.CART_SESSION_ID] = {}
+        self._cart = self.session.get(settings.CART_SESSION_ID, None)
+        if not self._cart:
+            self._cart = {}
+            self.session[settings.CART_SESSION_ID] = self._cart
+
+    def save_cart(self):
+        self.session[settings.CART_SESSION_ID] = self._cart
+        self.session.modified = True
 
     def add_item(self, item_id: int, quantity: int) -> None:
         # TODO - add logging
-        self.validate_item_id(item_id)
+        product = self.validate_and_get_product(item_id)
+        author = product.author
         quantity = int(quantity)
         item_id = int(item_id)
-        if not self.session[settings.CART_SESSION_ID].get(str(item_id)):
-            self.session[settings.CART_SESSION_ID][item_id] = quantity
-            self.session.modified = True
+        if not self._cart.get(str(author.id)):
+            self._cart[str(author.id)] = {str(item_id): quantity}
+            self.save_cart()
+        elif not self._cart[str(author.id)].get(str(item_id)):
+            self._cart[str(author.id)].update({str(item_id): quantity})
+            self.save_cart()
         else:
-            self.update_item_quantity(item_id, quantity)
+            new_quantity = self._cart[str(author.id)][str(item_id)] + quantity
+            self.update_item_quantity(item_id, new_quantity)
 
     def remove_item(self, item_id: int) -> None:
-        self.validate_item_id(item_id)
+        product = self.validate_and_get_product(item_id)
+        author = product.author
         try:
-            self.session[settings.CART_SESSION_ID].pop(item_id)
-            self.session.modified = True
+            self._cart[str(author.id)].pop(str(item_id))
+            self.save_cart()
         except KeyError:
             # TODO - add logging
             ...
     
     def update_item_quantity(self, item_id: int, new_quantity: int) -> None:
-        self.validate_item_id(item_id)
+        product = self.validate_and_get_product(item_id)
+        author = product.author
         if new_quantity < 1:
             self.remove_item(item_id)
             return
-        try:
-            self.session[settings.CART_SESSION_ID][str(item_id)] = new_quantity
-            self.session.modified = True
-        except KeyError:
-            # TODO - add logging
+        if not self._cart.get(str(author.id)):
             self.add_item(item_id, new_quantity)
+            return
+        self._cart[str(author.id)][str(product.id)] = new_quantity
+        self.save_cart()
 
-    def get_items(self) -> List[CartItem]:
-        _items = []
-        for item_id, quantity in self.session[settings.CART_SESSION_ID].items():
-            _items.append(CartItem(quantity=quantity, product=Product.objects.get(id=item_id)))
-        return _items
+    def get_items(self) -> List[dict[str, dict|str]]:
+        items: List[dict[str, dict|str]] = []
+        for author_id, cart_items in self._cart.items():
+            author = ProductAuthor.objects.get(id=int(author_id))
+            products = []
+            for item_id, quantity in cart_items.items():
+                product=Product.objects.get(id=int(item_id))
+                products.append({"product": product, "quantity": quantity})
+            items.append({"author": author, "products": products})
+        return items
 
     @property
     def total_price(self):
         total = 0
-        for item in self.get_items():
-            total += item.product.price * int(item.quantity)
+        for _, cart_items in self._cart.items():
+            for item_id, quantity in cart_items.items():
+                product = Product.objects.get(id=int(item_id))
+                total += product.price * quantity
         return total
     
     def is_empty(self) -> bool:
-        return not bool(self.session[settings.CART_SESSION_ID].items())
+        return not bool(self._cart.items())
 
     def clear(self) -> None:
-        self.session[settings.CART_SESSION_ID] = {}
-        self.session.modified = True
+        self._cart = {}
+        self.save_cart()

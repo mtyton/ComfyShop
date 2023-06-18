@@ -14,7 +14,7 @@
                       <p class="mb-0">Imię i Nazwisko</p>
                     </div>
                     <div class="col-sm-9">
-                      <p class="text-muted mb-0">{{customer_data.full_name}}</p>
+                      <p class="text-muted mb-0">{{customer_data.name}} {{customer_data.surname}}</p>
                     </div>
                   </div>
                   <hr>
@@ -41,7 +41,10 @@
                       <p class="mb-0">Adres</p>
                     </div>
                     <div class="col-sm-9">
-                      <p class="text-muted mb-0">{{customer_data.full_address}}</p>
+                      <p class="text-muted mb-0">
+                        {{customer_data.city}}, {{customer_data.zip_code}}<br/>
+                        {{customer_data.street}}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -54,8 +57,13 @@
                     <h3 class="fw-normal mb-0 text-black">Zamówione przedmioty</h3>   
                 </div>
             </div>
-            {% for item in cart.get_items %}
-                {% include 'store/partials/summary_cart_item.html' %}
+            {% for group in cart.get_items %}
+              {% if group.products %}
+                <h4>Wykonawca: {{group.author.display_name}}</h4>
+                {% for item in group.products %}
+                  {% include 'store/partials/summary_cart_item.html' %}
+                {% endfor %}
+              {% endif %}
             {% endfor %}
 
             <div class="card ">

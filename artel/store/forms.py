@@ -2,18 +2,9 @@ from django import forms
 from phonenumber_field.formfields import PhoneNumberField
 # from phonenumber_field.widgets import PhoneNumberPrefixWidget
 
-from store.models import (
-    CustomerData,
-)
 
 
-class CustomerDataForm(forms.ModelForm):
-    class Meta:
-        model = CustomerData
-        fields = [
-            "name", "surname", "email", "phone", 
-            "street", "city", "zip_code"
-        ]
+class CustomerDataForm(forms.Form):
 
     name = forms.CharField(
         max_length=255, label="Imię", widget=forms.TextInput(attrs={"class": "form-control"})
