@@ -20,6 +20,7 @@ services:
     build:
       dockerfile: Dockerfile
       context: ./
+    user: "${UID}:${GID}"
     restart: always
     ports:
       - "8001:8000"
@@ -38,6 +39,7 @@ services:
 
   web:
     image: nginx
+    restart: always
     volumes:
       - ../nginx/conf.d/:/etc/nginx/conf.d/
       - ./static/:/opt/services/comfy/static

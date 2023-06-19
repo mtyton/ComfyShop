@@ -9,6 +9,7 @@ services:
     build:
       dockerfile: Dockerfile.local
       context: ./
+    user: "${UID}:${GID}"
     ports:
       - "8000:8000"
     volumes:
