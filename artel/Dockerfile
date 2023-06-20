@@ -27,6 +27,9 @@ RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-r
 # Install the application server.
 RUN pip install "gunicorn==20.0.4"
 
+# Install gettext
+RUN apt-get update && apt-get install -y gettext
+
 # Install the project requirements.
 COPY requirements.txt /
 RUN pip install -r /requirements.txt

@@ -24,9 +24,8 @@ urlpatterns = [
 
 urlpatterns += i18n_patterns(
     path('search/', search_views.search, name='search'),
+    path("store-app/", include("store.urls")),
     path("", include(wagtail_urls)),
-    path("search/", search_views.search, name="search"),
-    path("store-app/", include("store.urls"))
 )
 
 if settings.DEBUG:

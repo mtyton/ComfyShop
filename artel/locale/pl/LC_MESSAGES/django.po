@@ -1,0 +1,189 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-06-20 13:43+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n"
+"%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n"
+"%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+
+#: artel/templates/menu/custom_main_menu.html:33
+msgid "Cart"
+msgstr "Koszyk"
+
+#: home/templates/home/welcome_page.html:6
+msgid "Visit the Wagtail website"
+msgstr ""
+
+#: home/templates/home/welcome_page.html:15
+msgid "View the release notes"
+msgstr ""
+
+#: home/templates/home/welcome_page.html:27
+msgid "Welcome to your new Wagtail site!"
+msgstr ""
+
+#: home/templates/home/welcome_page.html:28
+msgid ""
+"Please feel free to <a href=\"https://github.com/wagtail/wagtail/wiki/Slack"
+"\">join our community on Slack</a>, or get started with one of the links "
+"below."
+msgstr ""
+
+#: home/templates/home/welcome_page.html:35
+msgid "Wagtail Documentation"
+msgstr ""
+
+#: home/templates/home/welcome_page.html:36
+msgid "Topics, references, & how-tos"
+msgstr ""
+
+#: home/templates/home/welcome_page.html:42
+msgid "Tutorial"
+msgstr ""
+
+#: home/templates/home/welcome_page.html:43
+msgid "Build your first Wagtail site"
+msgstr ""
+
+#: home/templates/home/welcome_page.html:49
+msgid "Admin Interface"
+msgstr ""
+
+#: home/templates/home/welcome_page.html:50
+msgid "Create your superuser first!"
+msgstr ""
+
+#: search/templates/search/search.html:10
+#: search/templates/search/search.html:14
+msgid "Search"
+msgstr "Wyszukaj"
+
+#: search/templates/search/search.html:30
+#: store/templates/store/product_list_page.html:39
+msgid "Previous"
+msgstr "Poprzednia"
+
+#: search/templates/search/search.html:34
+#: store/templates/store/product_list_page.html:45
+msgid "Next"
+msgstr "Następna"
+
+#: search/templates/search/search.html:37
+msgid "No results found"
+msgstr "Nie znaleziono wyników"
+
+#: store/forms.py:21
+msgid "Name"
+msgstr "Imię"
+
+#: store/forms.py:25
+msgid "Surname"
+msgstr "Nazwisko"
+
+#: store/forms.py:28 store/templates/store/order_confirm.html:42
+msgid "Address"
+msgstr "Adres"
+
+#: store/forms.py:31
+msgid "City"
+msgstr "Miasto"
+
+#: store/forms.py:34
+msgid "Zip-code"
+msgstr "Kod pocztowy"
+
+#: store/forms.py:37
+msgid "E-mail"
+msgstr "Email"
+
+#: store/forms.py:40
+msgid "Phone number"
+msgstr "Numer telefonu"
+
+#: store/forms.py:43
+msgid "Polska"
+msgstr ""
+
+#: store/forms.py:43
+msgid "Country"
+msgstr "Kraj"
+
+#: store/templates/store/cart.html:9
+msgid "Shopping Cart"
+msgstr "Koszyk"
+
+#: store/templates/store/cart.html:20
+#: store/templates/store/order_confirm.html:66
+msgid "To Pay:"
+msgstr "Do zapłaty:"
+
+#: store/templates/store/cart.html:23
+msgid "Proceed to Pay"
+msgstr "Przejdź do płatności"
+
+#: store/templates/store/order.html:12
+msgid "Order Data"
+msgstr "Dane zamówienia"
+
+#: store/templates/store/order.html:13
+msgid "We won't share your data"
+msgstr "Nie udostępnimy Twoich danych"
+
+#: store/templates/store/order.html:58
+msgid "Contact Details"
+msgstr "Dane kontaktowe"
+
+#: store/templates/store/order.html:88
+#: store/templates/store/order_confirm.html:69
+msgid "Confirm"
+msgstr "Potwierdź"
+
+#: store/templates/store/order_confirm.html:9
+msgid "Customer Data"
+msgstr "Dane klienta"
+
+#: store/templates/store/order_confirm.html:15
+msgid "Full Name"
+msgstr "Pełne imię"
+
+#: store/templates/store/order_confirm.html:24
+msgid "Email"
+msgstr "Email"
+
+#: store/templates/store/order_confirm.html:33
+msgid "Phone"
+msgstr "Numer Telefonu"
+
+#: store/templates/store/order_confirm.html:55
+msgid "Order Items"
+msgstr "Zamawiane przedmioty"
+
+#: store/templates/store/product_list_page.html:10
+msgid "Added to cart"
+msgstr "Dodano do koszyka"
+
+#: store/templates/store/product_list_page.html:16
+msgid "Item has been added to cart."
+msgstr "Przedmiot został dodany do koszyka"
+
+#: store/templates/store/product_list_page.html:19
+msgid "Continue shopping"
+msgstr "Kontynuuj zakupy"
+
+#: store/templates/store/product_list_page.html:20
+msgid "Go to cart"
+msgstr "Idź do koszyka"
