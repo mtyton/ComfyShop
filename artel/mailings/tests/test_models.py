@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core import mail
 
 from mailings.models import (
     MailTemplate,
@@ -15,8 +16,7 @@ class TestMailTemplate(TestCase):
             template_name="test_template",
             template=SimpleUploadedFile(
                 "test_template.html", b"<html>{{test_var}}</html>"
-            ),
-            subject="Test subject",
+            )
         )
 
     def test_load_and_process_template_success(self):
@@ -43,22 +43,24 @@ class TestOutgoingEmail(TestCase):
             template_name="test_template",
             template=SimpleUploadedFile(
                 "test_template.html", b"<html>{{test_var}}</html>"
-            ),
-            subject="Test subject",
+            )
         )
 
     def test_send_success(self):
-        mail = OutgoingEmail.objects.send(
+        email = OutgoingEmail.objects.send(
             template_name="test_template",
             recipient="test@stardust.io", context={},
-            sender="sklep-test@stardust.io"
+            sender="sklep-test@stardust.io",
+            subject="Test subject"
         )
-        self.assertEqual(mail.sent, True)
-        # TODO outbox
+        self.assertEqual(email.sent, True)
+        self.assertEqual(mail.outbox[0].subject, "Test subject")
 
     def test_send_missing_template_failure(self):
         with self.assertRaises(MailTemplate.DoesNotExist):
             OutgoingEmail.objects.send(
                 template_name="missing_template",
-                recipient="", sender="", context={}\
+                recipient="", sender="", context={},
+                subject="Test subject"
             )
+        self.assertEqual(len(mail.outbox), 0)

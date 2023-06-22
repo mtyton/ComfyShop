@@ -22,15 +22,16 @@ def send_mail(
         to: list[str], 
         attachments: list[Attachment],
         subject: str, 
-        body: str,
+        content: str,
         sender_email: str = settings.DEFAULT_FROM_EMAIL
     ):
     message = EmailMessage(
         subject=subject,
-        body=body,
+        body=content,
         from_email=sender_email,
         to=to
     )
+    message.content_subtype = 'html'
     for attachment in attachments:
         message.attach(attachment.name, attachment.content, attachment.contenttype)
     return bool(message.send())
@@ -42,7 +43,6 @@ class MailTemplate(models.Model):
     template = models.FileField(
         upload_to="mail_templates"
     )
-    subject = models.CharField(max_length=255)
 
     def delete(self, *args, **kwargs):
         # delete file
@@ -66,17 +66,20 @@ class MailTemplate(models.Model):
 class OutgoingEmailManager(models.Manager):
 
     def send(
-            self, template_name: str, 
+            self, template_name: str, subject: str,
             recipient: str, context: dict | Context, 
             sender:str,  attachments: list[Attachment] = None
         ):
         template = MailTemplate.objects.get(template_name=template_name)
-        outgoing_email = self.create(template=template, recipient=recipient)
+        outgoing_email = self.create(
+            template=template, recipient=recipient, subject=subject,
+            sender=sender
+        )
         attachments = attachments or []
         # send email
         sent = send_mail(
             to=[recipient], sender_email=sender,
-            subject=template.subject, content=template.load_and_process_template(context),
+            subject=subject, content=template.load_and_process_template(context),
             attachments=attachments
         )
         outgoing_email.sent = sent
@@ -85,6 +88,7 @@ class OutgoingEmailManager(models.Manager):
 
 
 class OutgoingEmail(models.Model):
+    subject = models.CharField(max_length=255)
     template = models.ForeignKey(MailTemplate, on_delete=models.CASCADE)
     sender = models.EmailField()
     recipient = models.EmailField()

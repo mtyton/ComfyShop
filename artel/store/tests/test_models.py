@@ -1,9 +1,12 @@
+
+from unittest.mock import patch
 from django.test import TestCase
 from django.urls import reverse
 from django.core import mail
 
 from store.tests import factories
 from store import models as store_models
+from mailings.tests.factories import MailTemplateFactory
 
 
 # TODO - this is fine for now, but we'll want to use factoryboy for this:
@@ -72,8 +75,11 @@ class OrderTestCase(TestCase):
         self.payment_method = factories.PaymentMethodFactory()
         factories.DocumentTemplateFactory()
         factories.DocumentTemplateFactory(doc_type="receipt")
+        MailTemplateFactory(template_name="order_created_user")
+        MailTemplateFactory(template_name="order_created_author")
 
-    def test_create_from_cart_success_single_author(self):
+    @patch("mailings.models.MailTemplate.load_and_process_template", return_value="test")
+    def test_create_from_cart_success_single_author(self, mocked_load):
         product = factories.ProductFactory(template__author=self.author, price=100)
         cart_items = [{
             "author": self.author,
@@ -86,10 +92,13 @@ class OrderTestCase(TestCase):
         )
         self.assertEqual(orders.count(), 1)
         self.assertEqual(len(mail.outbox), 2)
-        self.assertEqual(mail.outbox[0].subject, f"Zamówienie {orders[0].order_number}")
+        self.assertEqual(
+            mail.outbox[0].subject, 
+            f"Wygenerowano umowę numer {orders[0].order_number} z dnia {orders[0].created_at.strftime('%d.%m.%Y')}"
+        )
 
-
-    def test_create_from_cart_success_multpile_authors(self):
+    @patch("mailings.models.MailTemplate.load_and_process_template", return_value="test")
+    def test_create_from_cart_success_multpile_authors(self, mocked_load):
         product = factories.ProductFactory(template__author=self.second_author, price=100)
         cart_items = [
             {
@@ -107,5 +116,11 @@ class OrderTestCase(TestCase):
         )
         self.assertEqual(orders.count(), 2)
         self.assertEqual(len(mail.outbox), 4)
-        self.assertEqual(mail.outbox[0].subject, f"Zamówienie {orders[0].order_number}")
-        self.assertEqual(mail.outbox[2].subject, f"Zamówienie {orders[1].order_number}")
+        self.assertEqual(
+            mail.outbox[0].subject, 
+            f"Wygenerowano umowę numer {orders[0].order_number} z dnia {orders[0].created_at.strftime('%d.%m.%Y')}"
+        )
+        self.assertEqual(
+            mail.outbox[2].subject, 
+            f"Wygenerowano umowę numer {orders[1].order_number} z dnia {orders[1].created_at.strftime('%d.%m.%Y')}"
+        )
