@@ -26,11 +26,13 @@ class ProductCategoryParamAdmin(ModelAdmin):
 
 
 class ProductTemplateAdmin(ModelAdmin):
+    menu_label = "Product design"
     model = models.ProductTemplate
     list_display = ("title", "code")
 
 
 class ProductAdmin(ModelAdmin):
+    menu_label = "Product variant"
     model = models.Product
     list_display = ("title", "price")
 

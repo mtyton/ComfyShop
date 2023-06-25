@@ -31,6 +31,10 @@ from store.utils import (
     notify_user_about_order,
     notify_manufacturer_about_order
 )
+from mailings.models import (
+    OutgoingEmail,
+    Attachment
+)
 
 
 class PersonalData(models.Model):
@@ -233,6 +237,44 @@ class OrderManager(models.Manager):
         year = datetime.datetime.now().year
         return f"{author.id}/{number_of_prev_orders:06}/{year}"
 
+    def _send_notifications(
+            self, order: models.Model, author: ProductAuthor, 
+            customer_data: dict[str, Any], docs: list[models.Model]
+        ):
+        # for user
+        attachments = [
+            Attachment(
+                content=doc.generate_document({"customer_data": customer_data}), 
+                contenttype="application/pdf", 
+                name=f"{doc.template.doc_type}_{order.order_number}.pdf"
+            ) for doc in docs
+        ]
+        mail_subject = f"Wygenerowano umowę numer {order.order_number} z dnia {order.created_at.strftime('%d.%m.%Y')}"
+        user_mail = OutgoingEmail.objects.send(
+            recipient=customer_data["email"],
+            subject=mail_subject,
+            context = {
+                "docs": docs,
+                "order_number": order.order_number,
+                "customer_email": customer_data["email"],
+            }, sender=settings.DEFAULT_FROM_EMAIL,
+            template_name="order_created_user",
+            attachments=attachments
+        )
+        # for author
+        author_mail = OutgoingEmail.objects.send(
+            recipient=author.email,
+            subject=mail_subject,
+            context = {
+                "docs": docs,
+                "order_number": order.order_number,
+                "manufacturer_email": author.email,
+            }, sender=settings.DEFAULT_FROM_EMAIL,
+            template_name="order_created_author",
+            attachments=attachments
+        )
+        return user_mail is not None and author_mail is not None
+
     def create_from_cart(
             self, cart_items: list[dict[str, str|dict]], 
             payment_method: models.Model| None, 
@@ -242,8 +284,9 @@ class OrderManager(models.Manager):
         orders_pks = []
 
         payment_method = payment_method or PaymentMethod.objects.first()
-        agreement_template = DocumentTemplate.objects.get(doc_type=DocumentTypeChoices.AGREEMENT)
-        receipt_template = DocumentTemplate.objects.get(doc_type=DocumentTypeChoices.RECEIPT)
+        doc_templates = DocumentTemplate.objects.filter(
+            doc_type__in=[DocumentTypeChoices.AGREEMENT, DocumentTypeChoices.RECEIPT]
+        )
 
         for item in cart_items:
             author = item["author"]
@@ -255,39 +298,18 @@ class OrderManager(models.Manager):
             )
             OrderProduct.objects.create_from_cart(author_products, order)
             orders_pks.append(order.pk)
-            agreement = OrderDocument.objects.create(
-                order=order,
-                template=agreement_template
-            )
-            receipt = OrderDocument.objects.create(
-                order=order,
-                template=receipt_template
-            )
-            extra_document_kwargs = {
-                "customer_data": customer_data
-            }
-            default_kwargs ={
-                "docs": [
-                    agreement.generate_document(extra_document_kwargs), 
-                    receipt.generate_document(extra_document_kwargs)
-                ],
-                "order_number": order.order_number
-            }
-            user_kwargs = {
-                "customer_email": customer_data["email"],
-            }
-            user_kwargs.update(default_kwargs)
-            user_notified = notify_user_about_order(**user_kwargs)
-            manufacturer_kwargs = {
-                "manufacturer_email": author.email,
-            }
-            manufacturer_kwargs.update(default_kwargs)
-            manufacturer_notified = notify_manufacturer_about_order(**manufacturer_kwargs)
-            sent = user_notified and manufacturer_notified
-            agreement.sent = sent
-            receipt.sent = sent
-            agreement.save()
-            receipt.save()
+            docs = []
+            for template in doc_templates:
+                doc = OrderDocument.objects.create(
+                    order=order, template=template
+                )
+                docs.append(doc)
+            sent = self._send_notifications(order, author, customer_data, docs)
+            
+            if not sent:
+                # TODO - store data temporarily
+                raise Exception("Error while sending emails")
+
         return Order.objects.filter(pk__in=orders_pks)
 
 
@@ -346,7 +368,6 @@ class DocumentTemplate(models.Model):
 class OrderDocument(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="documents")
     template = models.ForeignKey(DocumentTemplate, on_delete=models.CASCADE)
-    sent = models.BooleanField(default=False)
 
     def get_document_context(self):
         _context = {
