@@ -1,18 +1,25 @@
 from django.shortcuts import render, redirect
-from .models import SiteConfiguration
+from django.views import View
 from .forms import SiteConfigurationForm
 import json
 
 
-def setup_page(request):
-    config = SiteConfiguration.objects.first()
+class SetupPageView(View):
+    template_name = 'setup.html'
 
-    if request.method == 'POST':
-        form = SiteConfigurationForm(request.POST, request.FILES, instance=config)
+    def get(self, request):
+        form = SiteConfigurationForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = SiteConfigurationForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
             form_data = form.cleaned_data
-            form_data['logo'] = str(form_data['logo'])
+            logo_path = form.save_logo()
+            if logo_path:
+                form_data['logo'] = 'media/' + logo_path
+            else:
+                form_data['logo'] = None
 
             json_data = json.dumps(form_data, indent=4)
 
@@ -20,7 +27,5 @@ def setup_page(request):
                 file.write(json_data)
 
             return redirect('/')
-    else:
-        form = SiteConfigurationForm(instance=config)
-
-    return render(request, 'setup.html', {'form': form})
+        else:
+            return render(request, self.template_name, {'form': form})

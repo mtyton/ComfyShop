@@ -10,5 +10,7 @@ class CheckSetupMiddleware(object):
         if not os.path.exists('config.json') and not request.path_info.startswith('/setup'):
             return redirect('/setup/')
 
+        if os.path.exists('config.json') and request.path_info.startswith('/setup'):
+            return redirect('/')
         response = self.get_response(request)
         return response

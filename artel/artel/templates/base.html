@@ -37,18 +37,24 @@
         {% wagtailuserbar %}
         <div class="container">
             <div class="row">
-                {% if menu_left %}
-                <div class="col-md-3 mt-5 ml-2">
+                {% if navbar_position == 'top' %}
+                <div class="col-md-12 mt-5 ml-2">
                     {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
-                </div>
+                    </div>
+                {% endif %}
+
+                {% if navbar_position == 'left' %}
+                    <div class="col-md-3 mt-5 ml-2">
+                    {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
+                    </div>
                 {% endif %}
                 <div class="col-md-9 mt-5 ml-2">
-                    {% block content %}{% endblock %}
+                {% block content %}{% endblock %}
                 </div>
-                {% if not menu_left %}
-                <div class="col-md-3 mt-5 ml-2">
+                {% if navbar_position == 'right' %}
+                    <div class="col-md-3 mt-5 ml-2">
                     {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
-                </div>
+                    </div>
                 {% endif %}
             </div>
         </div>

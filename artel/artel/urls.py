@@ -12,14 +12,14 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
 
-from setup.views import setup_page as setup_view
+from setup.views import SetupPageView as setup_view
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
-    path('setup/', setup_view, name='setup_page'),
+    path('setup/', setup_view.as_view(), name='setup_page'),
 ]
 
 store_app_enabled = getattr(settings, 'SHOP_ENABLED', False)

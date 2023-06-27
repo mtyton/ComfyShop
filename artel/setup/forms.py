@@ -1,12 +1,27 @@
 from django import forms
-from .models import SiteConfiguration
+from django.conf import settings
+import os
 
 
-class SiteConfigurationForm(forms.ModelForm):
-    class Meta:
-        model = SiteConfiguration
-        exclude = ()
+class SiteConfigurationForm(forms.Form):
+    logo = forms.ImageField(required=False)
+    shop_enabled = forms.BooleanField(required=False)
+    navbar_position = forms.ChoiceField(
+        choices=[
+            ('left', 'Left'),
+            ('right', 'Right'),
+            ('top', 'Top'),
+        ],
+        initial='left',
+        widget=forms.RadioSelect
+    )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['navbar_position'].widget.attrs['class'] = 'custom-select'
+    def save_logo(self):
+        if self.cleaned_data['logo']:
+            logo = self.cleaned_data['logo']
+            filename = os.path.join(settings.MEDIA_ROOT, 'images/icons', logo.name)
+            with open(filename, 'wb') as f:
+                for chunk in logo.chunks():
+                    f.write(chunk)
+            return os.path.join('images/icons', logo.name)
+        return None
