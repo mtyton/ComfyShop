@@ -19,7 +19,7 @@ urlpatterns = [
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
-    path('setup/', setup_view.as_view(), name='setup_page'),
+    path('setup/', setup_view.as_view(), name='setup'),
 ]
 
 store_app_enabled = getattr(settings, 'SHOP_ENABLED', False)
