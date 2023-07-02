@@ -40,6 +40,14 @@ class ProductCategoryParamFactory(DjangoModelFactory):
     param_type = 'str'
 
 
+class ProductCategoryParamValueFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.ProductCategoryParamValue'
+
+    param = SubFactory(ProductCategoryParamFactory)
+    value = Faker('name')
+
+
 class ProductTemplateFactory(DjangoModelFactory):
     class Meta:
         model = 'store.ProductTemplate'
@@ -56,10 +64,17 @@ class ProductFactory(DjangoModelFactory):
         model = 'store.Product'
 
     name = Faker('name')
-    info = Faker('text')
     price = Faker('pydecimal', left_digits=5, right_digits=2, positive=True)
     available = Faker('boolean')
     template = SubFactory(ProductTemplateFactory)
+
+
+class ProductParamFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.ProductParam'
+    
+    product = SubFactory(ProductFactory)
+    param = SubFactory(ProductCategoryParamFactory)
 
 
 class PaymentMethodFactory(DjangoModelFactory):

@@ -1,5 +1,6 @@
 import pdfkit
 import datetime
+import builtins
 
 from decimal import Decimal
 from typing import Any
@@ -14,6 +15,7 @@ from django.template import (
     Template,
     Context
 )
+from django.core.exceptions import ValidationError
 
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -27,14 +29,19 @@ from taggit.managers import TaggableManager
 from phonenumber_field.modelfields import PhoneNumberField
 from num2words import num2words
 
-from store.utils import (
-    notify_user_about_order,
-    notify_manufacturer_about_order
-)
 from mailings.models import (
     OutgoingEmail,
     Attachment
 )
+from store.validators import ProductParamDuplicateValidator
+
+
+class BaseImageModel(models.Model):
+    image = models.ImageField()
+    is_main = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
 
 
 class PersonalData(models.Model):
@@ -92,6 +99,28 @@ class ProductCategoryParam(ClusterableModel):
 
     def __str__(self):
         return self.key
+    
+    panels = [
+        FieldPanel("category"),
+        FieldPanel("key"),
+        FieldPanel("param_type"),
+        InlinePanel("param_values")
+    ]
+
+
+class ProductCategoryParamValue(ClusterableModel):
+    param = ParentalKey(ProductCategoryParam, on_delete=models.CASCADE, related_name="param_values")
+    value = models.CharField(max_length=255)
+    
+    def get_value(self):
+        try:
+            func = getattr(builtins, self.param.param_type)
+            return func(self.value)
+        except ValueError:
+            return
+
+    def __str__(self):
+        return f"{self.param.key}: {self.value}"
 
 
 class ProductTemplate(ClusterableModel):
@@ -106,45 +135,58 @@ class ProductTemplate(ClusterableModel):
     def __str__(self):
         return self.title
 
+    @property
+    def main_image(self):
+        try:
+            return self.template_images.get(is_main=True)
+        except ProductImage.DoesNotExist:
+            return self.template_images.first()
+
     panels = [
         FieldPanel("category"),
         FieldPanel("author"),
         FieldPanel('title'),
         FieldPanel('code'),
         FieldPanel('description'),
-        InlinePanel("images"),
+        InlinePanel("template_images", label="Template Images"),
         FieldPanel("tags"),
     ]
 
 
-class ProductImage(models.Model):
+class ProductTemplateImage(BaseImageModel):
     template = ParentalKey(
-        ProductTemplate, on_delete=models.CASCADE, related_name="images"
+        ProductTemplate, on_delete=models.CASCADE, related_name="template_images"
     )
     image = models.ImageField()
+    is_main = models.BooleanField(default=False)
 
 
 class Product(ClusterableModel):
     name = models.CharField(max_length=255, blank=True)
-    info = models.TextField(blank=True)
     template = models.ForeignKey(ProductTemplate, on_delete=models.CASCADE, related_name="products")
+    params = models.ManyToManyField(
+        ProductCategoryParamValue, blank=True, through="ProductParam",
+        validators=(ProductParamDuplicateValidator(),)
+    )
     price = models.FloatField()
     available = models.BooleanField(default=True)
-
+    
     panels = [
         FieldPanel("template"),
         FieldPanel("price"),
-        InlinePanel("param_values"),
+        FieldPanel("params"),
         FieldPanel("available"),
         FieldPanel("name"),
-        FieldPanel("info")
+        InlinePanel("product_images", label="Variant Images"),
     ]
 
     @property
     def main_image(self):
-        images = self.template.images.all()
-        if images:
-            return images.first().image
+        try:
+            return self.product_images.get(is_main=True)
+        except ProductImage.DoesNotExist:
+            return self.product_images.first()
+
 
     @property
     def tags(self):
@@ -163,10 +205,30 @@ class Product(ClusterableModel):
         return self.name or self.template.title
 
 
-class TemplateParamValue(models.Model):
-    param = models.ForeignKey(ProductCategoryParam, on_delete=models.CASCADE)
-    product = ParentalKey(Product, on_delete=models.CASCADE, related_name="param_values")
-    value = models.CharField(max_length=255)
+class ProductImage(BaseImageModel):
+    product = ParentalKey(
+        "Product", on_delete=models.CASCADE, related_name="product_images"
+    )
+
+
+class ProductParam(models.Model):
+    product = ParentalKey(Product, on_delete=models.CASCADE, related_name="product_params")
+    param_value = models.ForeignKey(ProductCategoryParamValue, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def clean(self) -> None:
+        print("SDADASDASDASD")
+        # get all of this product params with same category
+        product_params_count = self.product.product_params.filter(
+            param_value__param=self.param_value.param
+        ).count()
+        if product_params_count > 1:
+            raise ValidationError("Product can't have two values for one param")
+
+        return super().clean()
 
 
 class ProductListPage(Page):
@@ -177,9 +239,9 @@ class ProductListPage(Page):
 
     def _get_items(self):
         if self.tags.all():
-            return Product.objects.filter(available=True, template__tags__in=self.tags.all())
-        return Product.objects.filter(available=True)
-
+            return ProductTemplate.objects.filter(tags__in=self.tags.all())
+        return ProductTemplate.objects.all()
+    
     def get_context(self, request):
         context = super().get_context(request)
         items = self._get_items()

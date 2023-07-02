@@ -20,7 +20,8 @@ from store.serializers import (
 from store.forms import CustomerDataForm
 from store.models import (
     Order,
-    Product
+    Product,
+    ProductTemplate
 )
 
 
@@ -84,7 +85,20 @@ class CartActionView(ViewSet):
         items = cart.get_items()
         serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)
-    
+
+
+class ConfigureProductView(View):
+    template_name = "store/configure_product.html"
+
+    def get_context_data(self, pk: int, **kwargs: Any) -> Dict[str, Any]:
+        context = {}
+        context["template"] = ProductTemplate.objects.get(pk=pk)
+        return context
+
+    def get(self, request, pk: int, *args, **kwargs):
+        context = self.get_context_data(pk)
+        return render(request, self.template_name, context)
+
 
 class OrderView(View):
     template_name = "store/order.html"

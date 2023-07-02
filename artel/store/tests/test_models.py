@@ -3,15 +3,67 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.urls import reverse
 from django.core import mail
+from django.core.exceptions import ValidationError
 
 from store.tests import factories
 from store import models as store_models
 from mailings.tests.factories import MailTemplateFactory
 
 
-# TODO - this is fine for now, but we'll want to use factoryboy for this:
-# https://factoryboy.readthedocs.io/en/stable/
-# TODO - test have to rewritten - I'll do it tommorow
+class ProductCategoryParamValueTestCase(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.category = factories.ProductCategoryFactory()
+    
+
+    def test_get_value_success(self):
+        param = factories.ProductCategoryParamFactory(
+            category=self.category,
+            param_type="int",
+            key="test_param"
+        )
+        param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
+        proper_value = param_value.get_value()
+        self.assertEqual(proper_value, 23)
+    
+    def test_get_value_failure_wrong_value(self):
+        param = factories.ProductCategoryParamFactory(
+            category=self.category,
+            param_type="int",
+            key="test_param"
+        )
+        param_value = factories.ProductCategoryParamValueFactory(param=param, value="wrong_value")
+        proper_value = param_value.get_value()
+        self.assertEqual(proper_value, None)
+
+
+class ProductTestCase(TestCase):
+
+    def test_category_params_one_value_success(self):
+        product = factories.ProductFactory()
+        param = factories.ProductCategoryParamFactory(
+            category=product.template.category,
+            param_type="int",
+            key="test_param"
+        )
+        param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
+        product.params.add(param_value)
+        product.save()
+        self.assertEqual(product.params.count(), 1)
+        self.assertEqual(product.params.first().get_value(), 23)
+
+    def test_category_params_multiple_values_failure(self):
+        product = factories.ProductFactory()
+        param = factories.ProductCategoryParamFactory(
+            category=product.template.category,
+            param_type="int",
+            key="test_param"
+        )
+        param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
+        sec_param_value = factories.ProductCategoryParamValueFactory(param=param, value="24")
+        with self.assertRaises(ValidationError):
+            product.params.add(param_value)
+            product.params.add(sec_param_value)
 
 
 class OrderProductTestCase(TestCase):
