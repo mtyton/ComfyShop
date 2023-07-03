@@ -3,7 +3,10 @@ import datetime
 import builtins
 
 from decimal import Decimal
-from typing import Any
+from typing import (
+    Any,
+    Self
+)
 from django.db import models
 from django.core.paginator import (
     Paginator,
@@ -16,6 +19,7 @@ from django.template import (
     Context
 )
 from django.core.exceptions import ValidationError
+from django.db.models.signals import m2m_changed
 
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -33,7 +37,6 @@ from mailings.models import (
     OutgoingEmail,
     Attachment
 )
-from store.validators import ProductParamDuplicateValidator
 
 
 class BaseImageModel(models.Model):
@@ -165,8 +168,7 @@ class Product(ClusterableModel):
     name = models.CharField(max_length=255, blank=True)
     template = models.ForeignKey(ProductTemplate, on_delete=models.CASCADE, related_name="products")
     params = models.ManyToManyField(
-        ProductCategoryParamValue, blank=True, through="ProductParam",
-        validators=(ProductParamDuplicateValidator(),)
+        ProductCategoryParamValue, blank=True, through="ProductParam"
     )
     price = models.FloatField()
     available = models.BooleanField(default=True)
@@ -219,16 +221,30 @@ class ProductParam(models.Model):
         self.full_clean()
         return super().save(*args, **kwargs)
 
-    def clean(self) -> None:
-        print("SDADASDASDASD")
-        # get all of this product params with same category
-        product_params_count = self.product.product_params.filter(
-            param_value__param=self.param_value.param
-        ).count()
-        if product_params_count > 1:
-            raise ValidationError("Product can't have two values for one param")
 
-        return super().clean()
+# SIGNALS
+def validate_param(sender, **kwargs):
+    action = kwargs.pop("action")
+    if action != "pre_add":
+        return
+    pk_set = kwargs.get("pk_set")
+    product_instance = kwargs.get("instance")
+    errors = []
+    for pk in pk_set:
+        try:
+            param = ProductCategoryParamValue.objects.get(pk=pk).param
+        except ProductCategoryParamValue.DoesNotExist:
+            # TODO log this
+            ...
+        count = product_instance.params.filter(productparam__param_value__param=param).count()
+        if count >= 1:
+            errors.append(ValueError("Product param with this key already exists."))
+    
+    if errors:
+        raise ValidationError(errors)
+    
+
+m2m_changed.connect(validate_param, Product.params.through)
 
 
 class ProductListPage(Page):
