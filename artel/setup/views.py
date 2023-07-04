@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views import View
-from .forms import SiteConfigurationForm
+from django.conf import settings
+import os
+from .forms import SiteConfigurationForm, SkinChangerForm
 import json
 
 
@@ -26,6 +28,43 @@ class SetupPageView(View):
             with open('config.json', 'w') as file:
                 file.write(json_data)
 
+            return redirect('/skins')
+        else:
+            return render(request, self.template_name, {'form': form})
+
+
+class SkinChangerView(View):
+    template_name = 'skin_changer.html'
+
+    def get(self, request):
+        form = SkinChangerForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = SkinChangerForm(request.POST)
+        if form.is_valid():
+            form_data = form.data
+            css_content = generate_css_content(form_data)
+            file_name = 'dynamic_colors.css'
+            css_file_path = os.path.join(settings.MEDIA_ROOT, 'css', file_name)
+            with open(css_file_path, 'w') as css_file:
+                css_file.write(css_content)
             return redirect('/')
         else:
             return render(request, self.template_name, {'form': form})
+
+
+def generate_css_content(form_data):
+    css_content = f"""
+        body {{
+            background-color: {form_data['background_color']};
+            color: {form_data['font_color']};
+        }}
+        .button {{
+            background-color: {form_data['button_color']};
+        }}
+        a {{
+            color: {form_data['link_color']};
+        }}
+    """
+    return css_content

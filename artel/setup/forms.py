@@ -1,5 +1,6 @@
 from django import forms
 from django.conf import settings
+from colorfield.fields import ColorField
 import os
 
 
@@ -25,3 +26,15 @@ class SiteConfigurationForm(forms.Form):
                     f.write(chunk)
             return os.path.join('images/icons', logo.name)
         return None
+
+
+class SkinChangerForm(forms.Form):
+    COLOR_PALETTE = [
+        ("#FFFFFF", "white", ),
+        ("#000000", "black", ),
+    ]
+
+    background_color = ColorField(samples=COLOR_PALETTE)
+    font_color = ColorField(samples=COLOR_PALETTE)
+    button_color = ColorField(samples=COLOR_PALETTE)
+    link_color = ColorField(samples=COLOR_PALETTE)
