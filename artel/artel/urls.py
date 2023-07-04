@@ -21,7 +21,7 @@ urlpatterns = [
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
     path('setup/', setup_view.as_view(), name='setup'),
-    path('skins/', skin_view.as_view(), name='skin' )
+    path('skins/', skin_view.as_view(), name='skin')
 ]
 
 store_app_enabled = getattr(settings, 'SHOP_ENABLED', False)
