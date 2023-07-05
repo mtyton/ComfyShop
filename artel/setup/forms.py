@@ -16,6 +16,14 @@ class SiteConfigurationForm(forms.Form):
         initial='left',
         widget=forms.RadioSelect
     )
+    skin = forms.ChoiceField(
+        choices=[
+            ('light', 'Light'),
+            ('dark', 'Dark'),
+            ('custom', 'Custom'),
+        ],
+        widget=forms.Select
+    )
 
     def save_logo(self):
         if self.cleaned_data['logo']:

@@ -27,7 +27,16 @@
         {# Global stylesheets #}
         <link rel="stylesheet" type="text/css" href="{% static 'css/artel.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/dynamic_colors.css' %}">
+
+        {% if skin == 'light' %}
+        <link rel="stylesheet" href="{% static 'css/light.css' %}">
+        {% endif %}
+        {% if skin == 'dark' %}
+        <link rel="stylesheet" href="{% static 'css/dark.css' %}">
+        {% endif %}
+        {% if skin == 'custom' %}
+        <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+        {% endif %}
 
         {% block extra_css %}
         {# Override this in templates to add extra stylesheets #}
