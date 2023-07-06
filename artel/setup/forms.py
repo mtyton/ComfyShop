@@ -44,5 +44,6 @@ class SkinChangerForm(forms.Form):
 
     background_color = ColorField(samples=COLOR_PALETTE)
     font_color = ColorField(samples=COLOR_PALETTE)
-    button_color = ColorField(samples=COLOR_PALETTE)
+    hr_color = ColorField(samples=COLOR_PALETTE)
     link_color = ColorField(samples=COLOR_PALETTE)
+    hover_on_link_color = ColorField(samples=COLOR_PALETTE)
