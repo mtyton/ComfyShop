@@ -1,6 +1,12 @@
 from django import forms
 from phonenumber_field.formfields import PhoneNumberField
-# from phonenumber_field.widgets import PhoneNumberPrefixWidget
+
+from store.models import (
+    ProductCategoryParamValue,
+    ProductCategoryParam,
+    ProductCategory
+)
+
 
 
 
@@ -31,4 +37,23 @@ class CustomerDataForm(forms.Form):
     country = forms.ChoiceField(
         choices=(("PL", "Polska"), ), label="Kraj",
         widget=forms.Select(attrs={"class": "form-control"})
+    )
+
+
+class ProductCategoryParamForm(forms.ModelForm):
+    class Meta:
+        model = ProductCategoryParam
+        fields = ("key", "value", )
+        readonly_fields = ("key", )
+
+    def __init__(self, instance, *args, **kwargs):
+        super().__init__(*args, instance=instance, **kwargs)
+        self.fields["key"].widget.attrs["disabled"] = True
+        self.fields["value"].choices = [
+            (param_value.pk, param_value.value) for param_value in instance.param_values.all()
+        ]
+
+    value = forms.ModelChoiceField(
+        queryset=ProductCategoryParamValue.objects.none(),
+        widget=forms.RadioSelect(attrs={"class": "form-control"})
     )

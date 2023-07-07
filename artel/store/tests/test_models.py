@@ -4,10 +4,40 @@ from django.test import TestCase
 from django.urls import reverse
 from django.core import mail
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from store.tests import factories
 from store import models as store_models
 from mailings.tests.factories import MailTemplateFactory
+
+
+class ProductCategoryParamTestCase(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.category = factories.ProductCategoryFactory()
+        self.param = factories.ProductCategoryParamFactory(
+            category=self.category,
+            param_type="int",
+            key="test_param"
+        )
+    
+    def test_get_available_values_no_values_success(self):
+        available_values = [v for v in self.param.get_available_values()]
+        self.assertEqual(available_values, [])
+
+    def test_get_available_values_one_value_success(self):
+        factories.ProductCategoryParamValueFactory(param=self.param, value="23")
+        available_values = [v for v in self.param.get_available_values()]
+        self.assertEqual(available_values, [23])
+        self.assertEqual(len(available_values), 1)
+
+    def test_get_available_values_multiple_values_success(self):
+        factories.ProductCategoryParamValueFactory(param=self.param, value="23")
+        factories.ProductCategoryParamValueFactory(param=self.param, value="24")
+        factories.ProductCategoryParamValueFactory(param=self.param, value="25")
+        available_values = [v for v in self.param.get_available_values()]
+        self.assertEqual(available_values, [23, 24, 25])
+        self.assertEqual(len(available_values), 3)
 
 
 class ProductCategoryParamValueTestCase(TestCase):
@@ -47,7 +77,8 @@ class ProductTestCase(TestCase):
             key="test_param"
         )
         param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
-        product.params.add(param_value)
+        with transaction.atomic():
+            product.params.add(param_value)
         product.save()
         self.assertEqual(product.params.count(), 1)
         self.assertEqual(product.params.first().get_value(), 23)
@@ -62,8 +93,10 @@ class ProductTestCase(TestCase):
         param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
         sec_param_value = factories.ProductCategoryParamValueFactory(param=param, value="24")
         with self.assertRaises(ValidationError):
-            product.params.add(param_value)
-            product.params.add(sec_param_value)
+            with transaction.atomic():
+                product.params.add(param_value)
+                product.params.add(sec_param_value)
+        self.assertEqual(product.params.count(), 0)
 
 
 class OrderProductTestCase(TestCase):

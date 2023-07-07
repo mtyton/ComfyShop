@@ -5,7 +5,7 @@ import builtins
 from decimal import Decimal
 from typing import (
     Any,
-    Self
+    Iterator
 )
 from django.db import models
 from django.core.paginator import (
@@ -109,6 +109,10 @@ class ProductCategoryParam(ClusterableModel):
         FieldPanel("param_type"),
         InlinePanel("param_values")
     ]
+
+    def get_available_values(self) -> Iterator[any]:
+        for elem in self.param_values.all():
+            yield elem.get_value()
 
 
 class ProductCategoryParamValue(ClusterableModel):

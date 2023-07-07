@@ -17,7 +17,10 @@ from store.serializers import (
     CartSerializer, 
     CartProductAddSerializer
 )
-from store.forms import CustomerDataForm
+from store.forms import (
+    CustomerDataForm,
+    ProductCategoryParamForm
+)
 from store.models import (
     Order,
     Product,
@@ -91,8 +94,17 @@ class ConfigureProductView(View):
     template_name = "store/configure_product.html"
 
     def get_context_data(self, pk: int, **kwargs: Any) -> Dict[str, Any]:
-        context = {}
-        context["template"] = ProductTemplate.objects.get(pk=pk)
+        template = ProductTemplate.objects.get(pk=pk)
+        category_params = template.category.category_params.all()
+        
+
+        context = {
+            "template": template,
+            "available_variants": Product.objects.filter(template__pk=pk),
+            "category_params": category_params,
+            "forms": [ProductCategoryParamForm(instance=param) for param in category_params]
+        }
+        
         return context
 
     def get(self, request, pk: int, *args, **kwargs):
