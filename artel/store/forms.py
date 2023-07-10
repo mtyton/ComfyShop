@@ -43,7 +43,7 @@ class CustomerDataForm(forms.Form):
 class ProductCategoryParamForm(forms.ModelForm):
     class Meta:
         model = ProductCategoryParam
-        fields = ("key", "value", )
+        fields = ("key", "value")
         readonly_fields = ("key", )
 
     def __init__(self, instance, *args, **kwargs):
@@ -57,3 +57,9 @@ class ProductCategoryParamForm(forms.ModelForm):
         queryset=ProductCategoryParamValue.objects.none(),
         widget=forms.RadioSelect(attrs={"class": "form-control"})
     )
+
+    def save(self, *args, **kwargs):
+        return ProductCategoryParamValue.objects.get(
+            param=self.instance,
+            value=str(self.cleaned_data["value"])
+        )

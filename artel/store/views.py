@@ -111,6 +111,22 @@ class ConfigureProductView(View):
         context = self.get_context_data(pk)
         return render(request, self.template_name, context)
 
+    def post(self, request, pk: int, *args, **kwargs):
+        print(request.POST)
+        return HttpResponseRedirect(reverse("product-configure-summary", kwargs={"variant_pk": 1}))
+
+
+class ConfigureProductSummaryView(View):
+    template_name = "store/configure_product_summary.html"
+    
+    def get(self, request, variant_pk: int, *args, **kwargs):
+        variant = Product.objects.get(pk=variant_pk)
+        context = {
+            "variant": variant,
+            "category_params": variant.template.category.category_params.all()
+        }
+        return render(request, self.template_name, context)
+
 
 class OrderView(View):
     template_name = "store/order.html"
