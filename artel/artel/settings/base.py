@@ -16,6 +16,16 @@ import os
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+# -> GlitchTip error reporting 
+sentry_sdk.init(
+    integrations=[DjangoIntegration()],
+    auto_session_tracking=False,
+    traces_sample_rate=0
+) 
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
