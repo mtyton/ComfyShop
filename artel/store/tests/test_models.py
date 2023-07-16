@@ -98,6 +98,48 @@ class ProductTestCase(TestCase):
                 product.params.add(sec_param_value)
         self.assertEqual(product.params.count(), 0)
 
+    def test_get_or_create_by_params_success(self):
+        product = factories.ProductFactory(available=True)
+        value1 = factories.ProductCategoryParamValueFactory()
+        value2 = factories.ProductCategoryParamValueFactory()
+        product.params.add(value1)
+        product.params.add(value2)
+        product.save()
+        prod = store_models.Product.objects.get_or_create_by_params(
+            params=[value1, value2], template=product.template,
+        )
+        self.assertIsNotNone(prod)
+        self.assertEqual(prod.pk, product.pk)
+        self.assertTrue(prod.available)
+
+    def test_get_or_create_by_params_success_not_existing_product(self):
+        product = factories.ProductFactory(available=True)
+        value1 = factories.ProductCategoryParamValueFactory()
+        value2 = factories.ProductCategoryParamValueFactory()
+        product.params.add(value1)
+        product.price = 13.0
+        product.save()
+        
+        prod = store_models.Product.objects.get_or_create_by_params(
+            params=[value1, value2], template=product.template,
+        )
+        self.assertIsNotNone(prod)
+        self.assertNotEqual(prod.pk, product.pk)
+        self.assertFalse(prod.available)
+        self.assertEqual(prod.price, 13.0)
+
+    def test_get_or_create_by_params_success_not_existing_product_no_other_products(self):
+        template = factories.ProductTemplateFactory()
+        value1 = factories.ProductCategoryParamValueFactory()
+        value2 = factories.ProductCategoryParamValueFactory()
+        
+        prod = store_models.Product.objects.get_or_create_by_params(
+            params=[value1, value2], template=template,
+        )
+        self.assertIsNotNone(prod)
+        self.assertFalse(prod.available)
+        self.assertEqual(prod.price, 4.0)
+
 
 class OrderProductTestCase(TestCase):
     def setUp(self):

@@ -40,12 +40,10 @@ class OutgoingMailAdmin(ModelAdmin):
     exclude_from_explorer = False
     list_display = (
         "subject",
-        "to",
         "sent",
     )
     search_fields = (
         "subject",
-        "to",
     )
     list_filter = (
         "subject",

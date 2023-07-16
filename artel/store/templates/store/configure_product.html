@@ -23,16 +23,21 @@
       <div class="container">
         <form action="" method="POST" class="mt-5">
           {% csrf_token %}
+
+          {{ formset.management_form }}
           <div class="row mt-5">
-            {% for form in forms %}
+            {% for form in formset.forms %}
                 <div class="col-6  text-center">
-                  <h3>{{form.instance}}</h3>
-                  {% for value, label in form.value.field.choices %}
-                    <div class="btn-group btn-group-toggle" role="group">
-                      <input type="radio" class="btn-check" name="{{form.key.value}}" id="{{value}}" autocomplete="off" checked>
-                      <label class="btn btn-outline-primary" for="{{value}}">{{label}}</label>
-                    </div>
-                  {% endfor %}
+                  <h3>{{form.cat_param}}</h3>
+                  {% if form.value.field.choices %}
+                    <input type="hidden" name="{{form.prefix}}-key" value="{{form.key.value}}">
+                    {% for value, label in form.value.field.choices %}
+                      <div class="btn-group btn-group-toggle" role="group">
+                        <input type="radio" class="btn-check" name="{{form.prefix}}-value" id="{{value}}" autocomplete="off" value="{{value}}" required>
+                        <label class="btn btn-outline-primary" for="{{value}}">{{label}}</label>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
                 </div>
               {% if forloop.counter|divisibleby:"2" %} </div><div class="row mt-5">{% endif %}  
             {% endfor %}

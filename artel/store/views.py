@@ -8,6 +8,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+from django.forms import modelformset_factory
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -19,12 +20,14 @@ from store.serializers import (
 )
 from store.forms import (
     CustomerDataForm,
-    ProductCategoryParamForm
+    ProductCategoryParamValueForm,
+    ProductCategoryParamFormset
 )
 from store.models import (
     Order,
     Product,
-    ProductTemplate
+    ProductTemplate,
+    ProductCategoryParamValue
 )
 
 
@@ -96,13 +99,17 @@ class ConfigureProductView(View):
     def get_context_data(self, pk: int, **kwargs: Any) -> Dict[str, Any]:
         template = ProductTemplate.objects.get(pk=pk)
         category_params = template.category.category_params.all()
-        
-
+        formset_class = modelformset_factory(
+            ProductCategoryParamValue,
+            form=ProductCategoryParamValueForm, 
+            formset=ProductCategoryParamFormset
+        )
+        formset = formset_class(queryset=category_params)
         context = {
             "template": template,
             "available_variants": Product.objects.filter(template__pk=pk),
             "category_params": category_params,
-            "forms": [ProductCategoryParamForm(instance=param) for param in category_params]
+            "formset": formset
         }
         
         return context
@@ -112,8 +119,42 @@ class ConfigureProductView(View):
         return render(request, self.template_name, context)
 
     def post(self, request, pk: int, *args, **kwargs):
+        # first select template
+        template = ProductTemplate.objects.get(pk=pk)
+        category_params = template.category.category_params.all()
+        params_values = []
+        formset_class = modelformset_factory(
+            ProductCategoryParamValue,
+            form=ProductCategoryParamValueForm, 
+            formset=ProductCategoryParamFormset
+        )
+        formset = formset_class(queryset=category_params, data=request.POST)
         print(request.POST)
-        return HttpResponseRedirect(reverse("product-configure-summary", kwargs={"variant_pk": 1}))
+        if not formset.is_valid():
+            print(formset.errors)
+            messages.error(request, "Niepoprawne dane")
+            context = self.get_context_data(pk)
+            context["formset"] = formset
+            return render(request, self.template_name, context)
+
+        for form in formset.forms:
+            if not form.is_valid():
+                messages.error(request, "Niepoprawne dane")
+                context = self.get_context_data(pk)
+                context["formset"] = formset
+                return render(request, self.template_name, context)
+            params_values.append(form.save())
+        
+        product_variant = Product.objects.get_or_create_by_params(
+            template=ProductTemplate.objects.get(pk=pk), params=params_values
+        )
+        if not product_variant:
+            messages.error(request, "Nie udało się utworzyć wariantu produktu")
+            return HttpResponseRedirect(reverse("product-configure", kwargs={"pk": pk}))
+
+        return HttpResponseRedirect(
+            reverse("product-configure-summary", kwargs={"variant_pk": product_variant.pk})
+        )
 
 
 class ConfigureProductSummaryView(View):
@@ -123,7 +164,7 @@ class ConfigureProductSummaryView(View):
         variant = Product.objects.get(pk=variant_pk)
         context = {
             "variant": variant,
-            "category_params": variant.template.category.category_params.all()
+            "params_values": variant.params.all()
         }
         return render(request, self.template_name, context)
 

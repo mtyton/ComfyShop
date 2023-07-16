@@ -40,26 +40,39 @@ class CustomerDataForm(forms.Form):
     )
 
 
-class ProductCategoryParamForm(forms.ModelForm):
+class ProductCategoryParamFormset(forms.BaseModelFormSet):
+    ...
+
+
+class ProductCategoryParamValueForm(forms.ModelForm):
     class Meta:
-        model = ProductCategoryParam
+        model = ProductCategoryParamValue
         fields = ("key", "value")
-        readonly_fields = ("key", )
-
-    def __init__(self, instance, *args, **kwargs):
-        super().__init__(*args, instance=instance, **kwargs)
-        self.fields["key"].widget.attrs["disabled"] = True
-        self.fields["value"].choices = [
-            (param_value.pk, param_value.value) for param_value in instance.param_values.all()
-        ]
-
+    
+    key = forms.CharField(required=True)
     value = forms.ModelChoiceField(
         queryset=ProductCategoryParamValue.objects.none(),
-        widget=forms.RadioSelect(attrs={"class": "form-control"})
+        widget=forms.RadioSelect(attrs={"class": "btn-check", "type": "radio", "autocomplete": "off"}),
+        required=True
     )
 
+    def _get_instace(self, key: str):
+        return ProductCategoryParam.objects.get(key=key)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        key = self.initial.get("key")
+        if not key:
+            return
+        self.cat_param = self._get_instace(key)
+        self.fields["value"].choices = [
+            (param_value.pk, param_value.value) for param_value in self.cat_param.param_values.all()
+        ]
+
     def save(self, *args, **kwargs):
-        return ProductCategoryParamValue.objects.get(
-            param=self.instance,
+        param_value = ProductCategoryParamValue.objects.get(
+            param__key=str(self.cleaned_data["key"]),
             value=str(self.cleaned_data["value"])
         )
+        print(param_value or "DUPSKo")
+        return param_value
