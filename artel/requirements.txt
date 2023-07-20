@@ -9,3 +9,4 @@ django-phonenumber-field==7.1.0
 factory-boy==3.2.1
 pdfkit==1.0.0
 num2words==0.5.12
+sentry-sdk==1.28.0
