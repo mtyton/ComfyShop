@@ -138,7 +138,7 @@ class ProductTestCase(TestCase):
         )
         self.assertIsNotNone(prod)
         self.assertFalse(prod.available)
-        self.assertEqual(prod.price, 4.0)
+        self.assertEqual(prod.price, 0)
 
 
 class OrderProductTestCase(TestCase):

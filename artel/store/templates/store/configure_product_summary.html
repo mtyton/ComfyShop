@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="h-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <img src="{{variant.main_image.image.url}}" 
+                    class="img-fluid img-thumbnail h-80" alt="Responsive image">
+            </div>
+            <div class="col-6">
+                <div class="card mb-2 py-5">
+                    <div class="card-body">
+                    {% for value in params_values %}
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <p class="text-muted mb-0">{{value}}</p>
+                            </div>
+                        </div>
+                        <hr>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if not variant.available %}
+        <div class="row mt-3">
+            <div class="col-12 card alert-danger text-center">
+                Niestety skonfigurowany przez Ciebie wariant produktu nie jest jeszcze dostępny.
+                Jeżeli jesteś zainteresowany tą konfiguracją złóż zapytanie ofertowe.
+            </div>
+        </div>
+        {% endif %}
+        <div class="row mt-3">
+            <div class="col-3 ">
+                {% if variant.available %}
+                    <h3>Cena: {{variant.price}} zł</h3>
+                {% endif %}
+            </div>
+            <div class="col-9 text-end">
+                <a class="btn btn-outline-primary btn-lg" href="{% url 'product-configure' variant.template.pk %}">Wróć do konfiguratora</a>
+                {% if variant.available %}
+                    <button class="btn btn-outline-success btn-lg">Zamów produkt</button>
+                {% else %}
+                    <button class="btn btn-outline-success btn-lg">Złóż zapytanie ofertowe</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

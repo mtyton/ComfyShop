@@ -2,9 +2,9 @@ from django import forms
 from phonenumber_field.formfields import PhoneNumberField
 
 from store.models import (
+    ProductTemplate,
     ProductCategoryParamValue,
-    ProductCategoryParam,
-    ProductCategory
+    Product
 )
 
 
@@ -40,39 +40,27 @@ class CustomerDataForm(forms.Form):
     )
 
 
-class ProductCategoryParamFormset(forms.BaseModelFormSet):
-    ...
+class ButtonToggleSelect(forms.RadioSelect):
+    template_name = "store/forms/button_toggle_select.html"
 
 
-class ProductCategoryParamValueForm(forms.ModelForm):
-    class Meta:
-        model = ProductCategoryParamValue
-        fields = ("key", "value")
+class ProductTemplateConfigForm(forms.Form):
     
-    key = forms.CharField(required=True)
-    value = forms.ModelChoiceField(
-        queryset=ProductCategoryParamValue.objects.none(),
-        widget=forms.RadioSelect(attrs={"class": "btn-check", "type": "radio", "autocomplete": "off"}),
-        required=True
-    )
-
-    def _get_instace(self, key: str):
-        return ProductCategoryParam.objects.get(key=key)
-
-    def __init__(self, *args, **kwargs):
+    def _create_dynamic_fields(self, template: ProductTemplate):
+        category_params = template.category.category_params.all()
+        for param in category_params:
+            self.fields[param.key] = forms.ModelChoiceField(
+                queryset=ProductCategoryParamValue.objects.filter(param=param),
+                widget=ButtonToggleSelect(attrs={"class": "btn-group btn-group-toggle"}),
+            )
+    
+    def __init__(
+            self, template: ProductTemplate, *args, **kwargs
+        ):
+        self.template = template
         super().__init__(*args, **kwargs)
-        key = self.initial.get("key")
-        if not key:
-            return
-        self.cat_param = self._get_instace(key)
-        self.fields["value"].choices = [
-            (param_value.pk, param_value.value) for param_value in self.cat_param.param_values.all()
-        ]
+        self._create_dynamic_fields(template)
 
-    def save(self, *args, **kwargs):
-        param_value = ProductCategoryParamValue.objects.get(
-            param__key=str(self.cleaned_data["key"]),
-            value=str(self.cleaned_data["value"])
-        )
-        print(param_value or "DUPSKo")
-        return param_value
+    def get_product(self):
+        params = list(self.cleaned_data.values())
+        return Product.objects.get_or_create_by_params(template=self.template, params=params)
