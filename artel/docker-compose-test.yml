@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  test_db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_ROOT_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - ../postgres/:/var/lib/postgresql
+    env_file:
+      - .env
+  test_comfy:
+    depends_on:
+      - test_db
+    build:
+      dockerfile: Dockerfile.local
+      context: ./
+    user: "${UID}:${GID}"
+    volumes:
+      - ./:/app
+    environment:
+      - SECRET_KEY
+      - DATABASE_URL
+    env_file:
+      - .env
+    command:
+      python manage.py test --noinput
