@@ -26,7 +26,7 @@ from store.models import (
     Order,
     Product,
     ProductTemplate,
-    ProductCategoryParamValue
+    ProductListPage
 )
 
 
@@ -127,9 +127,11 @@ class ConfigureProductSummaryView(View):
     
     def get(self, request, variant_pk: int, *args, **kwargs):
         variant = Product.objects.get(pk=variant_pk)
+
         context = {
             "variant": variant,
-            "params_values": variant.params.all()
+            "params_values": variant.params.all(),
+            "store_url": ProductListPage.objects.first().get_url()
         }
         return render(request, self.template_name, context)
 
@@ -186,11 +188,27 @@ class OrderConfirmView(View):
     def post(self, request):
         customer_data = request.session["customer_data"]
         cart = SessionCart(self.request)
-        Order.objects.create_from_cart(
+        order = Order.objects.create_from_cart(
             cart.get_items(), 
             None, customer_data
         )
         request.session.pop("customer_data")
         cart.clear()
-        messages.success(request, "Zamówienie zostało złożone, sprawdź swój email.")
-        return HttpResponseRedirect(reverse("cart"))
+        request.session["order_uuids"] = [str(elem) for elem in order.values_list("uuid", flat=True)]
+        return HttpResponseRedirect(reverse("order-success"))
+
+
+class OrderSuccessView(View):
+    template_name = "store/order_success.html"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        return {
+            "orders": Order.objects.filter(uuid__in=self.request.session.get("order_uuids")),
+            "store_url": ProductListPage.objects.first().get_url()
+        }
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.session.get("order_uuids"):
+            return HttpResponseRedirect(reverse("cart"))
+        
+        return render(request, self.template_name, self.get_context_data())

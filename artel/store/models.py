@@ -1,6 +1,7 @@
 import pdfkit
 import datetime
 import builtins
+import uuid
 
 from decimal import Decimal
 from typing import (
@@ -202,6 +203,7 @@ class Product(ClusterableModel):
     )
     price = models.FloatField()
     available = models.BooleanField(default=True)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     
     objects = ProductManager()
 
@@ -439,6 +441,7 @@ class Order(models.Model):
     sent = models.BooleanField(default=False)
     order_number = models.CharField(max_length=255, null=True)
     
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     objects = OrderManager()
 
     @property

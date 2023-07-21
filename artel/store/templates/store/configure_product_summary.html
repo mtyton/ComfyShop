@@ -1,6 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="modal" tabindex="-1" role="dialog" id="addToCartModal" aria-labelledby="addToCartLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Added to cart</h5>
+        </div>
+        <div class="modal-body">
+          <p>Item has been added to cart.</p>
+        </div>
+        <div class="modal-footer">
+          <a class="btn btn-secondary" href="{{store_url}}">Continue shopping</button>
+          <a href="{% url 'cart' %}" class="btn btn-primary">Go to cart</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+    <a class="btn btn-outline-primary btn-lg" href="{% url 'product-configure' variant.template.pk %}">Wróć do konfiguratora</a>
+</div>
+
 <section class="h-100">
     <div class="container">
         <div class="row">
@@ -38,9 +59,13 @@
                 {% endif %}
             </div>
             <div class="col-9 text-end">
-                <a class="btn btn-outline-primary btn-lg" href="{% url 'product-configure' variant.template.pk %}">Wróć do konfiguratora</a>
+                
                 {% if variant.available %}
-                    <button class="btn btn-outline-success btn-lg">Zamów produkt</button>
+                    <button class="btn btn-outline-success btn-lg add-to-cart-button" data-product-id="{{variant.id}}" 
+                    data-add-to-cart-url="{% url 'cart-action-add-product' %}" data-csrf-token='{{ csrf_token }}' 
+                    data-bs-toggle="modal" data-bs-target="#addToCartModal">
+                        Zamów produkt
+                    </button>
                 {% else %}
                     <button class="btn btn-outline-success btn-lg">Złóż zapytanie ofertowe</button>
                 {% endif %}
