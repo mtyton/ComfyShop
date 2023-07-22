@@ -42,6 +42,11 @@ class PaymentMethodAdmin(ModelAdmin):
     list_display = ("name", "active")
 
 
+class DeliveryMethodAdmin(ModelAdmin):
+    model = models.DeliveryMethod
+    list_display = ("name", "active")
+
+
 class DocumentTemplateAdmin(ModelAdmin):
     model = models.DocumentTemplate
     list_display = ("name", )
@@ -58,7 +63,8 @@ class StoreAdminGroup(ModelAdminGroup):
         ProductTemplateAdmin,
         ProductAdmin,
         DocumentTemplateAdmin,
-        PaymentMethodAdmin
+        PaymentMethodAdmin,
+        DeliveryMethodAdmin
     )
 
 

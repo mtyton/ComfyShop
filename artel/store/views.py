@@ -11,13 +11,15 @@ from django.shortcuts import (
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django.forms import modelformset_factory
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from store.tasks import send_produt_request_email
-from store.cart import SessionCart
+from store.cart import (
+    SessionCart,
+    CustomerData
+)
 from store.serializers import (
     CartSerializer, 
     CartProductAddSerializer
@@ -174,9 +176,8 @@ class OrderView(View):
             context = self.get_context_data()
             context["form"] = form
             return render(request, self.template_name, context)
-        customer_data = form.data
-        # TODO - add encryption
-        request.session["customer_data"] = customer_data
+        customer_data = CustomerData(data=form.cleaned_data)
+        request.session["customer_data"] = customer_data.data
         return HttpResponseRedirect(reverse("order-confirm"))
 
 
@@ -184,7 +185,9 @@ class OrderConfirmView(View):
     template_name = "store/order_confirm.html"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        customer_data = self.request.session["customer_data"]
+        customer_data = CustomerData(
+            encrypted_data=self.request.session["customer_data"]
+        ).decrypted_data
         return {
             "cart": SessionCart(self.request),
             "customer_data": customer_data
@@ -193,7 +196,7 @@ class OrderConfirmView(View):
     def get(self, request, *args, **kwargs):
         cart = SessionCart(self.request)
         if cart.is_empty():
-            # TODO - messages
+            messages.error(request, "Twój koszyk jest pusty")
             return HttpResponseRedirect(reverse("cart"))
         return render(request, self.template_name, self.get_context_data())
 

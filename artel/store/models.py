@@ -432,9 +432,22 @@ class PaymentMethod(models.Model):
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
 
+    def __str__(self) -> str:
+        return self.name
+
+class DeliveryMethod(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    price = models.FloatField(default=0)
+    active = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return self.name
+
 
 class Order(models.Model):
     payment_method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE)
+    delivery_method = models.ForeignKey(DeliveryMethod, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     sent = models.BooleanField(default=False)
@@ -449,10 +462,12 @@ class Order(models.Model):
 
     @property
     def total_price(self) -> Decimal:
-        return sum(
+        price = sum(
             [order_product.product.price * order_product.quantity 
              for order_product in self.products.all()]
         )
+        delivery_price = self.delivery_method.price if self.delivery_method else 5.0
+        return price + delivery_price
 
     @property
     def total_price_words(self) -> str:

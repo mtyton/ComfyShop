@@ -9,6 +9,7 @@ from typing import (
 from dataclasses import dataclass
 from django.http.request import HttpRequest
 from django.conf import settings
+from django.core import signing
 
 from store.models import (
     Product,
@@ -116,3 +117,25 @@ class SessionCart(BaseCart):
     def clear(self) -> None:
         self._cart = {}
         self.save_cart()
+
+
+class CustomerData:
+    
+    def _encrypt_data(self, data: dict[str, Any]) -> str:
+        signer = signing.Signer()
+        return signer.sign_object(data)
+
+    def _decrypt_data(self, data: str) -> dict[str, Any]:
+        signer = signing.Signer()
+        return signer.unsign_object(data)
+
+    def __init__(self, data: dict[str, Any]=None, encrypted_data: str=None) -> None:
+        self._data = self._encrypt_data(data) if data else encrypted_data
+    
+    @property
+    def data(self) -> dict[str, Any]:
+        return self._data
+    
+    @property
+    def decrypted_data(self) -> dict[str, Any]:
+        return self._decrypt_data(self._data)

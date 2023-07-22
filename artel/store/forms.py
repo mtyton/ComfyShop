@@ -1,10 +1,14 @@
 from django import forms
 from phonenumber_field.formfields import PhoneNumberField
+from phonenumber_field.phonenumber import PhoneNumber
+from django.db.models import Model
 
 from store.models import (
     ProductTemplate,
     ProductCategoryParamValue,
-    Product
+    Product,
+    PaymentMethod,
+    DeliveryMethod
 )
 
 
@@ -38,6 +42,27 @@ class CustomerDataForm(forms.Form):
         choices=(("PL", "Polska"), ), label="Kraj",
         widget=forms.Select(attrs={"class": "form-control"})
     )
+    payment_method = forms.ModelChoiceField(
+        queryset=PaymentMethod.objects.filter(active=True), label="Sposób płatności",
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+    delivery_method = forms.ModelChoiceField(
+        queryset=DeliveryMethod.objects.filter(active=True), label="Sposób dostawy",
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+
+    def clean(self):
+        """Clean method should return JSON serializable"""
+        cleaned_data = super().clean()
+        new_cleaned_data = {}
+        for key, value in cleaned_data.items():
+            if isinstance(value, PhoneNumber):
+                new_cleaned_data[key] = str(value)
+            elif isinstance(value, Model):
+                new_cleaned_data[key] = value.pk
+            else:
+                new_cleaned_data[key] = value
+        return new_cleaned_data
 
 
 class ButtonToggleSelect(forms.RadioSelect):
