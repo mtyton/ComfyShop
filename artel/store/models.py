@@ -225,7 +225,6 @@ class Product(ClusterableModel):
                 return main_image
             return self.product_images.first()
 
-
     @property
     def tags(self):
         return self.template.tags.all()

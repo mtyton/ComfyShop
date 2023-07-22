@@ -18,10 +18,6 @@
     </div>
   </div>
 
-<div class="container">
-    <a class="btn btn-outline-primary btn-lg" href="{% url 'product-configure' variant.template.pk %}">Wróć do konfiguratora</a>
-</div>
-
 <section class="h-100">
     <div class="container">
         <div class="row">
@@ -51,14 +47,18 @@
                 Jeżeli jesteś zainteresowany tą konfiguracją złóż zapytanie ofertowe.
             </div>
         </div>
+        {% else %}
+            <div class="row mt-3">
+                <div class="col-12 text-end">
+                    <h3>Cena: {{variant.price}} zł</h3>
+                </div>
+            </div>
         {% endif %}
         <div class="row mt-3">
-            <div class="col-3 ">
-                {% if variant.available %}
-                    <h3>Cena: {{variant.price}} zł</h3>
-                {% endif %}
+            <div class="col-6 ">
+                <a class="btn btn-outline-primary btn-lg" href="{% url 'product-configure' variant.template.pk %}">Wróć do konfiguratora</a>
             </div>
-            <div class="col-9 text-end">
+            <div class="col-6 text-end">
                 
                 {% if variant.available %}
                     <button class="btn btn-outline-success btn-lg add-to-cart-button" data-product-id="{{variant.id}}" 
@@ -67,7 +67,10 @@
                         Zamów produkt
                     </button>
                 {% else %}
-                    <button class="btn btn-outline-success btn-lg">Złóż zapytanie ofertowe</button>
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-success btn-lg" type="submit">Złóż zapytanie ofertowe</button>
+                    </form>
                 {% endif %}
             </div>
         </div>

@@ -4,7 +4,10 @@ from django.views.generic import (
     TemplateView,
     View
 )
-from django.shortcuts import render
+from django.shortcuts import (
+    render,
+    get_object_or_404
+) 
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
@@ -13,6 +16,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from store.tasks import send_produt_request_email
 from store.cart import SessionCart
 from store.serializers import (
     CartSerializer, 
@@ -96,14 +100,12 @@ class ConfigureProductView(View):
     template_name = "store/configure_product.html"
 
     def get_context_data(self, pk: int, **kwargs: Any) -> Dict[str, Any]:
-        template = ProductTemplate.objects.get(pk=pk)
+        template = get_object_or_404(ProductTemplate, pk=pk)
         form = ProductTemplateConfigForm(template=template)
         context = {
             "template": template,
-            "available_variants": Product.objects.filter(template__pk=pk),
             "form": form
         }
-        
         return context
 
     def get(self, request, pk: int, *args, **kwargs):
@@ -112,7 +114,7 @@ class ConfigureProductView(View):
 
     def post(self, request, pk: int, *args, **kwargs):
         # first select template
-        template = ProductTemplate.objects.get(pk=pk)
+        template = get_object_or_404(ProductTemplate, pk=pk)
         form = ProductTemplateConfigForm(template=template, data=request.POST)
         if not form.is_valid():
             context = self.get_context_data(pk)
@@ -125,15 +127,25 @@ class ConfigureProductView(View):
 class ConfigureProductSummaryView(View):
     template_name = "store/configure_product_summary.html"
     
-    def get(self, request, variant_pk: int, *args, **kwargs):
-        variant = Product.objects.get(pk=variant_pk)
-
-        context = {
+    def get_context_data(self, variant_pk):
+        variant = get_object_or_404(Product, pk=variant_pk)
+        return {
             "variant": variant,
             "params_values": variant.params.all(),
             "store_url": ProductListPage.objects.first().get_url()
         }
+
+    def get(self, request, variant_pk: int, *args, **kwargs):
+        context = self.get_context_data(variant_pk)
         return render(request, self.template_name, context)
+
+    def post(self, request, variant_pk: int, *args, **kwargs):
+        # Here just send the email with product request
+        variant = Product.objects.get(pk=variant_pk)
+        send_produt_request_email(variant.pk)
+        messages.success(request, "Zapytanie o produkt zostało wysłane")
+        context = self.get_context_data(variant_pk)
+        return HttpResponseRedirect(context["store_url"])
 
 
 class OrderView(View):
