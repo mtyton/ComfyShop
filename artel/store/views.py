@@ -58,7 +58,7 @@ class CartActionView(ViewSet):
     def list_products(self, request):
         # get cart items
         cart = SessionCart(self.request)
-        items = cart.get_items()
+        items = cart.display_items
         serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data)
     
@@ -69,7 +69,7 @@ class CartActionView(ViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
         serializer.save(cart)
-        items = cart.get_items()
+        items = cart.display_items
         serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)
     
@@ -82,7 +82,7 @@ class CartActionView(ViewSet):
         except Product.DoesNotExist:
             return Response({"error": "Product does not exist"}, status=400)
 
-        items = cart.get_items()
+        items = cart.display_items
         serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)
 
@@ -93,7 +93,7 @@ class CartActionView(ViewSet):
             cart.update_item_quantity(pk, int(request.data["quantity"]))
         except Product.DoesNotExist:
             return Response({"error": "Product does not exist"}, status=404)
-        items = cart.get_items()
+        items = cart.display_items
         serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)
 
@@ -176,7 +176,7 @@ class OrderView(View):
             context = self.get_context_data()
             context["form"] = form
             return render(request, self.template_name, context)
-        customer_data = CustomerData(data=form.cleaned_data)
+        customer_data = CustomerData(data=form.serialize())
         request.session["customer_data"] = customer_data.data
         return HttpResponseRedirect(reverse("order-confirm"))
 
@@ -185,12 +185,19 @@ class OrderConfirmView(View):
     template_name = "store/order_confirm.html"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        customer_data = CustomerData(
-            encrypted_data=self.request.session["customer_data"]
-        ).decrypted_data
+        
+        form = CustomerDataForm(
+            data=CustomerData(
+                encrypted_data=self.request.session["customer_data"]
+            ).decrypted_data
+        )
+        if not form.is_valid():
+            raise Exception("Customer data is not valid")
+        
+        customer_data = form.cleaned_data
         return {
-            "cart": SessionCart(self.request),
-            "customer_data": customer_data
+            "cart": SessionCart(self.request, delivery=customer_data["delivery_method"]),
+            "customer_data": customer_data 
         }
 
     def get(self, request, *args, **kwargs):
@@ -201,10 +208,12 @@ class OrderConfirmView(View):
         return render(request, self.template_name, self.get_context_data())
 
     def post(self, request):
-        customer_data = request.session["customer_data"]
+        customer_data = CustomerData(
+                encrypted_data=self.request.session["customer_data"]
+        ).decrypted_data
         cart = SessionCart(self.request)
         order = Order.objects.create_from_cart(
-            cart.get_items(), 
+            cart.display_items, 
             None, customer_data
         )
         request.session.pop("customer_data")

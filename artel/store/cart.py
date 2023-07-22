@@ -1,6 +1,9 @@
+import logging
+
 from abc import (
     ABC,
-    abstractmethod
+    abstractmethod,
+    abstractproperty
 )
 from typing import (
     List,
@@ -13,8 +16,11 @@ from django.core import signing
 
 from store.models import (
     Product,
-    ProductAuthor
+    ProductAuthor,
+    DeliveryMethod
 )
+
+logger = logging.getLogger("cart_logger")
 
 
 class BaseCart(ABC):
@@ -34,22 +40,54 @@ class BaseCart(ABC):
     def update_item_quantity(self, item_id, change):
         ...
     
-    @abstractmethod
-    def get_items(self):
+    @abstractproperty
+    def display_items(self):
         ...
 
 
 class SessionCart(BaseCart):
 
-    def __init__(self, request: HttpRequest) -> None:
+
+    def _get_author_total_price(self, author_id: int):
+        author_cart = self._cart[str(author_id)]
+        author_price = 0
+        product_ids = list(int(pk) for pk in author_cart.keys())
+        queryset = Product.objects.filter(id__in=product_ids)
+        for product in queryset:
+            author_price += product.price * author_cart[str(product.id)]
+
+        if self._delivery_info:
+            author_price += self._delivery_info.price
+        
+        return author_price
+
+    def _prepare_display_items(self)-> List[dict[str, dict|str]]:
+        items: List[dict[str, dict|str]] = []
+        for author_id, cart_items in self._cart.items():
+            author = ProductAuthor.objects.get(id=int(author_id))
+            products = []
+            for item_id, quantity in cart_items.items():
+                product=Product.objects.get(id=int(item_id))
+                products.append({"product": product, "quantity": quantity})
+            items.append({
+                "author": author, 
+                "products": products, 
+                "group_price": self._get_author_total_price(author_id)
+            })
+        return items
+
+    def __init__(self, request: HttpRequest, delivery: DeliveryMethod=None) -> None:
         super().__init__()
         self.session = request.session
         self._cart = self.session.get(settings.CART_SESSION_ID, None)
         if not self._cart:
             self._cart = {}
             self.session[settings.CART_SESSION_ID] = self._cart
-
+        self._delivery_info = delivery
+        self._display_items = self._prepare_display_items()
+    
     def save_cart(self):
+        self._display_items = self._prepare_display_items()
         self.session[settings.CART_SESSION_ID] = self._cart
         self.session.modified = True
 
@@ -76,8 +114,7 @@ class SessionCart(BaseCart):
             self._cart[str(author.id)].pop(str(item_id))
             self.save_cart()
         except KeyError:
-            # TODO - add logging
-            ...
+            logger.exception(f"Item {item_id} not found in cart")
     
     def update_item_quantity(self, item_id: int, new_quantity: int) -> None:
         product = self.validate_and_get_product(item_id)
@@ -91,17 +128,14 @@ class SessionCart(BaseCart):
         self._cart[str(author.id)][str(product.id)] = new_quantity
         self.save_cart()
 
-    def get_items(self) -> List[dict[str, dict|str]]:
-        items: List[dict[str, dict|str]] = []
-        for author_id, cart_items in self._cart.items():
-            author = ProductAuthor.objects.get(id=int(author_id))
-            products = []
-            for item_id, quantity in cart_items.items():
-                product=Product.objects.get(id=int(item_id))
-                products.append({"product": product, "quantity": quantity})
-            items.append({"author": author, "products": products})
-        return items
+    @property
+    def delivery_info(self):
+        return self._delivery_info
 
+    @property
+    def display_items(self) -> List[dict[str, dict|str]]:
+        return self._display_items
+        
     @property
     def total_price(self):
         total = 0
@@ -109,6 +143,8 @@ class SessionCart(BaseCart):
             for item_id, quantity in cart_items.items():
                 product = Product.objects.get(id=int(item_id))
                 total += product.price * quantity
+        if self._delivery_info:
+            total += self._delivery_info.price * len(self._cart.keys())
         return total
     
     def is_empty(self) -> bool:

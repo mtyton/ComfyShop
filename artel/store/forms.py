@@ -51,11 +51,10 @@ class CustomerDataForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-control"})
     )
 
-    def clean(self):
+    def serialize(self):
         """Clean method should return JSON serializable"""
-        cleaned_data = super().clean()
         new_cleaned_data = {}
-        for key, value in cleaned_data.items():
+        for key, value in self.cleaned_data.items():
             if isinstance(value, PhoneNumber):
                 new_cleaned_data[key] = str(value)
             elif isinstance(value, Model):

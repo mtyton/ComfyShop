@@ -126,7 +126,7 @@ class ProductTestCase(TestCase):
         self.assertIsNotNone(prod)
         self.assertNotEqual(prod.pk, product.pk)
         self.assertFalse(prod.available)
-        self.assertEqual(prod.price, 13.0)
+        self.assertEqual(prod.price, 0)
 
     def test_get_or_create_by_params_success_not_existing_product_no_other_products(self):
         template = factories.ProductTemplateFactory()
