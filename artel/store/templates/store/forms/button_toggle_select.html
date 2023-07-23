@@ -1,0 +1,28 @@
+
+{% with id=widget.attrs.id %}
+<div class="btn-group btn-group-toggle" role="group">    
+    {% for group, options, index in widget.optgroups %}  
+        {% for option in options %}
+            <input type="radio" class="btn-check" name="{{option.name}}" id="{{id}}_{{option.index}}" autocomplete="off" 
+            value="{{option.value}}" required>
+            <label class="btn btn-outline-primary" for="{{id}}_{{option.index}}">{{option.label}}</label>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endwith %}
+<!--
+{% with id=widget.attrs.id %}
+    <div{% if id %} id="{{ id }}"{% endif %}
+        {% if widget.attrs.class %} class="{{ widget.attrs.class }}"{% endif %}
+    >
+        {% for group, options, index in widget.optgroups %}
+            {% if group %}
+                <div><label>{{ group }}</label>{% endif %}{% for option in options %}<div>
+                {% include option.template_name with widget=option %}</div>{% endfor %}{% if group %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endwith %}
+
+-->

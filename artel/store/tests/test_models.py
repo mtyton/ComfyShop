@@ -3,15 +3,142 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.urls import reverse
 from django.core import mail
+from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from store.tests import factories
 from store import models as store_models
 from mailings.tests.factories import MailTemplateFactory
 
 
-# TODO - this is fine for now, but we'll want to use factoryboy for this:
-# https://factoryboy.readthedocs.io/en/stable/
-# TODO - test have to rewritten - I'll do it tommorow
+class ProductCategoryParamTestCase(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.category = factories.ProductCategoryFactory()
+        self.param = factories.ProductCategoryParamFactory(
+            category=self.category,
+            param_type="int",
+            key="test_param"
+        )
+    
+    def test_get_available_values_no_values_success(self):
+        available_values = [v for v in self.param.get_available_values()]
+        self.assertEqual(available_values, [])
+
+    def test_get_available_values_one_value_success(self):
+        factories.ProductCategoryParamValueFactory(param=self.param, value="23")
+        available_values = [v for v in self.param.get_available_values()]
+        self.assertEqual(available_values, [23])
+        self.assertEqual(len(available_values), 1)
+
+    def test_get_available_values_multiple_values_success(self):
+        factories.ProductCategoryParamValueFactory(param=self.param, value="23")
+        factories.ProductCategoryParamValueFactory(param=self.param, value="24")
+        factories.ProductCategoryParamValueFactory(param=self.param, value="25")
+        available_values = [v for v in self.param.get_available_values()]
+        self.assertEqual(available_values, [23, 24, 25])
+        self.assertEqual(len(available_values), 3)
+
+
+class ProductCategoryParamValueTestCase(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.category = factories.ProductCategoryFactory()
+    
+
+    def test_get_value_success(self):
+        param = factories.ProductCategoryParamFactory(
+            category=self.category,
+            param_type="int",
+            key="test_param"
+        )
+        param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
+        proper_value = param_value.get_value()
+        self.assertEqual(proper_value, 23)
+    
+    def test_get_value_failure_wrong_value(self):
+        param = factories.ProductCategoryParamFactory(
+            category=self.category,
+            param_type="int",
+            key="test_param"
+        )
+        param_value = factories.ProductCategoryParamValueFactory(param=param, value="wrong_value")
+        proper_value = param_value.get_value()
+        self.assertEqual(proper_value, None)
+
+
+class ProductTestCase(TestCase):
+
+    def test_category_params_one_value_success(self):
+        product = factories.ProductFactory()
+        param = factories.ProductCategoryParamFactory(
+            category=product.template.category,
+            param_type="int",
+            key="test_param"
+        )
+        param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
+        with transaction.atomic():
+            product.params.add(param_value)
+        product.save()
+        self.assertEqual(product.params.count(), 1)
+        self.assertEqual(product.params.first().get_value(), 23)
+
+    def test_category_params_multiple_values_failure(self):
+        product = factories.ProductFactory()
+        param = factories.ProductCategoryParamFactory(
+            category=product.template.category,
+            param_type="int",
+            key="test_param"
+        )
+        param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
+        sec_param_value = factories.ProductCategoryParamValueFactory(param=param, value="24")
+        with self.assertRaises(ValidationError):
+            with transaction.atomic():
+                product.params.add(param_value)
+                product.params.add(sec_param_value)
+        self.assertEqual(product.params.count(), 0)
+
+    def test_get_or_create_by_params_success(self):
+        product = factories.ProductFactory(available=True)
+        value1 = factories.ProductCategoryParamValueFactory()
+        value2 = factories.ProductCategoryParamValueFactory()
+        product.params.add(value1)
+        product.params.add(value2)
+        product.save()
+        prod = store_models.Product.objects.get_or_create_by_params(
+            params=[value1, value2], template=product.template,
+        )
+        self.assertIsNotNone(prod)
+        self.assertEqual(prod.pk, product.pk)
+        self.assertTrue(prod.available)
+
+    def test_get_or_create_by_params_success_not_existing_product(self):
+        product = factories.ProductFactory(available=True)
+        value1 = factories.ProductCategoryParamValueFactory()
+        value2 = factories.ProductCategoryParamValueFactory()
+        product.params.add(value1)
+        product.price = 13.0
+        product.save()
+        
+        prod = store_models.Product.objects.get_or_create_by_params(
+            params=[value1, value2], template=product.template,
+        )
+        self.assertIsNotNone(prod)
+        self.assertNotEqual(prod.pk, product.pk)
+        self.assertFalse(prod.available)
+        self.assertEqual(prod.price, 0)
+
+    def test_get_or_create_by_params_success_not_existing_product_no_other_products(self):
+        template = factories.ProductTemplateFactory()
+        value1 = factories.ProductCategoryParamValueFactory()
+        value2 = factories.ProductCategoryParamValueFactory()
+        
+        prod = store_models.Product.objects.get_or_create_by_params(
+            params=[value1, value2], template=template,
+        )
+        self.assertIsNotNone(prod)
+        self.assertFalse(prod.available)
+        self.assertEqual(prod.price, 0)
 
 
 class OrderProductTestCase(TestCase):

@@ -5,17 +5,17 @@
       <div class="row d-flex justify-content-between align-items-center">
         <div class="col-md-2 col-lg-2 col-xl-2">
           <img
-            src="{{item.product.main_image.image.url}}"
-            class="img-fluid rounded-3">
+            src="{% static 'images/icons/truck.svg'%}"
+            class="rounded mx-auto d-block">
         </div>
         <div class="col-md-3 col-lg-3 col-xl-3">
-          <p class="lead fw-normal mb-2">{{item.product.title}}</p>
+          <p class="lead fw-normal mb-2">{{delivery.name}}</p>
         </div>
         <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-            {{item.quantity}}
+            1
         </div>
         <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-          <h5 class="mb-0">{{item.product.price}} zł</h5>
+          <h5 class="mb-0">{{delivery.price}} zł</h5>
         </div>
 
       </div>

@@ -9,7 +9,7 @@
                     <h3 class="fw-normal mb-0 text-black">Koszyk</h3>   
                 </div>
             </div>
-            {% for group in cart.get_items %}
+            {% for group in cart.display_items %}
                 {% if group.products %}
                     <h4>Wykonawca: {{group.author.display_name}}</h4>
                     {% for item in group.products %}

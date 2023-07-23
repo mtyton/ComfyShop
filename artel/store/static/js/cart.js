@@ -10,7 +10,7 @@ $(document).on('click', '.add-to-cart-button', function(event) {
     const csrfToken = $(this).data('csrf-token');
     console.log(productID);
     formData.append('product_id', productID);
-    formData.append('quantity', quantity); // Serialize the form data correctly
+    formData.append('quantity', 1); // Serialize the form data correctly
     button.prop('disabled', true); 
     $.ajax({
         type: 'POST',

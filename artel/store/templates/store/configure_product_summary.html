@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="modal" tabindex="-1" role="dialog" id="addToCartModal" aria-labelledby="addToCartLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Dodano do koszyka</h5>
+        </div>
+        <div class="modal-body">
+          <p>Przedmiot dodany do koszyka</p>
+        </div>
+        <div class="modal-footer">
+          <a class="btn btn-secondary" href="{{store_url}}">Kontynuuj zakupy</button>
+          <a href="{% url 'cart' %}" class="btn btn-primary">Idź do koszyka</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<section class="h-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <img src="{{variant.main_image.image.url}}" 
+                    class="img-fluid img-thumbnail h-80" alt="Responsive image">
+            </div>
+            <div class="col-6">
+                <div class="card mb-2 py-5">
+                    <div class="card-body">
+                    {% for value in params_values %}
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <p class="text-muted mb-0">{{value}}</p>
+                            </div>
+                        </div>
+                        <hr>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if not variant.available %}
+        <div class="row mt-3">
+            <div class="col-12 card alert-danger text-center">
+                Niestety skonfigurowany przez Ciebie wariant produktu nie jest jeszcze dostępny.
+                Jeżeli jesteś zainteresowany tą konfiguracją złóż zapytanie ofertowe.
+            </div>
+        </div>
+        {% else %}
+            <div class="row mt-3">
+                <div class="col-12 text-end">
+                    <h3>Cena: {{variant.price}} zł</h3>
+                </div>
+            </div>
+        {% endif %}
+        <div class="row mt-3">
+            <div class="col-6 ">
+                <a class="btn btn-outline-primary btn-lg" href="{% url 'product-configure' variant.template.pk %}">Wróć do konfiguratora</a>
+            </div>
+            <div class="col-6 text-end">
+                
+                {% if variant.available %}
+                    <button class="btn btn-outline-success btn-lg add-to-cart-button" data-product-id="{{variant.id}}" 
+                    data-add-to-cart-url="{% url 'cart-action-add-product' %}" data-csrf-token='{{ csrf_token }}' 
+                    data-bs-toggle="modal" data-bs-target="#addToCartModal">
+                        Zamów produkt
+                    </button>
+                {% else %}
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-success btn-lg" type="submit">Złóż zapytanie ofertowe</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
