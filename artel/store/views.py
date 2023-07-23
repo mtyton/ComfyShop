@@ -209,7 +209,7 @@ class OrderConfirmView(View):
 
     def post(self, request):
         customer_data = CustomerData(
-                encrypted_data=self.request.session["customer_data"]
+            encrypted_data=self.request.session["customer_data"]
         ).decrypted_data
         cart = SessionCart(self.request)
         order = Order.objects.create_from_cart(

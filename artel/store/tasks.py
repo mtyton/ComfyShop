@@ -18,7 +18,7 @@ def send_produt_request_email(variant_pk: int):
     try:
         send = OutgoingEmail.objects.send(
             template_name="product_request",
-            subject="Zapytanie o produkt",
+            subject="Złożono zapytanie ofertowe",
             recipient=variant.template.author.email,
             context={"product": variant},
             sender=settings.DEFAULT_FROM_EMAIL

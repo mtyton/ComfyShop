@@ -20,12 +20,14 @@
                 <b>Twoje numery zamówień:</b>
                 <div class="col-12 text-center">
                     {% for order in orders %}
-                    <div class="row">{{order.order_number}}</div>
+                        {{order.order_number}}<br/>
                     {% endfor %}
                 </div>
 
             </div>
-            <a class="btn btn-outline-primary" href="{{store_url}}">Powrót do sklepu</a>
+            <a class="btn btn-outline-primary mt-3" href="{{store_url}}">
+                Powrót do sklepu
+            </a>
         </div>
     </div>
 {% endblock %}
