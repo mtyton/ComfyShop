@@ -57,20 +57,28 @@
                     <h3 class="fw-normal mb-0 text-black">Zamówione przedmioty</h3>   
                 </div>
             </div>
-            {% for group in cart.get_items %}
+            {% for group in cart.display_items %}
               {% if group.products %}
                 <h4>Wykonawca: {{group.author.display_name}}</h4>
                 {% for item in group.products %}
                   {% include 'store/partials/summary_cart_item.html' %}
                 {% endfor %}
+                {% if cart.delivery_info %}
+                  {% with delivery=cart.delivery_info %}
+                    {% include 'store/partials/delivery_cart_item.html' %}
+                  {% endwith %}
+                {% endif %}
+                <div class="col-sm-11 text-end">
+                  <h5 class="fw-normal mb-0 pr-3text-black">W sumie: {{group.group_price}} zł</h5>  
+                </div>
               {% endif %}
             {% endfor %}
 
-            <div class="card ">
+            <div class="card mt-5">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-sm-6">
-                            <h5 class="fw-normal mb-0 text-black">Do zapłaty: {{cart.total_price}}</h5>  
+                            <h5 class="fw-normal mb-0 text-black">Do zapłaty: {{cart.total_price}} zł</h5>  
                         </div>
                         <div class="col-sm-6 text-end">
                           <form action="" method="POST">
