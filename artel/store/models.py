@@ -2,6 +2,7 @@ import pdfkit
 import datetime
 import builtins
 import uuid
+import logging
 
 from decimal import Decimal
 from typing import (
@@ -38,6 +39,9 @@ from mailings.models import (
     OutgoingEmail,
     Attachment
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class BaseImageModel(models.Model):
@@ -179,7 +183,10 @@ class ProductManager(models.Manager):
             
         # There should be only one
         if not products.count() <= 1:
-            raise ValidationError("There should be only one product with given set of params")
+            logger.exception(
+                f"There should be only one product with given set of params, detected: " +
+                f"{products.count()}, params: {params}, template: {template}"
+            )
         
         product = products.first()
         if not product:
@@ -268,9 +275,8 @@ def validate_param(sender, **kwargs):
     for pk in pk_set:
         try:
             param = ProductCategoryParamValue.objects.get(pk=pk).param
-        except ProductCategoryParamValue.DoesNotExist:
-            # TODO log this
-            ...
+        except ProductCategoryParamValue.DoesNotExist as e:
+            logger.exception(f"Product param validation failed with exception: {str(e)}")
         count = product_instance.params.filter(productparam__param_value__param=param).count()
         if count >= 1:
             errors.append(ValueError("Product param with this key already exists."))
@@ -320,7 +326,10 @@ class OrderProductManager(models.Manager):
         pks = []
         for item in items:
             if item["quantity"] < 1:
-                # TODO - logging
+                logger.exception(
+                    f"This is not possible to add less than one item to Order, omitting item: "+
+                    f"{item['product']}"
+                )
                 continue
             
             pk = self.create(
@@ -420,8 +429,9 @@ class OrderManager(models.Manager):
             sent = self._send_notifications(order, author, customer_data, docs)
             
             if not sent:
-                # TODO - store data temporarily
-                raise Exception("Error while sending emails")
+                logger.exception(
+                    f"Error while sending emails, for order: {order.order_number}"
+                )
 
         return Order.objects.filter(pk__in=orders_pks)
 
@@ -434,6 +444,7 @@ class PaymentMethod(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
 
 class DeliveryMethod(models.Model):
     name = models.CharField(max_length=255)

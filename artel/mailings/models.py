@@ -1,3 +1,5 @@
+import logging
+
 from typing import Any
 from dataclasses import dataclass
 
@@ -9,6 +11,9 @@ from django.template import (
 )
 from django.core.mail import EmailMessage
 from django.conf import settings
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -34,7 +39,11 @@ def send_mail(
     message.content_subtype = 'html'
     for attachment in attachments:
         message.attach(attachment.name, attachment.content, attachment.contenttype)
-    return bool(message.send())
+    
+    sent = bool(message.send())
+    if not sent:
+        logger.exception(f"Sending email to {to} with subject {subject} caused an exception")
+    return sent
 
 
 class MailTemplate(models.Model):
@@ -54,6 +63,10 @@ class MailTemplate(models.Model):
 
     def load_and_process_template(self, context: dict|Context):
         if not self.template:
+            logger.exception(
+                f"Template file is missing for template with "+
+                f"pk={self.pk}, template_name={self.template_name}"
+            )
             raise FileNotFoundError("Template file is missing")
         if isinstance(context, dict):
             context = Context(context)

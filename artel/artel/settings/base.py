@@ -21,6 +21,7 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 # -> GlitchTip error reporting 
 sentry_sdk.init(
+    dsn=os.environ.get("SENTRY_DSN", ''),
     integrations=[DjangoIntegration()],
     auto_session_tracking=False,
     traces_sample_rate=0
@@ -212,3 +213,18 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", '')
 EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'artel-sklep@tepewu.pl')
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+}
