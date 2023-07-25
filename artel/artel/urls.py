@@ -14,6 +14,7 @@ from search import views as search_views
 
 handler404 = 'artel.views.my_custom_page_not_found_view'
 
+
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("admin/", include(wagtailadmin_urls)),

@@ -92,7 +92,6 @@ class SessionCart(BaseCart):
         self.session.modified = True
 
     def add_item(self, item_id: int, quantity: int) -> None:
-        # TODO - add logging
         product = self.validate_and_get_product(item_id)
         author = product.author
         quantity = int(quantity)

@@ -6,6 +6,7 @@ services:
       - "1025:1025"
       - "8025:8025"  
   comfy:
+    restart: always
     depends_on:
       - smtp-server
       - db
@@ -16,7 +17,7 @@ services:
     ports:
       - "8001:8000"
     volumes:
-#      - ./:/app
+      - ./:/app
       - media:/app/media
     environment:
       - SECRET_KEY
