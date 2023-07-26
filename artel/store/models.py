@@ -22,6 +22,7 @@ from django.template import (
 )
 from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed
+from django.forms import CheckboxSelectMultiple
 
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -217,7 +218,7 @@ class Product(ClusterableModel):
     panels = [
         FieldPanel("template"),
         FieldPanel("price"),
-        FieldPanel("params"),
+        FieldPanel("params", widget=CheckboxSelectMultiple),
         FieldPanel("available"),
         FieldPanel("name"),
         InlinePanel("product_images", label="Variant Images"),
