@@ -17,10 +17,20 @@ class BaseLoader:
 
     def load_data(self):
         return pd.read_csv(self.path)
-        
+
+
+class TemplateLoader(BaseLoader):
+    ...
+
 
 class ProductLoader(BaseLoader):
     
+    def _get_images(self, row):
+        urls = row["images"]
+        for url in urls:
+            ...
+        return None
+
     def _process_row(self, row):
         template = ProductTemplate.objects.get(code=row["template"])
         price = float(row["price"])
@@ -35,6 +45,10 @@ class ProductLoader(BaseLoader):
         product.price = price
         product.name = name
         product.available = available
+
+        images = self._get_images(row)
+        for image in images:
+            product.images.add(image)
         product.save()
         return product
 
