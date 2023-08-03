@@ -1,10 +1,14 @@
 import logging
+import requests
 import pandas as pd
+
+from django.core import files
 
 from store.models import (
     ProductTemplate,
     ProductCategoryParamValue,
-    Product
+    Product, 
+    ProductImage
 )
 
 
@@ -25,11 +29,17 @@ class TemplateLoader(BaseLoader):
 
 class ProductLoader(BaseLoader):
     
-    def _get_images(self, row):
+    def _get_images(self, row) -> list[files.ContentFile]:
         urls = row["images"]
+        images = []
         for url in urls:
-            ...
-        return None
+            response = requests.get(url, stream=True)
+            if response.status_code == 200:
+                data = response.raw
+            file_name = url.split("/")[-1]
+            image = files.ContentFile(data, name=file_name)
+            images.append(image)
+        return images
 
     def _process_row(self, row):
         template = ProductTemplate.objects.get(code=row["template"])
@@ -47,8 +57,8 @@ class ProductLoader(BaseLoader):
         product.available = available
 
         images = self._get_images(row)
-        for image in images:
-            product.images.add(image)
+        for i, image in enumerate(images):
+            ProductImage.objects.create(product=product, image=image, is_main=bool(i==0))
         product.save()
         return product
 
