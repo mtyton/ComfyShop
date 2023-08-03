@@ -22,6 +22,7 @@ from django.template import (
 )
 from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed
+from django.forms import CheckboxSelectMultiple
 
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -141,6 +142,7 @@ class ProductTemplate(ClusterableModel):
     title = models.CharField(max_length=255)
     code = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    # TODO - add mechanism for enabling params
 
     tags = TaggableManager()
     
@@ -206,7 +208,8 @@ class Product(ClusterableModel):
     name = models.CharField(max_length=255, blank=True)
     template = models.ForeignKey(ProductTemplate, on_delete=models.CASCADE, related_name="products")
     params = models.ManyToManyField(
-        ProductCategoryParamValue, blank=True, through="ProductParam"
+        ProductCategoryParamValue, blank=True, through="ProductParam",
+        limit_choices_to=models.Q(param__category=models.F("product__template__category"))
     )
     price = models.FloatField()
     available = models.BooleanField(default=True)
@@ -217,7 +220,7 @@ class Product(ClusterableModel):
     panels = [
         FieldPanel("template"),
         FieldPanel("price"),
-        FieldPanel("params"),
+        FieldPanel("params", widget=CheckboxSelectMultiple),
         FieldPanel("available"),
         FieldPanel("name"),
         InlinePanel("product_images", label="Variant Images"),
@@ -295,6 +298,8 @@ class ProductListPage(Page):
     tags = TaggableManager(blank=True)
 
     def _get_items(self):
+        if not self.pk:
+            return ProductTemplate.objects.all()
         if self.tags.all():
             return ProductTemplate.objects.filter(tags__in=self.tags.all())
         return ProductTemplate.objects.all()

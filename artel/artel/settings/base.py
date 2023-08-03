@@ -228,3 +228,5 @@ LOGGING = {
         "level": "WARNING",
     },
 }
+
+PRODUCTS_CSV_PATH = os.environ.get("PRODUCTS_CSV_PATH", "products.csv")
