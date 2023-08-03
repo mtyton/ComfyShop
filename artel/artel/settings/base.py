@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "phonenumber_field",
+    "django_celery_results",
+    "django_celery_beat"
 ]
 
 MIDDLEWARE = [
@@ -187,4 +189,11 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mtyton@tepewu.pl')
 
 # CELERY settings
-CELERY_BROKER_URL = 'amqp://user:**@rabbit1:5672//:'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_TIMEZONE = "YourTimeZone"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+# CELERY_RESULT_BACKEND_DB = f'db+mysql+pymysql://{os.environ.get("MYSQL_USER")}:{os.environ.get("MYSQL_PASSWORD")}@db/{os.environ.get("MYSQL_DATABASE")}'
+CELERY_BROKER_URL = f'amqp://{os.environ.get("RABBITMQ_DEFAULT_USER")}:{os.environ.get("RABBITMQ_DEFAULT_PASS")}@rabbit//'
+CELERY_TASK_RESULT_EXPIRES = 18000

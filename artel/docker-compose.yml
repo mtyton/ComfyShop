@@ -1,5 +1,29 @@
 version: "3.8"
 services:
+  
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_ROOT_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - ../postgres/:/var/lib/postgresql
+    env_file:
+      - .env
+
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:3.6.0
+    environment:
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
+    ports:
+      - "5672:5672"  # We forward this port because it's useful for debugging
+      - "15672:15672"  # Here, we can access RabbitMQ management plugin
+
   comfy:
     build:
       dockerfile: Dockerfile.local
@@ -15,15 +39,39 @@ services:
       - .env
     stdin_open: true
     tty: true
-  db:
-    image: postgres
-    restart: always
-    environment:
-      - POSTGRES_ROOT_PASSWORD
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A artel beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
-      - ../postgres/:/var/lib/postgresql
+      - ./:/app
     env_file:
       - .env
+    environment:
+      - SECRET_KEY
+      - DATABASE_URL
+    depends_on:
+      - comfy
+      - rabbit
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A artel worker -l info
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY
+      - DATABASE_URL
+    depends_on:
+      - comfy
+      - rabbit
+      - beat
+
+volumes:
+  rabbitmq_data:
