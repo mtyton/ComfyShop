@@ -5,9 +5,9 @@ from easy_thumbnails.files import get_thumbnailer
 @shared_task
 def generate_thumbnails(image_instance):
     thumbnailer = get_thumbnailer(image_instance)
-    small_thumbnail = thumbnailer.get_thumbnail({'size': (40, 60), 'crop': False})
-    medium_thumbnail = thumbnailer.get_thumbnail({'size': (80, 120), 'crop': False})
-    large_thumbnail = thumbnailer.get_thumbnail({'size': (160, 240), 'crop': False})
+    small_thumbnail = thumbnailer.get_thumbnail({'size': (40, 60), 'crop': True})
+    medium_thumbnail = thumbnailer.get_thumbnail({'size': (80, 120), 'crop': True})
+    large_thumbnail = thumbnailer.get_thumbnail({'size': (160, 240), 'crop': True})
 
     return {
         'small': small_thumbnail.url,
