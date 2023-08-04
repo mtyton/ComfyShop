@@ -26,6 +26,9 @@ from store.utils import (
     send_mail
 )
 
+from easy_thumbnails.fields import ThumbnailerImageField
+from artel.tasks import generate_thumbnails
+
 
 class ProductAuthor(models.Model):
     name = models.CharField(max_length=255)
@@ -89,7 +92,7 @@ class ProductImage(models.Model):
     template = ParentalKey(
         ProductTemplate, on_delete=models.CASCADE, related_name="images"
     )
-    image = models.ImageField()
+    image = ThumbnailerImageField()
 
 
 class Product(ClusterableModel):
@@ -113,7 +116,10 @@ class Product(ClusterableModel):
         images = self.template.images.all()
         print(images)
         if images:
-            return images.first().image
+            image_instance = images.first().image
+            thumbnails = generate_thumbnails(image_instance)
+            return thumbnails
+        return None
 
     @property
     def tags(self):
@@ -166,6 +172,7 @@ class ProductListPage(Page):
         FieldPanel("tags")
     ]
 
+
 class CustomerData(models.Model):
     name = models.CharField(max_length=255)
     surname = models.CharField(max_length=255)
@@ -179,7 +186,7 @@ class CustomerData(models.Model):
     @property
     def full_name(self):
         return f"{self.name} {self.surname}"
-    
+
     @property
     def full_address(self):
         return f"{self.street}, {self.zip_code} {self.city}, {self.country}"

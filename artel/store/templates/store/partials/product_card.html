@@ -1,15 +1,20 @@
 {% load static %}
-
+{% load thumbnail %}
 <div class="card h-100" >
     <div class="card-header text-truncate">{{item.title}}</div>
-    <div class="card-body p-0">
-      <img src="{{item.main_image.url}}" class="img-fluid rounded mx-auto d-block" style="width: 10rem; height: 15rem;" alt="{{item.title}}">
+    <div class="card-body p-0 h-70">
 
-      <div class="card-footer row d-flex mt-3 m-0">
-        <div class="col">
-          <input type="number" id="quantity{{item.id}}" name="quantity" min="1" value="1" class="form-control form-control-sm">
-        </div>
-        <div class="col text-end">
+      <img src="{{ item.main_image.small }}" class="d-block d-sm-block d-md-none img-fluid rounded mx-auto" alt="{{item.title}}">
+
+      <img src="{{ item.main_image.medium }}" class="d-none d-sm-none d-md-block d-lg-none img-fluid rounded mx-auto" alt="{{item.title}}">
+
+      <img src="{{ item.main_image.large }}" class="d-none d-lg-block d-xl-block img-fluid rounded mx-auto" alt="{{item.title}}">
+    </div>
+    <div class="card-footer row d-flex mt-3 m-0">
+      <div class="col">
+        <input type="number" id="quantity{{item.id}}" name="quantity" min="1" value="1" class="form-control form-control-sm">
+      </div>
+      <div class="col text-end">
           <button class="btn btn-outline-success add-to-cart-button"
             data-product-id="{{item.id}}"
             data-csrf-token="{{csrf_token}}"
@@ -18,7 +23,7 @@
           >
               <img src="{% static 'images/icons/cart.svg' %}" style="width: 1rem; height: 1rem;" alt="Koszyk"/>
           </button>
-        </div>
       </div>
     </div>
 </div>
+
