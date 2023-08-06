@@ -13,6 +13,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from search import views as search_views
 
 from setup.views import SetupPageView as setup_view
+from setup.views import SkinChangerView as skin_view
 
 
 handler404 = 'artel.views.my_custom_page_not_found_view'
@@ -23,6 +24,7 @@ urlpatterns = [
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
     path('setup/', setup_view.as_view(), name='setup'),
+    path('skins/', skin_view.as_view(), name='skin')
 ]
 
 store_app_enabled = getattr(settings, 'SHOP_ENABLED', False)

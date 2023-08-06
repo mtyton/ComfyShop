@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "phonenumber_field",
+    "colorfield"
 ]
 
 # Optionalization
@@ -75,6 +76,7 @@ INSTALLED_APPS = [
 SHOP_ENABLED = False
 LOGO = 'nologo'
 NAVBAR_POSITION = 'left'
+SKIN = 'none'
 
 if os.path.exists('config.json'):
     with open(os.path.join(BASE_DIR, 'config.json'), 'r') as file:
@@ -85,6 +87,7 @@ if os.path.exists('config.json'):
         SHOP_ENABLED = True
     LOGO = config_data.get('logo', False)
     NAVBAR_POSITION = config_data.get('navbar_position', False)
+    SKIN = config_data.get('skin', False)
 
 
 MIDDLEWARE = [
