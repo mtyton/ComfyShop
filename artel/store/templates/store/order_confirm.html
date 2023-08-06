@@ -14,7 +14,7 @@
                       <p class="mb-0">Imię i Nazwisko</p>
                     </div>
                     <div class="col-sm-9">
-                      <p class="text-muted mb-0">{{customer_data.full_name}}</p>
+                      <p class="text-muted mb-0">{{customer_data.name}} {{customer_data.surname}}</p>
                     </div>
                   </div>
                   <hr>
@@ -41,7 +41,10 @@
                       <p class="mb-0">Adres</p>
                     </div>
                     <div class="col-sm-9">
-                      <p class="text-muted mb-0">{{customer_data.full_address}}</p>
+                      <p class="text-muted mb-0">
+                        {{customer_data.city}}, {{customer_data.zip_code}}<br/>
+                        {{customer_data.street}}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -54,15 +57,28 @@
                     <h3 class="fw-normal mb-0 text-black">Zamówione przedmioty</h3>   
                 </div>
             </div>
-            {% for item in cart.get_items %}
-                {% include 'store/partials/summary_cart_item.html' %}
+            {% for group in cart.display_items %}
+              {% if group.products %}
+                <h4>Wykonawca: {{group.author.display_name}}</h4>
+                {% for item in group.products %}
+                  {% include 'store/partials/summary_cart_item.html' %}
+                {% endfor %}
+                {% if cart.delivery_info %}
+                  {% with delivery=cart.delivery_info %}
+                    {% include 'store/partials/delivery_cart_item.html' %}
+                  {% endwith %}
+                {% endif %}
+                <div class="col-sm-11 text-end">
+                  <h5 class="fw-normal mb-0 pr-3text-black">W sumie: {{group.group_price}} zł</h5>  
+                </div>
+              {% endif %}
             {% endfor %}
 
-            <div class="card ">
+            <div class="card mt-5">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-sm-6">
-                            <h5 class="fw-normal mb-0 text-black">Do zapłaty: {{cart.total_price}}</h5>  
+                            <h5 class="fw-normal mb-0 text-black">Do zapłaty: {{cart.total_price}} zł</h5>  
                         </div>
                         <div class="col-sm-6 text-end">
                           <form action="" method="POST">

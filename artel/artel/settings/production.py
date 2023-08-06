@@ -7,10 +7,12 @@ ALLOWED_HOSTS = [
     "localhost",
     "0.0.0.0",
     "127.0.0.1",
+    "artel.citizen4.eu",
     "artel.tepewu.pl"
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://0.0.0.0", "http://0.0.0.0",
     "https://localhost", "http://localhost",
-    "https://artel.tepewu.pl"
+    "https://artel.tepewu.pl",
+    "https://artel.citizen4.eu",
 ]

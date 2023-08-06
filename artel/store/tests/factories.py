@@ -1,16 +1,17 @@
 from factory import (
     Faker,
-    SubFactory
+    SubFactory,
+    Factory
 )
 from factory.django import (
     FileField,
-    DjangoModelFactory
+    DjangoModelFactory,
 )
 
 
-class CustomerDataFactory(DjangoModelFactory):
+class ProductAuthorFactory(DjangoModelFactory):
     class Meta:
-        model = 'store.CustomerData'
+        model = 'store.ProductAuthor'
 
     name = Faker('name')
     surname = Faker('name')
@@ -20,13 +21,76 @@ class CustomerDataFactory(DjangoModelFactory):
     city = Faker('city')
     zip_code = Faker('postcode')
     country = Faker('country')
+    display_name = Faker('name')
+
+
+class ProductCategoryFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.ProductCategory'
+
+    name = Faker('name')
+
+
+class ProductCategoryParamFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.ProductCategoryParam'
+
+    key = Faker('name')
+    category = SubFactory(ProductCategoryFactory)
+    param_type = 'str'
+
+
+class ProductCategoryParamValueFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.ProductCategoryParamValue'
+
+    param = SubFactory(ProductCategoryParamFactory)
+    value = Faker('name')
+
+
+class ProductTemplateFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.ProductTemplate'
+
+    title = Faker('name')
+    description = Faker('text')
+    code = Faker('name')
+    author = SubFactory(ProductAuthorFactory)
+    category = SubFactory(ProductCategoryFactory)
+
+
+class ProductFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.Product'
+
+    name = Faker('name')
+    price = Faker('pydecimal', left_digits=5, right_digits=2, positive=True)
+    available = Faker('boolean')
+    template = SubFactory(ProductTemplateFactory)
+
+
+class ProductParamFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.ProductParam'
+    
+    product = SubFactory(ProductFactory)
+    param = SubFactory(ProductCategoryParamFactory)
+
+
+class PaymentMethodFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.PaymentMethod'
+
+    name = Faker('name')
+    description = Faker('text')
+    active = Faker('boolean')
 
 
 class OrderFactory(DjangoModelFactory):
     class Meta:
         model = 'store.Order'
 
-    customer = SubFactory(CustomerDataFactory)
+    payment_method = SubFactory(PaymentMethodFactory)
     created_at = Faker('date_time')
     updated_at = Faker('date_time')
     sent = Faker('boolean')
@@ -38,4 +102,4 @@ class DocumentTemplateFactory(DjangoModelFactory):
 
     name = Faker('name')
     file = FileField(filename="doc.odt")
-    doc_type = "AGREEMENT"
+    doc_type = "agreement"

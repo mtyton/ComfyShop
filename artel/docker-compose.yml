@@ -24,14 +24,26 @@ services:
       - "5672:5672"  # We forward this port because it's useful for debugging
       - "15672:15672"  # Here, we can access RabbitMQ management plugin
 
+  smtp-server:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025" 
+      
   comfy:
+    restart: always
+    depends_on:
+      - smtp-server
+      - db
     build:
       dockerfile: Dockerfile.local
       context: ./
+    user: "${UID}:${GID}"
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - ./:/app
+      - media:/app/media
     environment:
       - SECRET_KEY
       - DATABASE_URL
@@ -73,5 +85,14 @@ services:
       - rabbit
       - beat
 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8002:8080"
+
+
 volumes:
+  media:
+  db:
   rabbitmq_data:

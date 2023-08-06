@@ -26,19 +26,30 @@ class ProductCategoryParamAdmin(ModelAdmin):
 
 
 class ProductTemplateAdmin(ModelAdmin):
+    menu_label = "Product design"
     model = models.ProductTemplate
     list_display = ("title", "code")
 
 
 class ProductAdmin(ModelAdmin):
+    menu_label = "Product variant"
     model = models.Product
     list_display = ("title", "price")
 
 
+class PaymentMethodAdmin(ModelAdmin):
+    model = models.PaymentMethod
+    list_display = ("name", "active")
+
+
+class DeliveryMethodAdmin(ModelAdmin):
+    model = models.DeliveryMethod
+    list_display = ("name", "active")
+
 
 class DocumentTemplateAdmin(ModelAdmin):
     model = models.DocumentTemplate
-    list_display = ("name", "doc_type")
+    list_display = ("name", )
 
 
 class StoreAdminGroup(ModelAdminGroup):
@@ -51,7 +62,9 @@ class StoreAdminGroup(ModelAdminGroup):
         ProductCategoryParamAdmin,
         ProductTemplateAdmin,
         ProductAdmin,
-        DocumentTemplateAdmin
+        DocumentTemplateAdmin,
+        PaymentMethodAdmin,
+        DeliveryMethodAdmin
     )
 
 
