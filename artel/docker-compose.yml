@@ -1,13 +1,24 @@
 version: "3.8"
 services:
+  smtp-server:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"  
   comfy:
+    restart: always
+    depends_on:
+      - smtp-server
+      - db
     build:
       dockerfile: Dockerfile.local
       context: ./
+    user: "${UID}:${GID}"
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - ./:/app
+      - media:/app/media
     environment:
       - SECRET_KEY
       - DATABASE_URL
@@ -24,6 +35,17 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_DB
     volumes:
-      - ../postgres/:/var/lib/postgresql
+      - db:/var/lib/postgresql/data
     env_file:
       - .env
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8002:8080"
+
+
+volumes:
+  media:
+  db:

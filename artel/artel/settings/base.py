@@ -18,6 +18,19 @@ import json
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+# -> GlitchTip error reporting 
+sentry_sdk.init(
+    dsn=os.environ.get("SENTRY_DSN", ''),
+    integrations=[DjangoIntegration()],
+    auto_session_tracking=False,
+    traces_sample_rate=0
+) 
+
+SENTRY_ENVIRONMENT = os.environ.get("SENTRY_ENVIRONMENT", '')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -27,6 +40,8 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 
 INSTALLED_APPS = [
     "home",
+    "store",
+    "mailings",
     "blog",
     "search",
     "setup",
@@ -193,6 +208,19 @@ WAGTAILSEARCH_BACKENDS = {
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
 WAGTAILADMIN_BASE_URL = "https://artel.tepewu.pl"
 
+# Messages
+from django.contrib import messages
+
+MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+MESSAGE_TAGS = {
+    messages.DEBUG: "debug",
+    messages.INFO: "info",
+    messages.SUCCESS: "success",
+    messages.WARNING: "warning",
+    messages.ERROR: "danger",
+}
+
+
 # STORE SETTINGS
 PRODUCTS_PER_PAGE = 6
 
@@ -205,4 +233,22 @@ EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", '')
 EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'mtyton@tepewu.pl')
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'artel-sklep@tepewu.pl')
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+}
+
+PRODUCTS_CSV_PATH = os.environ.get("PRODUCTS_CSV_PATH", "products.csv")
