@@ -42,14 +42,13 @@ from mailings.models import (
 )
 
 from easy_thumbnails.fields import ThumbnailerImageField
-from artel.tasks import generate_thumbnails
 
 
 logger = logging.getLogger(__name__)
 
 
 class BaseImageModel(models.Model):
-    image = models.ImageField()
+    image = ThumbnailerImageField()
     is_main = models.BooleanField(default=False)
 
     class Meta:

@@ -6,7 +6,7 @@ import easy_thumbnails.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("store", "0006_documenttemplate_created_at_orderdocument_sent"),
+        ("store", "0006_remove_orderdocument_sent"),
     ]
 
     operations = [
