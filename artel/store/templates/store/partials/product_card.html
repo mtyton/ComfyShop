@@ -3,15 +3,15 @@
 <div class="card h-100" >
   <div class="card-header text-truncate">{{item.title}}</div>
   <div class="card-body p-0">
-    <img src="{{ item.product.main_image.image_40_60 }}" class="d-block d-sm-none img-fluid rounded mx-auto" alt="{{item.title}}">
+    <img src="{{ item.main_image.image.url }}.40x60_q85_crop.jpg" class="d-block d-sm-none img-fluid rounded mx-auto" alt="{{item.title}}">
 
-    <img src="{{ item.product.main_image.image_60_90 }}" class="d-none d-sm-block d-md-none img-fluid rounded mx-auto" alt="{{item.title}}">
+    <img src="{{ item.main_image.image.url }}.60x90_q85_crop.jpg" class="d-none d-sm-block d-md-none img-fluid rounded mx-auto" alt="{{item.title}}">
 
-    <img src="{{ item.product.main_image.image_80_120 }}" class="d-none d-md-block d-lg-none img-fluid rounded mx-auto" alt="{{item.title}}">
+    <img src="{{ item.main_image.image.url }}.80x120_q85_crop.jpg" class="d-none d-md-block d-lg-none img-fluid rounded mx-auto" alt="{{item.title}}">
     
-    <img src="{{ template.main_image.image.url.image_120_180 }}" class="d-none d-lg-block d-xl-none img-fluid rounded mx-auto" alt="{{item.title}}">
+    <img src="{{ item.main_image.image.url }}.120x180_q85_crop.jpg" class="d-none d-lg-block d-xl-none img-fluid rounded mx-auto" alt="{{item.title}}">
 
-    <img src="{{ template.main_image.image.url.image_160_240 }}" class="d-none d-xl-block img-fluid rounded mx-auto" alt="{{item.title}}">
+    <img src="{{ item.main_image.image.url }}.160x240_q85_crop.jpg" class="d-none d-xl-block img-fluid rounded mx-auto" alt="{{item.title}}">
 
     <div class="card-footer row d-flex m-0">
       <div class="col text-center">
