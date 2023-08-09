@@ -5,6 +5,6 @@ from artel.tasks import generate_thumbnails
 
 
 @receiver(post_save, sender=ProductTemplateImage)
-def create_thumbnail_on_image_creation(sender, instance, created, **kwargs):
-    if created:
-        generate_thumbnails.delay(instance.image.url)
+def generate_thumbnail(sender, instance, **kwargs):
+    image_path = instance.image.path
+    generate_thumbnails.delay(image_path)

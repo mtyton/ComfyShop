@@ -15,17 +15,14 @@ THUMBNAIL_SIZES = {
 
 
 @shared_task
-def generate_thumbnails(image_url):
+def generate_thumbnails(image_path):
     try:
+        thumbnailer = get_thumbnailer(image_path)
         thumbnails = {}
-        thumbnailer = get_thumbnailer(image_url)
-
         for size_name, (width, height, crop) in THUMBNAIL_SIZES.items():
             thumbnail = thumbnailer.get_thumbnail({'size': (width, height), 'crop': crop})
-            thumbnail_url = thumbnail.url
-            thumbnails[size_name] = thumbnail_url
-
+            thumbnails[size_name] = thumbnail.url
         return thumbnails
     except Exception as e:
-        logger.exception(f"Error generating thumbnails for image_instance {image_url}: {e}")
+        logger.exception(f"Error generating thumbnails for image_instance {image_path}: {e}")
         return None
