@@ -73,9 +73,14 @@ class ProductTemplateConfigForm(forms.Form):
     def _create_dynamic_fields(self, template: ProductTemplate):
         category_params = template.category.category_params.all()
         for param in category_params:
+            queryset = ProductCategoryParamValue.objects.filter(param=param)
+            if queryset.count() >= 4:
+                widget = forms.Select(attrs={"class": "form-select"})
+            else:
+                widget = ButtonToggleSelect(attrs={"class": "btn-group btn-group-toggle"})
             self.fields[param.key] = forms.ModelChoiceField(
-                queryset=ProductCategoryParamValue.objects.filter(param=param),
-                widget=ButtonToggleSelect(attrs={"class": "btn-group btn-group-toggle"}),
+                queryset=queryset,
+                widget=widget,
             )
     
     def __init__(

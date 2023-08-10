@@ -133,7 +133,7 @@ class ProductCategoryParamValue(ClusterableModel):
             return
 
     def __str__(self):
-        return f"{self.param.key}: {self.value}"
+        return str(self.value)
 
 
 class ProductTemplate(ClusterableModel):
