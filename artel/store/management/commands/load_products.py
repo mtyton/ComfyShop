@@ -9,5 +9,5 @@ class Command(BaseCommand):
     help = "Load products from csv file"
 
     def handle(self, *args, **options):
-        loader = ProductLoader(settings.PRODUCTS_CSV_PATH)
+        loader = ProductLoader(settings.PRODUCTS_CSV_PATH, ["mocowanie", "format", "wykonanie"], True)
         loader.process()
