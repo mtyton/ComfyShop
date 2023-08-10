@@ -4,6 +4,7 @@ import requests
 import pandas as pd
 
 from django.core.files.base import ContentFile
+from django.conf import settings
 from store.models import (
     ProductTemplate,
     ProductCategoryParamValue,
@@ -42,8 +43,9 @@ class ProductLoader(BaseLoader):
     def _get_images(self, row) -> list[ContentFile]:
         url = row["images"]
         images = []
-        response = requests.get(url+"/download", stream=True)
-        print(response.status_code)
+        response = requests.get(
+            url+"/preview", stream=True
+        )
         if response.status_code == 200:
             data = response.content
             image = ContentFile(data, name=row["template"])
