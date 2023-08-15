@@ -7,8 +7,8 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from store.models import (
     ProductTemplate,
-    ProductCategoryParamValue,
-    ProductCategoryParam,
+    ProductTemplateParam,
+    ProductTemplateParamValue,
     Product, 
     ProductImage
 )
@@ -60,17 +60,17 @@ class ProductLoader(BaseLoader):
         params = []
         for key in self.param_names:
             value = row[key]
-            param, _ = ProductCategoryParam.objects.get_or_create(key=key, category=template.category)
-            param_value, _ = ProductCategoryParamValue.objects.get_or_create(param=param, value=value)
+            param, _ = ProductTemplateParam.objects.get_or_create(key=key, template=template)
+            param_value, _ = ProductTemplateParamValue.objects.get_or_create(param=param, value=value)
             params.append(param_value)
         product = Product.objects.get_or_create_by_params(template=template, params=params)
         product.price = price
         product.name = name
         product.available = available
-
-        images = self._get_images(row)
-        for i, image in enumerate(images):
-            ProductImage.objects.create(product=product, image=image, is_main=bool(i==0))
+        # NOTE - temporary solution
+        # images = self._get_images(row)
+        # for i, image in enumerate(images):
+        #     ProductImage.objects.create(product=product, image=image, is_main=bool(i==0))
         product.save()
         return product
 

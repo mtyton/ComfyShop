@@ -90,50 +90,8 @@ class ProductCategory(ClusterableModel):
         return self.name
 
     panels = [
-        FieldPanel("name"),
-        InlinePanel("category_params")
+        FieldPanel("name")
     ]
-
-
-class CategoryParamTypeChoices(models.TextChoices):
-    INT = "int"
-    STRING = "str"
-    FLOAT = "float"
-
-
-class ProductCategoryParam(ClusterableModel):
-    category = ParentalKey(ProductCategory, on_delete=models.CASCADE, related_name="category_params")
-    key = models.CharField(max_length=200)
-    param_type = models.CharField(max_length=200, choices=CategoryParamTypeChoices.choices)
-
-    def __str__(self):
-        return self.key
-    
-    panels = [
-        FieldPanel("category"),
-        FieldPanel("key"),
-        FieldPanel("param_type"),
-        InlinePanel("param_values")
-    ]
-
-    def get_available_values(self) -> Iterator[any]:
-        for elem in self.param_values.all():
-            yield elem.get_value()
-
-
-class ProductCategoryParamValue(ClusterableModel):
-    param = ParentalKey(ProductCategoryParam, on_delete=models.CASCADE, related_name="param_values")
-    value = models.CharField(max_length=255)
-    
-    def get_value(self):
-        try:
-            func = getattr(builtins, self.param.param_type)
-            return func(self.value)
-        except ValueError:
-            return
-
-    def __str__(self):
-        return str(self.value)
 
 
 class ProductTemplate(ClusterableModel):
@@ -142,7 +100,6 @@ class ProductTemplate(ClusterableModel):
     title = models.CharField(max_length=255)
     code = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    # TODO - add mechanism for enabling params
 
     tags = TaggableManager()
     
@@ -164,6 +121,7 @@ class ProductTemplate(ClusterableModel):
         FieldPanel('description'),
         InlinePanel("template_images", label="Template Images"),
         FieldPanel("tags"),
+        InlinePanel("template_params")
     ]
 
 
@@ -175,9 +133,50 @@ class ProductTemplateImage(BaseImageModel):
     is_main = models.BooleanField(default=False)
 
 
+class TemplateParamValueChoices(models.TextChoices):
+    INT = "int"
+    STRING = "str"
+    FLOAT = "float"
+
+
+class ProductTemplateParam(ClusterableModel):
+    template = ParentalKey(ProductTemplate, on_delete=models.CASCADE, related_name="template_params")
+    key = models.CharField(max_length=200)
+    param_type = models.CharField(max_length=200, choices=TemplateParamValueChoices.choices)
+
+    def __str__(self):
+        return self.key
+    
+    panels = [
+        FieldPanel("category"),
+        FieldPanel("key"),
+        FieldPanel("param_type"),
+        InlinePanel("param_values")
+    ]
+
+    def get_available_values(self) -> Iterator[any]:
+        for elem in self.param_values.all():
+            yield elem.get_value()
+
+
+class ProductTemplateParamValue(ClusterableModel):
+    param = ParentalKey(ProductTemplateParam, on_delete=models.CASCADE, related_name="param_values")
+    value = models.CharField(max_length=255)
+    
+    def get_value(self):
+        try:
+            func = getattr(builtins, self.param.param_type)
+            return func(self.value)
+        except ValueError:
+            return
+
+    def __str__(self):
+        return f"{self.param.key}: {self.value}"
+
+
 class ProductManager(models.Manager):
     
-    def get_or_create_by_params(self, params: list[ProductCategoryParamValue], template: ProductTemplate):
+    def get_or_create_by_params(self, params: list[ProductTemplateParam], template: ProductTemplate):
         products = self.filter(template=template)
 
         for param in params:
@@ -208,8 +207,8 @@ class Product(ClusterableModel):
     name = models.CharField(max_length=255, blank=True)
     template = models.ForeignKey(ProductTemplate, on_delete=models.CASCADE, related_name="products")
     params = models.ManyToManyField(
-        ProductCategoryParamValue, blank=True, through="ProductParam",
-        limit_choices_to=models.Q(param__category=models.F("product__template__category"))
+        ProductTemplateParamValue, blank=True, through="ProductParam",
+        limit_choices_to=models.Q(param__template=models.F("product__template"))
     )
     price = models.FloatField()
     available = models.BooleanField(default=True)
@@ -260,7 +259,7 @@ class ProductImage(BaseImageModel):
 
 class ProductParam(models.Model):
     product = ParentalKey(Product, on_delete=models.CASCADE, related_name="product_params")
-    param_value = models.ForeignKey(ProductCategoryParamValue, on_delete=models.CASCADE)
+    param_value = models.ForeignKey(ProductTemplateParamValue, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -277,8 +276,8 @@ def validate_param(sender, **kwargs):
     errors = []
     for pk in pk_set:
         try:
-            param = ProductCategoryParamValue.objects.get(pk=pk).param
-        except ProductCategoryParamValue.DoesNotExist as e:
+            param = ProductTemplateParamValue.objects.get(pk=pk).param
+        except ProductTemplateParamValue.DoesNotExist as e:
             logger.exception(f"Product param validation failed with exception: {str(e)}")
         count = product_instance.params.filter(productparam__param_value__param=param).count()
         if count >= 1:
