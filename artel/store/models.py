@@ -148,7 +148,7 @@ class ProductTemplateParam(ClusterableModel):
         return self.key
     
     panels = [
-        FieldPanel("category"),
+        FieldPanel("template"),
         FieldPanel("key"),
         FieldPanel("param_type"),
         InlinePanel("param_values")
