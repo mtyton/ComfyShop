@@ -31,23 +31,6 @@ class ProductCategoryFactory(DjangoModelFactory):
     name = Faker('name')
 
 
-class ProductCategoryParamFactory(DjangoModelFactory):
-    class Meta:
-        model = 'store.ProductCategoryParam'
-
-    key = Faker('name')
-    category = SubFactory(ProductCategoryFactory)
-    param_type = 'str'
-
-
-class ProductCategoryParamValueFactory(DjangoModelFactory):
-    class Meta:
-        model = 'store.ProductCategoryParamValue'
-
-    param = SubFactory(ProductCategoryParamFactory)
-    value = Faker('name')
-
-
 class ProductTemplateFactory(DjangoModelFactory):
     class Meta:
         model = 'store.ProductTemplate'
@@ -57,6 +40,23 @@ class ProductTemplateFactory(DjangoModelFactory):
     code = Faker('name')
     author = SubFactory(ProductAuthorFactory)
     category = SubFactory(ProductCategoryFactory)
+
+
+class ProductTemplateParamFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.ProductTemplateParam'
+
+    key = Faker('name')
+    template = SubFactory(ProductTemplateFactory)
+    param_type = 'str'
+
+
+class ProductTemplateParamValueFactory(DjangoModelFactory):
+    class Meta:
+        model = 'store.ProductTemplateParamValue'
+
+    param = SubFactory(ProductTemplateParamFactory)
+    value = Faker('name')
 
 
 class ProductFactory(DjangoModelFactory):

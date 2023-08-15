@@ -5,7 +5,7 @@ from django.db.models import Model
 
 from store.models import (
     ProductTemplate,
-    ProductCategoryParamValue,
+    ProductTemplateParam,
     Product,
     PaymentMethod,
     DeliveryMethod
@@ -74,7 +74,7 @@ class ProductTemplateConfigForm(forms.Form):
         category_params = template.category.category_params.all()
         for param in category_params:
             self.fields[param.key] = forms.ModelChoiceField(
-                queryset=ProductCategoryParamValue.objects.filter(param=param),
+                queryset=ProductTemplateParam.objects.filter(param=param),
                 widget=ButtonToggleSelect(attrs={"class": "btn-group btn-group-toggle"}),
             )
     

@@ -26,21 +26,21 @@ class ProductCategoryParamTestCase(TestCase):
         self.assertEqual(available_values, [])
 
     def test_get_available_values_one_value_success(self):
-        factories.ProductCategoryParamValueFactory(param=self.param, value="23")
+        factories.ProductTemplateParamValueFactory(param=self.param, value="23")
         available_values = [v for v in self.param.get_available_values()]
         self.assertEqual(available_values, [23])
         self.assertEqual(len(available_values), 1)
 
     def test_get_available_values_multiple_values_success(self):
-        factories.ProductCategoryParamValueFactory(param=self.param, value="23")
-        factories.ProductCategoryParamValueFactory(param=self.param, value="24")
-        factories.ProductCategoryParamValueFactory(param=self.param, value="25")
+        factories.ProductTemplateParamValueFactory(param=self.param, value="23")
+        factories.ProductTemplateParamValueFactory(param=self.param, value="24")
+        factories.ProductTemplateParamValueFactory(param=self.param, value="25")
         available_values = [v for v in self.param.get_available_values()]
         self.assertEqual(available_values, [23, 24, 25])
         self.assertEqual(len(available_values), 3)
 
 
-class ProductCategoryParamValueTestCase(TestCase):
+class ProductTemplateParamValueTestCase(TestCase):
     def setUp(self):
         super().setUp()
         self.category = factories.ProductCategoryFactory()
@@ -52,7 +52,7 @@ class ProductCategoryParamValueTestCase(TestCase):
             param_type="int",
             key="test_param"
         )
-        param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
+        param_value = factories.ProductTemplateParamValueFactory(param=param, value="23")
         proper_value = param_value.get_value()
         self.assertEqual(proper_value, 23)
     
@@ -62,7 +62,7 @@ class ProductCategoryParamValueTestCase(TestCase):
             param_type="int",
             key="test_param"
         )
-        param_value = factories.ProductCategoryParamValueFactory(param=param, value="wrong_value")
+        param_value = factories.ProductTemplateParamValueFactory(param=param, value="wrong_value")
         proper_value = param_value.get_value()
         self.assertEqual(proper_value, None)
 
@@ -76,7 +76,7 @@ class ProductTestCase(TestCase):
             param_type="int",
             key="test_param"
         )
-        param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
+        param_value = factories.ProductTemplateParamValueFactory(param=param, value="23")
         with transaction.atomic():
             product.params.add(param_value)
         product.save()
@@ -90,8 +90,8 @@ class ProductTestCase(TestCase):
             param_type="int",
             key="test_param"
         )
-        param_value = factories.ProductCategoryParamValueFactory(param=param, value="23")
-        sec_param_value = factories.ProductCategoryParamValueFactory(param=param, value="24")
+        param_value = factories.ProductTemplateParamValueFactory(param=param, value="23")
+        sec_param_value = factories.ProductTemplateParamValueFactory(param=param, value="24")
         with self.assertRaises(ValidationError):
             with transaction.atomic():
                 product.params.add(param_value)
@@ -100,8 +100,8 @@ class ProductTestCase(TestCase):
 
     def test_get_or_create_by_params_success(self):
         product = factories.ProductFactory(available=True)
-        value1 = factories.ProductCategoryParamValueFactory()
-        value2 = factories.ProductCategoryParamValueFactory()
+        value1 = factories.ProductTemplateParamValueFactory()
+        value2 = factories.ProductTemplateParamValueFactory()
         product.params.add(value1)
         product.params.add(value2)
         product.save()
@@ -114,8 +114,8 @@ class ProductTestCase(TestCase):
 
     def test_get_or_create_by_params_success_not_existing_product(self):
         product = factories.ProductFactory(available=True)
-        value1 = factories.ProductCategoryParamValueFactory()
-        value2 = factories.ProductCategoryParamValueFactory()
+        value1 = factories.ProductTemplateParamValueFactory()
+        value2 = factories.ProductTemplateParamValueFactory()
         product.params.add(value1)
         product.price = 13.0
         product.save()
@@ -130,8 +130,8 @@ class ProductTestCase(TestCase):
 
     def test_get_or_create_by_params_success_not_existing_product_no_other_products(self):
         template = factories.ProductTemplateFactory()
-        value1 = factories.ProductCategoryParamValueFactory()
-        value2 = factories.ProductCategoryParamValueFactory()
+        value1 = factories.ProductTemplateParamValueFactory()
+        value2 = factories.ProductTemplateParamValueFactory()
         
         prod = store_models.Product.objects.get_or_create_by_params(
             params=[value1, value2], template=template,

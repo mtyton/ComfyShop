@@ -10,8 +10,8 @@ class TestProductLoader(TestCase):
     def setUp(self) -> None:
         self.category = factories.ProductCategoryFactory()
         self.template = factories.ProductTemplateFactory(category=self.category)
-        self.category_params = [factories.ProductCategoryParamFactory(category=self.category) for _ in range(3)]
-        self.category_param_values = [factories.ProductCategoryParamValueFactory(param=param) for param in self.category_params]
+        self.category_params = [factories.ProductTemplateParamFactory(category=self.category) for _ in range(3)]
+        self.category_param_values = [factories.ProductTemplateParamValueFactory(param=param) for param in self.category_params]
     
     def test_load_products_single_product_success(self):
         fake_df = pd.DataFrame({
@@ -93,5 +93,5 @@ class TestProductLoader(TestCase):
             loader.process()
         
         self.assertEqual(self.template.products.count(), 0)
-        mock_logger.exception.assert_called_with("ProductCategoryParamValue matching query does not exist.")
+        mock_logger.exception.assert_called_with("ProductTemplateyParamValue matching query does not exist.")
     

@@ -2,11 +2,11 @@ import logging
 import requests
 import pandas as pd
 
-from django.core import files
+from django.core.files.base import ContentFile
 
 from store.models import (
     ProductTemplate,
-    ProductCategoryParamValue,
+    ProductTemplateParam,
     Product, 
     ProductImage
 )
@@ -29,7 +29,7 @@ class TemplateLoader(BaseLoader):
 
 class ProductLoader(BaseLoader):
     
-    def _get_images(self, row) -> list[files.ContentFile]:
+    def _get_images(self, row) -> list[ContentFile]:
         urls = row["images"]
         images = []
         for url in urls:
@@ -37,28 +37,28 @@ class ProductLoader(BaseLoader):
             if response.status_code == 200:
                 data = response.raw
             file_name = url.split("/")[-1]
-            image = files.ContentFile(data, name=file_name)
+            image = ContentFile(data, name=file_name)
             images.append(image)
         return images
 
     def _process_row(self, row):
         template = ProductTemplate.objects.get(code=row["template"])
-        price = float(row["price"])
+        price = float(row["price"].strip("zł").replace(",", "."))
         name = row["name"]
         available = bool(row["available"])
         params = []
         for param in row["params"]:
             key, value = param
-            param = ProductCategoryParamValue.objects.get(param__key=key, value=value)
+            param = ProductTemplateParam.objects.get(param__key=key, value=value)
             params.append(param)
         product = Product.objects.get_or_create_by_params(template=template, params=params)
         product.price = price
         product.name = name
         product.available = available
-
-        images = self._get_images(row)
-        for i, image in enumerate(images):
-            ProductImage.objects.create(product=product, image=image, is_main=bool(i==0))
+        # NOTE - temporary solution
+        # images = self._get_images(row)
+        # for i, image in enumerate(images):
+        #     ProductImage.objects.create(product=product, image=image, is_main=bool(i==0))
         product.save()
         return product
 
