@@ -90,8 +90,7 @@ class ProductCategory(ClusterableModel):
         return self.name
 
     panels = [
-        FieldPanel("name"),
-        InlinePanel("category_params")
+        FieldPanel("name")
     ]
 
 
@@ -122,6 +121,7 @@ class ProductTemplate(ClusterableModel):
         FieldPanel('description'),
         InlinePanel("template_images", label="Template Images"),
         FieldPanel("tags"),
+        InlinePanel("template_params")
     ]
 
 

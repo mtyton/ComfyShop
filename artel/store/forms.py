@@ -5,7 +5,7 @@ from django.db.models import Model
 
 from store.models import (
     ProductTemplate,
-    ProductTemplateParam,
+    ProductTemplateParamValue,
     Product,
     PaymentMethod,
     DeliveryMethod
@@ -71,11 +71,16 @@ class ButtonToggleSelect(forms.RadioSelect):
 class ProductTemplateConfigForm(forms.Form):
     
     def _create_dynamic_fields(self, template: ProductTemplate):
-        category_params = template.category.category_params.all()
-        for param in category_params:
+        template_params = template.template_params.all()
+        for param in template_params:
+            queryset = ProductTemplateParamValue.objects.filter(param=param)
+            if queryset.count() >= 4:
+                widget = forms.Select(attrs={"class": "form-select"})
+            else:
+                widget = ButtonToggleSelect(attrs={"class": "btn-group btn-group-toggle"})
             self.fields[param.key] = forms.ModelChoiceField(
-                queryset=ProductTemplateParam.objects.filter(param=param),
-                widget=ButtonToggleSelect(attrs={"class": "btn-group btn-group-toggle"}),
+                queryset=queryset,
+                widget=widget,
             )
     
     def __init__(

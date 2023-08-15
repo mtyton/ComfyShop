@@ -74,7 +74,7 @@ class ProductParamFactory(DjangoModelFactory):
         model = 'store.ProductParam'
     
     product = SubFactory(ProductFactory)
-    param = SubFactory(ProductCategoryParamFactory)
+    param = SubFactory(ProductTemplateParamValueFactory)
 
 
 class PaymentMethodFactory(DjangoModelFactory):

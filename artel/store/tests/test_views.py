@@ -22,13 +22,13 @@ class ConfigureProductViewTestCase(TestCase):
         self.product_template = ProductTemplateFactory(category=self.category)
         # create template params and values for those params
         self.param1 = ProductTemplateParam.objects.create(
-            key="Mocowanie", category=self.category,
+            key="Mocowanie", template=self.product_template,
             param_type=TemplateParamValueChoices.STRING
         )
         self.param1_value1 = ProductTemplateParamValueFactory(param=self.param1)
         self.param1_value2 = ProductTemplateParamValueFactory(param=self.param1)
         self.param2 = ProductTemplateParam.objects.create(
-            key="Format", category=self.category,
+            key="Format", template=self.product_template,
             param_type=TemplateParamValueChoices.STRING
         )
         self.param2_value1 = ProductTemplateParamValueFactory(param=self.param2)

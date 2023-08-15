@@ -15,8 +15,9 @@ class ProductCategoryParamTestCase(TestCase):
     def setUp(self):
         super().setUp()
         self.category = factories.ProductCategoryFactory()
-        self.param = factories.ProductCategoryParamFactory(
-            category=self.category,
+        self.template = factories.ProductTemplateFactory(category=self.category)
+        self.param = factories.ProductTemplateParamFactory(
+            template=self.template,
             param_type="int",
             key="test_param"
         )
@@ -44,11 +45,12 @@ class ProductTemplateParamValueTestCase(TestCase):
     def setUp(self):
         super().setUp()
         self.category = factories.ProductCategoryFactory()
+        self.template = factories.ProductTemplateFactory(category=self.category)
     
 
     def test_get_value_success(self):
-        param = factories.ProductCategoryParamFactory(
-            category=self.category,
+        param = factories.ProductTemplateParamFactory(
+            template=self.template,
             param_type="int",
             key="test_param"
         )
@@ -57,8 +59,8 @@ class ProductTemplateParamValueTestCase(TestCase):
         self.assertEqual(proper_value, 23)
     
     def test_get_value_failure_wrong_value(self):
-        param = factories.ProductCategoryParamFactory(
-            category=self.category,
+        param = factories.ProductTemplateParamFactory(
+            template=self.template,
             param_type="int",
             key="test_param"
         )
@@ -69,10 +71,10 @@ class ProductTemplateParamValueTestCase(TestCase):
 
 class ProductTestCase(TestCase):
 
-    def test_category_params_one_value_success(self):
+    def test_template_params_one_value_success(self):
         product = factories.ProductFactory()
-        param = factories.ProductCategoryParamFactory(
-            category=product.template.category,
+        param = factories.ProductTemplateParamFactory(
+            template=product.template,
             param_type="int",
             key="test_param"
         )
@@ -83,10 +85,10 @@ class ProductTestCase(TestCase):
         self.assertEqual(product.params.count(), 1)
         self.assertEqual(product.params.first().get_value(), 23)
 
-    def test_category_params_multiple_values_failure(self):
+    def test_template_params_multiple_values_failure(self):
         product = factories.ProductFactory()
-        param = factories.ProductCategoryParamFactory(
-            category=product.template.category,
+        param = factories.ProductTemplateParamFactory(
+            template=product.template,
             param_type="int",
             key="test_param"
         )
