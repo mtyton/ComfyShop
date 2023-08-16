@@ -43,6 +43,10 @@ from mailings.models import (
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
+from django.dispatch import receiver
+from easy_thumbnails.signals import saved_file
+from artel import tasks
+
 
 logger = logging.getLogger(__name__)
 
@@ -535,3 +539,11 @@ class OrderDocument(models.Model):
         template = Template(content)
         content = template.render(context)
         return pdfkit.from_string(content, False)
+
+
+
+@receiver(saved_file)
+def generate_thumbnails_async(sender, fieldfile, **kwargs):
+    tasks.generate_thumbnails.delay(
+        model=sender, pk=fieldfile.instance.pk,
+        field=fieldfile.field.name)

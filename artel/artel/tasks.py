@@ -1,28 +1,18 @@
 from celery import shared_task
-from easy_thumbnails.files import get_thumbnailer
+from easy_thumbnails.files import generate_all_aliases
 import logging
 
 
 logger = logging.getLogger(__name__)
 
-THUMBNAIL_SIZES = {
-    'image_40_60': (40, 60, True),
-    'image_60_90': (60, 90, True),
-    'image_80_120': (80, 120, True),
-    'image_120_180': (120, 180, True),
-    'image_160_240': (160, 240, True),
-}
 
-
-@shared_task
-def generate_thumbnails(image_path):
+@shared_task(serializer="pickle")
+def generate_thumbnails(model, pk, field):
     try:
-        thumbnailer = get_thumbnailer(image_path)
-        thumbnails = {}
-        for size_name, (width, height, crop) in THUMBNAIL_SIZES.items():
-            thumbnail = thumbnailer.get_thumbnail({'size': (width, height), 'crop': crop})
-            thumbnails[size_name] = thumbnail.url
-        return thumbnails
+        instance = model._default_manager.get(pk=pk)
+        fieldfile = getattr(instance, field)
+        generate_all_aliases(fieldfile, include_global=True)
+        return {"status": True}
     except Exception as e:
-        logger.exception(f"Error generating thumbnails for image_instance {image_path}: {e}")
-        return None
+        logger.exception("An error occurred while generating thumbnails.")
+        return {"status": False, "error": str(e)}
