@@ -1,12 +1,14 @@
 import logging
+import time
 import requests
 import pandas as pd
 
-from django.core import files
-
+from django.core.files.base import ContentFile
+from django.conf import settings
 from store.models import (
     ProductTemplate,
-    ProductCategoryParamValue,
+    ProductTemplateParam,
+    ProductTemplateParamValue,
     Product, 
     ProductImage
 )
@@ -29,36 +31,46 @@ class TemplateLoader(BaseLoader):
 
 class ProductLoader(BaseLoader):
     
-    def _get_images(self, row) -> list[files.ContentFile]:
-        urls = row["images"]
+    def _clear(self):
+        Product.objects.all().delete()
+
+    def __init__(self, path, param_names, clear=False):
+        super().__init__(path)
+        self.param_names = param_names
+        if clear:
+            self._clear()
+
+    def _get_images(self, row) -> list[ContentFile]:
+        url = row["images"]
         images = []
-        for url in urls:
-            response = requests.get(url, stream=True)
-            if response.status_code == 200:
-                data = response.raw
-            file_name = url.split("/")[-1]
-            image = files.ContentFile(data, name=file_name)
+        response = requests.get(
+            url+"/preview", stream=True
+        )
+        if response.status_code == 200:
+            data = response.content
+            image = ContentFile(data, name=row["template"])
             images.append(image)
         return images
 
     def _process_row(self, row):
         template = ProductTemplate.objects.get(code=row["template"])
-        price = float(row["price"])
+        price = float(row["price"].strip("zł").replace(",", "."))
         name = row["name"]
         available = bool(row["available"])
         params = []
-        for param in row["params"]:
-            key, value = param
-            param = ProductCategoryParamValue.objects.get(param__key=key, value=value)
-            params.append(param)
+        for key in self.param_names:
+            value = row[key]
+            param, _ = ProductTemplateParam.objects.get_or_create(key=key, template=template)
+            param_value, _ = ProductTemplateParamValue.objects.get_or_create(param=param, value=value)
+            params.append(param_value)
         product = Product.objects.get_or_create_by_params(template=template, params=params)
         product.price = price
         product.name = name
         product.available = available
-
-        images = self._get_images(row)
-        for i, image in enumerate(images):
-            ProductImage.objects.create(product=product, image=image, is_main=bool(i==0))
+        # NOTE - temporary solution
+        # images = self._get_images(row)
+        # for i, image in enumerate(images):
+        #     ProductImage.objects.create(product=product, image=image, is_main=bool(i==0))
         product.save()
         return product
 
@@ -66,6 +78,7 @@ class ProductLoader(BaseLoader):
         data = self.load_data()
         products = []
         for _, row in data.iterrows():
+            time.sleep(5)
             try:
                 product = self._process_row(row)
             except Exception as e:

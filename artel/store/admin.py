@@ -20,8 +20,8 @@ class ProductCategoryAdmin(ModelAdmin):
     list_display = ("name", )
 
 
-class ProductCategoryParamAdmin(ModelAdmin):
-    model = models.ProductCategoryParam
+class ProductTemplateParamAdmin(ModelAdmin):
+    model = models.ProductTemplateParam
     list_display = ("key", "param_type")
 
 
@@ -59,7 +59,7 @@ class StoreAdminGroup(ModelAdminGroup):
     items = (
         ProductAuthorAdmin, 
         ProductCategoryAdmin, 
-        ProductCategoryParamAdmin,
+        ProductTemplateParamAdmin,
         ProductTemplateAdmin,
         ProductAdmin,
         DocumentTemplateAdmin,
