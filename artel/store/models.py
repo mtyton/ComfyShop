@@ -541,7 +541,6 @@ class OrderDocument(models.Model):
         return pdfkit.from_string(content, False)
 
 
-
 @receiver(saved_file)
 def generate_thumbnails_async(sender, fieldfile, **kwargs):
     tasks.generate_thumbnails.delay(
