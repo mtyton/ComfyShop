@@ -1,9 +1,11 @@
-from django.test import TestCase
-from django.urls import reverse
 import json
 import os
-from .forms import SiteConfigurationForm, SkinChangerForm
-from .views import generate_css_content
+
+from django.test import TestCase
+from django.urls import reverse
+
+from setup.forms import SiteConfigurationForm, SkinChangerForm
+from setup.models import generate_css_content
 
 
 class SetupPageViewTestCase(TestCase):
@@ -59,7 +61,7 @@ class CheckSetupMiddlewareTestCase(TestCase):
 
 
 class SetupContextProcessorTestCase(TestCase):
-    def test_setup_context_processor(self):
+    def test_config_context_processor(self):
         from django.conf import settings
         settings.NAVBAR_POSITION = 'left'
         settings.LOGO = 'media/images/icons/logo.png'

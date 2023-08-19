@@ -34,16 +34,3 @@ class SiteConfigurationForm(forms.Form):
                     f.write(chunk)
             return os.path.join('images/icons', logo.name)
         return None
-
-
-class SkinChangerForm(forms.Form):
-    COLOR_PALETTE = [
-        ("#FFFFFF", "white", ),
-        ("#000000", "black", ),
-    ]
-
-    background_color = ColorField(samples=COLOR_PALETTE)
-    font_color = ColorField(samples=COLOR_PALETTE)
-    hr_color = ColorField(samples=COLOR_PALETTE)
-    link_color = ColorField(samples=COLOR_PALETTE)
-    hover_on_link_color = ColorField(samples=COLOR_PALETTE)

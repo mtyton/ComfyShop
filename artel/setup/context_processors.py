@@ -1,14 +1,10 @@
 from django.conf import settings
 
+from setup.models import ComfyConfig
+from setup.serializers import ConfigSerializers
 
-def SetupContextProcessor(request):
-    navbar_position = settings.NAVBAR_POSITION
-    logo = settings.LOGO
-    shop_enabled = settings.SHOP_ENABLED
-    skin = settings.SKIN
-    return {
-            'navbar_position': navbar_position,
-            'logo_url': logo,
-            'shop_enabled': shop_enabled,
-            'skin': skin,
-        }
+
+def config_context_processor(request):
+    config = ComfyConfig.objects.first()
+    serializer = ConfigSerializers(instance=config)
+    return serializer.data

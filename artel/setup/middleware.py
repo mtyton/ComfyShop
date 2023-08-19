@@ -1,5 +1,9 @@
+import logging
 from django.shortcuts import redirect
-import os
+
+from setup.models import ComfyConfig
+
+logger = logging.getLogger(__name__)
 
 
 class CheckSetupMiddleware(object):
@@ -7,10 +11,18 @@ class CheckSetupMiddleware(object):
         self.get_response = get_response
 
     def __call__(self, request):
-        if not os.path.exists('config.json') and not request.path_info.startswith('/setup'):
-            return redirect('/setup/')
-
-        if os.path.exists('config.json') and request.path_info.startswith('/setup'):
+        config = None
+        try:
+            config = ComfyConfig.objects.get()
+        except ComfyConfig.DoesNotExist:
+            if not request.path_info.startswith('/setup'):
+                return redirect('/setup/')
+        except ComfyConfig.MultipleObjectsReturned:
+            config = ComfyConfig.objects.first()
+            logger.exception("Multiple ComfyConfig objects found. Using first one.")
+        
+        if config and request.path_info.startswith('/setup'):
             return redirect('/')
+        
         response = self.get_response(request)
         return response

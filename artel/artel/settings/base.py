@@ -71,24 +71,6 @@ INSTALLED_APPS = [
     "colorfield"
 ]
 
-# Optionalization
-# Default settings
-SHOP_ENABLED = False
-LOGO = 'nologo'
-NAVBAR_POSITION = 'left'
-SKIN = 'none'
-
-if os.path.exists('config.json'):
-    with open(os.path.join(BASE_DIR, 'config.json'), 'r') as file:
-        config_data = json.load(file)
-    shop_enabled = config_data.get('shop_enabled', False)
-    if shop_enabled:
-        INSTALLED_APPS.append('store')
-        SHOP_ENABLED = True
-    LOGO = config_data.get('logo', False)
-    NAVBAR_POSITION = config_data.get('navbar_position', False)
-    SKIN = config_data.get('skin', False)
-
 
 MIDDLEWARE = [
     "setup.middleware.CheckSetupMiddleware",
@@ -113,7 +95,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                'setup.context_processors.SetupContextProcessor',
+                'setup.context_processors.config_context_processor',
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
