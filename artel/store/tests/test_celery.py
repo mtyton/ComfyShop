@@ -1,21 +1,22 @@
 from django.test import TestCase
-from unittest.mock import patch
 from store.tests.factories import ProductTemplateFactory
 from store.models import ProductTemplateImage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from artel.tasks import generate_thumbnails
+from abc import ABC
 
 
-class CeleryTaskTest(TestCase):
-    @patch('artel.tasks.generate_thumbnails')
-    def test_generate_thumbnails(self, mock_generate_thumbnails):
-        template_instance = ProductTemplateFactory()
+class AbstractThumbnailGenerationTest(TestCase, ABC):
+    model_factory = None
+
+    def test_generate_thumbnails(self):
+        model_instance = self.model_factory()
         image_path = "media/dow.jpg"
         image_file = SimpleUploadedFile("test_image.jpg",
                                         open(image_path, "rb").read(),
                                         content_type="image/jpeg")
-        instance_mock = ProductTemplateImage(
-            template=template_instance,
+        instance_mock = self.model_class(
+            template=model_instance,
             image=image_file,
             is_main=True
         )
@@ -26,3 +27,8 @@ class CeleryTaskTest(TestCase):
                                      pk=instance_pk,
                                      field="image")
         self.assertTrue(result["status"])
+
+
+class ProductTemplateImageThumbnailTest(AbstractThumbnailGenerationTest):
+    model_factory = ProductTemplateFactory
+    model_class = ProductTemplateImage
