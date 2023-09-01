@@ -1,24 +1,65 @@
-{% extends "modeladmin/create.html" %}
-{% load i18n wagtailadmin_tags %}
+{% extends 'base.html' %}
 
-{% block header %}
-    {% include "modeladmin/includes/header_with_history.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon merged=1 latest_log_entry=latest_log_entry history_url=history_url %}
-{% endblock %}
-
-{% block form_action %}{{ view.edit_url }}{% endblock %}
-
-{% block form_actions %}
-    <div class="dropdown dropup dropdown-button match-width">
-        <button type="submit" class="button action-save button-longrunning" data-clicked-text="{% trans 'Saving…' %}">
-            {% icon name="spinner" %}<em>{% trans 'Save' %}</em>
-        </button>
-
-        {% if user_can_delete %}
-            <div class="dropdown-toggle">{% icon name="arrow-up" %}</div>
-            <ul>
-                <li><a href="{{ view.delete_url }}" class="shortcut">{% trans "Delete" %}</a></li>
-            </ul>
-        {% endif %}
-
+{% load static %}
+{% block content %}
+    <div class="text-center">
+        <div class="card text-center">
+            <div class="card-header">
+                <img src="{% static 'images/icons/temp_comfy.png' %}" width="15%">
+            </div>
+            <form enctype="multipart/form-data" action="" method="POST">
+                {% csrf_token %}
+                <div class="card-body">
+                    <h1>Configure Your Comfy</h1>
+                    <div class="row mb-3 mt-5">
+                        <div class="col-2">
+                            
+                        </div>
+                        <div class="col-4">
+                            <h3>
+                                <label for="id_logo" class="form-label">{{form.logo.label}}</label>
+                            </h3>
+                        </div>
+                        <div class="col-6">
+                            {{form.logo}}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-2">
+                            
+                        </div>
+                        <div class="col-4">
+                            <h3>
+                                <label for="id_logo" class="form-label">{{form.navbar_position.label}}</label>
+                            </h3>
+                        </div>
+                        <div class="col-6">
+                            {{form.navbar_position}}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-2">
+                            
+                        </div>
+                        <div class="col-4">
+                            <h3>
+                                <label for="id_logo" class="form-label">{{form.shop_enabled.label}}</label>
+                            </h3>
+                        </div>
+                        <div class="col-2">
+                            {{form.shop_enabled}}
+                        </div>
+                    </div>
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-muted">
+                    <input type="submit" class="btn btn-primary" value="Save">
+                </div>
+            </form>
+        </div>
     </div>
 {% endblock %}

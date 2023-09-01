@@ -1,36 +1,26 @@
 from django import forms
 from django.conf import settings
-from colorfield.fields import ColorField
-import os
+
+from setup.models import (
+    ComfyConfig, 
+    NavbarPosition
+)
 
 
-class SiteConfigurationForm(forms.Form):
-    logo = forms.ImageField(required=False)
-    shop_enabled = forms.BooleanField(required=False)
+class SiteConfigurationForm(forms.ModelForm):
+    class Meta:
+        model = ComfyConfig
+        fields = [
+            "logo", "navbar_position", "shop_enabled"
+        ]
+        widgets = {
+            "logo": forms.FileInput(attrs={"class": "form-control"}),
+            "navbar_position": forms.Select(attrs={"class": "form-control"}),
+            "shop_enabled": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+    
     navbar_position = forms.ChoiceField(
-        choices=[
-            ('left', 'Left'),
-            ('right', 'Right'),
-            ('top', 'Top'),
-        ],
-        initial='left',
-        widget=forms.RadioSelect
+        choices=NavbarPosition.choices,
+        widget=forms.Select(attrs={"class": "form-control"}),
+        initial=NavbarPosition.LEFT.value
     )
-    skin = forms.ChoiceField(
-        choices=[
-            ('light', 'Light'),
-            ('dark', 'Dark'),
-            ('custom', 'Custom'),
-        ],
-        widget=forms.Select
-    )
-
-    def save_logo(self):
-        if self.cleaned_data['logo']:
-            logo = self.cleaned_data['logo']
-            filename = os.path.join(settings.MEDIA_ROOT, 'images/icons', logo.name)
-            with open(filename, 'wb') as f:
-                for chunk in logo.chunks():
-                    f.write(chunk)
-            return os.path.join('images/icons', logo.name)
-        return None

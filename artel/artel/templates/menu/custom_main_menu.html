@@ -3,7 +3,7 @@
 
 
 <div class="d-flex flex-column flex-shrink-0 p-3 mr-5">
-    <img src="{{ logo_url }}" class="img-fluid rounded mx-auto d-block mt-3" style="width: 10rem; height: 10 rem;" alt="Portal Logo"/>
+    <img src="{{logo}}" class="img-fluid rounded mx-auto d-block mt-3" style="width: 10rem; height: 10 rem;" alt="Portal Logo"/>
     <hr>
     <ul class="nav navbar-nav">
     {% for item in menu_items %}
@@ -22,7 +22,7 @@
 </div>
 <div class="d-flex flex-column flex-shrink-0 p-3 mr-5">
     <hr>
-    {% if store_enabled %}
-    <a href={% url 'cart' %} alt="Koszyk" > Koszyk </a>
+    {% if shop_enabled %}
+        <a href={% url 'cart' %} alt="Koszyk" > Koszyk </a>
     {% endif %}
 </div>

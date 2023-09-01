@@ -22,14 +22,10 @@ urlpatterns = [
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
-    path('setup/', setup_views.SetupPageView.as_view(), name='setup')
+    path('setup/', setup_views.SetupPageView.as_view(), name='setup'),
+    path('store-app/', include('store.urls')),
 ]
 
-store_app_enabled = getattr(settings, 'SHOP_ENABLED', False)
-if store_app_enabled:
-    urlpatterns += [
-        path('store-app/', include('store.urls')),
-    ]
 
 if settings.DEBUG:
     from django.conf.urls.static import static
