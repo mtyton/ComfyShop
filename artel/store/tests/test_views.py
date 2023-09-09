@@ -2,15 +2,15 @@ from django.test import TestCase
 from django.shortcuts import reverse
 
 from store.models import (
-    ProductCategoryParam,
-    ProductCategoryParamValue,
-    CategoryParamTypeChoices
+    ProductTemplateParam,
+    ProductTemplateParamValue,
+    TemplateParamValueChoices
 )
 from store.tests.factories import (
     ProductTemplateFactory,
     ProductCategoryFactory,
     ProductFactory,
-    ProductCategoryParamValueFactory
+    ProductTemplateParamValueFactory
 )
 
 
@@ -21,18 +21,18 @@ class ConfigureProductViewTestCase(TestCase):
         self.category = ProductCategoryFactory()
         self.product_template = ProductTemplateFactory(category=self.category)
         # create template params and values for those params
-        self.param1 = ProductCategoryParam.objects.create(
-            key="Mocowanie", category=self.category,
-            param_type=CategoryParamTypeChoices.STRING
+        self.param1 = ProductTemplateParam.objects.create(
+            key="Mocowanie", template=self.product_template,
+            param_type=TemplateParamValueChoices.STRING
         )
-        self.param1_value1 = ProductCategoryParamValueFactory(param=self.param1)
-        self.param1_value2 = ProductCategoryParamValueFactory(param=self.param1)
-        self.param2 = ProductCategoryParam.objects.create(
-            key="Format", category=self.category,
-            param_type=CategoryParamTypeChoices.STRING
+        self.param1_value1 = ProductTemplateParamValueFactory(param=self.param1)
+        self.param1_value2 = ProductTemplateParamValueFactory(param=self.param1)
+        self.param2 = ProductTemplateParam.objects.create(
+            key="Format", template=self.product_template,
+            param_type=TemplateParamValueChoices.STRING
         )
-        self.param2_value1 = ProductCategoryParamValueFactory(param=self.param2)
-        self.param2_value2 = ProductCategoryParamValueFactory(param=self.param2)
+        self.param2_value1 = ProductTemplateParamValueFactory(param=self.param2)
+        self.param2_value2 = ProductTemplateParamValueFactory(param=self.param2)
         # create product variant
         self.variant1 = ProductFactory(
             template=self.product_template

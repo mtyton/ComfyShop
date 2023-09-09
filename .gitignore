@@ -143,3 +143,4 @@ artel/static/
 
 # media
 artel/media/*
+artel/store/data/*
