@@ -22,8 +22,9 @@ services:
     volumes:
       - ./:/app
     environment:
-      - SECRET_KEY
-      - DATABASE_URL
+      - SECRET_KEY=RandomKey
+      - DATABASE_URL=postgres://comfy:password@test_db/comfy_shop
+      - DJANGO_SETTINGS_MODULE=artel.settings.tests
     env_file:
       - .env
     command:
