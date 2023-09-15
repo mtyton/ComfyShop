@@ -8,8 +8,6 @@ services:
       - POSTGRES_USER=comfy
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=comfy_shop
-    volumes:
-      - ../postgres/:/var/lib/postgresql
   test_comfy:
     depends_on:
       - test_db
@@ -17,8 +15,6 @@ services:
       dockerfile: Dockerfile.local
       context: ./
     user: "${UID}:${GID}"
-    volumes:
-      - ./:/app
     environment:
       - SECRET_KEY=RandomKey
       - DATABASE_URL=postgres://comfy:password@test_db/comfy_shop
