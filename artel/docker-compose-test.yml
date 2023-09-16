@@ -8,6 +8,14 @@ services:
       - POSTGRES_USER=comfy
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=comfy_shop
+  
+  test_rabbit:
+    hostname: rabbit
+    image: rabbitmq:3.6.0
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbitmq
+      - RABBITMQ_DEFAULT_PASS=rabbitmq
+
   test_comfy:
     depends_on:
       - test_db
@@ -19,5 +27,34 @@ services:
       - SECRET_KEY=RandomKey
       - DATABASE_URL=postgres://comfy:password@test_db/comfy_shop
       - DJANGO_SETTINGS_MODULE=artel.settings.tests
+      - RABBITMQ_DEFAULT_USER=rabbitmq
+      - RABBITMQ_DEFAULT_PASS=rabbitmq
     command:
       python manage.py test --noinput
+
+  test_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A artel beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - SECRET_KEY=RandomKey
+      - DATABASE_URL=postgres://comfy:password@test_db/comfy_shop
+      - DJANGO_SETTINGS_MODULE=artel.settings.tests
+    depends_on:
+      - test_comfy
+      - test_rabbit
+
+  test_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A artel worker -l info
+    environment:
+      - SECRET_KEY=RandomKey
+      - DATABASE_URL=postgres://comfy:password@test_db/comfy_shop
+      - DJANGO_SETTINGS_MODULE=artel.settings.tests
+    depends_on:
+      - test_comfy
+      - test_rabbit
+      - test_beat

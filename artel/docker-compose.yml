@@ -75,7 +75,7 @@ services:
     command: celery -A artel worker -l info
     volumes:
       - ./:/app
-      - media:/app/media
+      - ./media:/app/media
     env_file:
       - .env
     environment:

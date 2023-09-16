@@ -23,6 +23,7 @@ from django.template import (
 from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed
 from django.forms import CheckboxSelectMultiple
+from django.dispatch import receiver
 
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -35,17 +36,14 @@ from wagtail import fields as wagtail_fields
 from taggit.managers import TaggableManager
 from phonenumber_field.modelfields import PhoneNumberField
 from num2words import num2words
+from easy_thumbnails.fields import ThumbnailerImageField
+from easy_thumbnails.signals import saved_file
 
 from mailings.models import (
     OutgoingEmail,
     Attachment
 )
-
-from easy_thumbnails.fields import ThumbnailerImageField
-
-from django.dispatch import receiver
-from easy_thumbnails.signals import saved_file
-from artel import tasks
+from artel.tasks import generate_thumbnails
 
 
 logger = logging.getLogger(__name__)
@@ -542,6 +540,7 @@ class OrderDocument(models.Model):
 
 @receiver(saved_file)
 def generate_thumbnails_async(sender, fieldfile, **kwargs):
-    tasks.generate_thumbnails.delay(
+    generate_thumbnails.delay(
         model=sender, pk=fieldfile.instance.pk,
-        field=fieldfile.field.name)
+        field=fieldfile.field.name
+    )

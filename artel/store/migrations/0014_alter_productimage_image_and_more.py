@@ -21,4 +21,3 @@ class Migration(migrations.Migration):
             field=easy_thumbnails.fields.ThumbnailerImageField(upload_to=""),
         )
     ]
-    

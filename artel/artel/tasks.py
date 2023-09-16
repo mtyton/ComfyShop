@@ -1,12 +1,13 @@
-from celery import shared_task
-from easy_thumbnails.files import generate_all_aliases
+import celery
 import logging
+
+from easy_thumbnails.files import generate_all_aliases
 
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task(serializer="pickle")
+@celery.shared_task(name="generate_thumbnails")
 def generate_thumbnails(model, pk, field):
     try:
         instance = model._default_manager.get(pk=pk)
