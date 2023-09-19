@@ -23,6 +23,7 @@ from django.template import (
 from django.core.exceptions import ValidationError
 from django.db.models.signals import m2m_changed
 from django.forms import CheckboxSelectMultiple
+from django.dispatch import receiver
 
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -35,18 +36,21 @@ from wagtail import fields as wagtail_fields
 from taggit.managers import TaggableManager
 from phonenumber_field.modelfields import PhoneNumberField
 from num2words import num2words
+from easy_thumbnails.fields import ThumbnailerImageField
+from easy_thumbnails.signals import saved_file
 
 from mailings.models import (
     OutgoingEmail,
     Attachment
 )
+from artel.tasks import generate_thumbnails
 
 
 logger = logging.getLogger(__name__)
 
 
 class BaseImageModel(models.Model):
-    image = models.ImageField()
+    image = ThumbnailerImageField()
     is_main = models.BooleanField(default=False)
 
     class Meta:
@@ -129,7 +133,7 @@ class ProductTemplateImage(BaseImageModel):
     template = ParentalKey(
         ProductTemplate, on_delete=models.CASCADE, related_name="template_images"
     )
-    image = models.ImageField()
+    image = ThumbnailerImageField()
     is_main = models.BooleanField(default=False)
 
 
@@ -532,3 +536,11 @@ class OrderDocument(models.Model):
         template = Template(content)
         content = template.render(context)
         return pdfkit.from_string(content, False)
+
+
+@receiver(saved_file)
+def generate_thumbnails_async(sender, fieldfile, **kwargs):
+    generate_thumbnails.delay(
+        model=sender, pk=fieldfile.instance.pk,
+        field=fieldfile.field.name
+    )
