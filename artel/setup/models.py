@@ -16,6 +16,7 @@ class ComfyConfig(models.Model):
     shop_enabled = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    active = models.BooleanField(default=False)
 
     def __str__(self):
         return f'Comfy Config - updated: {self.updated}'

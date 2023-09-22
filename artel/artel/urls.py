@@ -22,8 +22,8 @@ urlpatterns = [
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
-    path('setup/', setup_views.SetupPageView.as_view(), name='setup'),
     path('store-app/', include('store.urls')),
+    path('setup/', include('setup.urls')),
 ]
 
 

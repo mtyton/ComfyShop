@@ -411,6 +411,7 @@ class OrderManager(models.Manager):
 
         payment_method = payment_method or PaymentMethod.objects.first()
         doc_templates = DocumentTemplate.objects.filter(
+            # TODO - this should be optional...
             doc_type__in=[DocumentTypeChoices.AGREEMENT, DocumentTypeChoices.RECEIPT]
         )
 

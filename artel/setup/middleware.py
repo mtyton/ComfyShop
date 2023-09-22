@@ -16,9 +16,10 @@ class CheckSetupMiddleware(object):
     def __call__(self, request):
         config = None
         try:
-            config = ComfyConfig.objects.get()
+            config = ComfyConfig.objects.get(active=True)
         except ComfyConfig.DoesNotExist:
-            if not request.path_info.startswith('/setup'):
+            if (not request.path_info.startswith('/setup') and not request.path_info.startswith('/admin')
+                and not request.path_info.startswith('/media') and not request.path_info.startswith('/static')):
                 return redirect('/setup/')
         except ComfyConfig.MultipleObjectsReturned:
             config = ComfyConfig.objects.first()
@@ -43,8 +44,7 @@ class CheckShopMiddleware(object):
         return ProductListPage.objects.filter(url_path__endswith=request.path_info).exists()
 
     def __call__(self, request):
-        config = ComfyConfig.objects.first()
-        print(self._check_if_store_request(request))
+        config = ComfyConfig.objects.get(active=True)
         if config and not config.shop_enabled and self._check_if_store_request(request):
             if settings.DEBUG:
                 return HttpResponse(
