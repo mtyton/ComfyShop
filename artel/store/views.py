@@ -53,7 +53,7 @@ class CartView(TemplateView):
 
 class CartActionView(ViewSet):
     
-    # TODO - test this, currently not in use
+    # NOTE - currently not in use
     @action(detail=False, methods=["get"], url_path="list-products")
     def list_products(self, request):
         # get cart items
@@ -144,7 +144,7 @@ class ConfigureProductSummaryView(View):
     def post(self, request, variant_pk: int, *args, **kwargs):
         # Here just send the email with product request
         variant = Product.objects.get(pk=variant_pk)
-        send_produt_request_email(variant.pk)
+        send_produt_request_email.apply_async(args=[variant.pk])
         messages.success(request, "Zapytanie o produkt zostało wysłane")
         context = self.get_context_data(variant_pk)
         return HttpResponseRedirect(context["store_url"])

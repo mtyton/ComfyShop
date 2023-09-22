@@ -1,5 +1,7 @@
 import logging
+import celery
 from django.conf import settings
+from easy_thumbnails.files import generate_all_aliases
 
 from mailings.models import OutgoingEmail
 from store.models import Product
@@ -8,8 +10,8 @@ from store.admin import ProductAdmin
 
 logger = logging.getLogger(__name__)
 
-# TODO - those should be modified to be celery tasks
 
+@celery.shared_task(name="send_produt_request_email")
 def send_produt_request_email(variant_pk: int):
     try:
         variant = Product.objects.get(pk=variant_pk)

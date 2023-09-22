@@ -69,6 +69,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "phonenumber_field",
     "colorfield"
+    "django_celery_results",
+    "django_celery_beat",
+    "easy_thumbnails",
 ]
 
 
@@ -222,6 +225,29 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'artel-sklep@tepewu.pl')
 
+# CELERY settings
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
+CELERY_CACHE_BACKEND = os.environ.get("CELERY_CACHE_BACKEND")
+CELERY_TIMEZONE = os.environ.get("CELERY_TIMEZONE")
+CELERY_TASK_TRACK_STARTED = os.environ.get("CELERY_TASK_TRACK_STARTED")
+CELERY_TASK_TIME_LIMIT = os.environ.get("CELERY_TASK_TIME_LIMIT")
+# CELERY_RESULT_BACKEND_DB = f'db+mysql+pymysql://{os.environ.get("MYSQL_USER")}:{os.environ.get("MYSQL_PASSWORD")}@db/{os.environ.get("MYSQL_DATABASE")}'
+CELERY_BROKER_URL = f'amqp://{os.environ.get("RABBITMQ_DEFAULT_USER")}:{os.environ.get("RABBITMQ_DEFAULT_PASS")}@rabbit//'
+CELERY_TASK_RESULT_EXPIRES = os.environ.get("CELERY_TASK_RESULT_EXPIRES")
+CELERY_ACCEPT_CONTENT = ['pickle'] #add this to your env
+
+# EASY_THUMBNAILS settings
+
+THUMBNAIL_DEFAULT_STORAGE = 'django.core.files.storage.FileSystemStorage'
+THUMBNAIL_ALIASES = {
+    '': {
+        'image_40_60': {'size': (40, 60), 'crop': True},
+        'image_60_90': {'size': (60, 90), 'crop': True},
+        'image_80_120': {'size': (80, 120), 'crop': True},
+        'image_120_180': {'size': (120, 180), 'crop': True},
+        'image_160_240': {'size': (160, 240), 'crop': True},
+    },
+}
 
 LOGGING = {
     "version": 1,
