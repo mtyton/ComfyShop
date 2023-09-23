@@ -3,10 +3,11 @@ from django.urls import reverse
 from django.conf import settings
 
 from store.tests import factories
+from artel.tests import BaseComfyTestCaseMixin
 
 
 
-class SessionCartTestCase(APITestCase):
+class SessionCartTestCase(BaseComfyTestCaseMixin, APITestCase):
     
     def setUp(self):
         super().setUp()

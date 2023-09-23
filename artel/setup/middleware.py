@@ -44,7 +44,7 @@ class CheckShopMiddleware(object):
         return ProductListPage.objects.filter(url_path__endswith=request.path_info).exists()
 
     def __call__(self, request):
-        config = ComfyConfig.objects.get(active=True)
+        config = ComfyConfig.objects.filter(active=True).first()
         if config and not config.shop_enabled and self._check_if_store_request(request):
             if settings.DEBUG:
                 return HttpResponse(

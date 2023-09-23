@@ -68,7 +68,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "phonenumber_field",
-    "colorfield",
     "django_celery_results",
     "django_celery_beat",
     "easy_thumbnails",

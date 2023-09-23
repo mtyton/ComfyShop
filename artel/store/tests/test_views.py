@@ -12,9 +12,10 @@ from store.tests.factories import (
     ProductFactory,
     ProductTemplateParamValueFactory
 )
+from artel.tests import BaseComfyTestCaseMixin
 
 
-class ConfigureProductViewTestCase(TestCase):
+class ConfigureProductViewTestCase(BaseComfyTestCaseMixin, TestCase):
     
     def setUp(self):
         super().setUp()
@@ -94,5 +95,5 @@ class ConfigureProductViewTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
 
 
-class ConfigureProductSummaryViewTestCase(TestCase):
+class ConfigureProductSummaryViewTestCase(BaseComfyTestCaseMixin, TestCase):
     ...

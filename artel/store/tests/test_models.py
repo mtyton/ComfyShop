@@ -9,9 +9,10 @@ from django.db import transaction
 from store.tests import factories
 from store import models as store_models
 from mailings.tests.factories import MailTemplateFactory
+from artel.tests import BaseComfyTestCaseMixin
 
 
-class ProductCategoryParamTestCase(TestCase):
+class ProductCategoryParamTestCase(BaseComfyTestCaseMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.category = factories.ProductCategoryFactory()
@@ -41,7 +42,7 @@ class ProductCategoryParamTestCase(TestCase):
         self.assertEqual(len(available_values), 3)
 
 
-class ProductTemplateParamValueTestCase(TestCase):
+class ProductTemplateParamValueTestCase(BaseComfyTestCaseMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.category = factories.ProductCategoryFactory()
@@ -69,7 +70,7 @@ class ProductTemplateParamValueTestCase(TestCase):
         self.assertEqual(proper_value, None)
 
 
-class ProductTestCase(TestCase):
+class ProductTestCase(BaseComfyTestCaseMixin, TestCase):
 
     def test_template_params_one_value_success(self):
         product = factories.ProductFactory()
@@ -143,7 +144,7 @@ class ProductTestCase(TestCase):
         self.assertEqual(prod.price, 0)
 
 
-class OrderProductTestCase(TestCase):
+class OrderProductTestCase(BaseComfyTestCaseMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.author = factories.ProductAuthorFactory()
@@ -185,7 +186,7 @@ class OrderProductTestCase(TestCase):
         self.assertEqual(products.count(), 0)
 
 
-class OrderTestCase(TestCase):
+class OrderTestCase(BaseComfyTestCaseMixin, TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.author = factories.ProductAuthorFactory()
