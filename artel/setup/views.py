@@ -100,4 +100,4 @@ class SetupCompleteView(BaseSetupView):
         config.save()
 
         request.session.flush()
-        return redirect('')
+        return redirect('/')
