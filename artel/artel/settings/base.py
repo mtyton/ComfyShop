@@ -256,3 +256,13 @@ LOGGING = {
 }
 
 PRODUCTS_CSV_PATH = os.environ.get("PRODUCTS_CSV_PATH", "products.csv")
+
+
+WAGTAILEMBEDS_FINDERS = [
+    {
+        "class": "wagtail.embeds.finders.oembed",
+    },
+    {
+        "class": "blog.finders",
+    },
+]
