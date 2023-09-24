@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.urls import (
-    include, 
+    include,
     path
 )
 from django.contrib import admin
@@ -12,15 +12,18 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
 
-handler404 = 'artel.views.my_custom_page_not_found_view'
+from setup import views as setup_views
 
+
+handler404 = 'artel.views.my_custom_page_not_found_view'
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("search/", search_views.search, name="search"),
-    path("store-app/", include("store.urls"))
+    path('store-app/', include('store.urls')),
+    path('setup/', include('setup.urls')),
 ]
 
 

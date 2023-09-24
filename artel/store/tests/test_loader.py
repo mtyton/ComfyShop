@@ -4,9 +4,10 @@ from unittest.mock import patch
 
 from store.tests import factories
 from store.loader import ProductLoader
+from artel.tests import BaseComfyTestCaseMixin
 
 
-class TestProductLoader(TestCase):
+class TestProductLoader(BaseComfyTestCaseMixin, TestCase):
     def setUp(self) -> None:
         self.category = factories.ProductCategoryFactory()
         self.template = factories.ProductTemplateFactory(category=self.category)
