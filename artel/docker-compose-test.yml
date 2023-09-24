@@ -35,7 +35,7 @@ services:
   test_beat:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.local
     command: celery -A artel beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - SECRET_KEY=RandomKey
@@ -48,7 +48,7 @@ services:
   test_worker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.local
     command: celery -A artel worker -l info
     environment:
       - SECRET_KEY=RandomKey

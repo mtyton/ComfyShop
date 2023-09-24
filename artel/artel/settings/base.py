@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "mailings",
     "blog",
     "search",
+    "setup",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.embeds",
@@ -70,7 +71,10 @@ INSTALLED_APPS = [
     "easy_thumbnails",
 ]
 
+
 MIDDLEWARE = [
+    "setup.middleware.CheckSetupMiddleware",
+    "setup.middleware.CheckShopMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -92,6 +96,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                'setup.context_processors.config_context_processor',
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
