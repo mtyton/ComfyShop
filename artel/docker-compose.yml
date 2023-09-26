@@ -1,20 +1,6 @@
 version: "3.8"
 services:
-  comfy:
-    build:
-      dockerfile: Dockerfile.local
-      context: ./
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./:/app
-    environment:
-      - SECRET_KEY
-      - DATABASE_URL
-    env_file:
-      - .env
-    stdin_open: true
-    tty: true
+  
   db:
     image: postgres
     restart: always
@@ -27,3 +13,87 @@ services:
       - ../postgres/:/var/lib/postgresql
     env_file:
       - .env
+
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:3.6.0
+    environment:
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
+    ports:
+      - "5672:5672"  # We forward this port because it's useful for debugging
+      - "15672:15672"  # Here, we can access RabbitMQ management plugin
+
+  smtp-server:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025" 
+      
+  comfy:
+    restart: always
+    depends_on:
+      - smtp-server
+      - db
+    build:
+      dockerfile: Dockerfile.local
+      context: ./
+    user: "${UID}:${GID}"
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./:/app
+      - media:/app/media
+    environment:
+      - SECRET_KEY
+      - DATABASE_URL
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true
+
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A artel beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY
+      - DATABASE_URL
+    depends_on:
+      - comfy
+      - rabbit
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A artel worker -l info
+    volumes:
+      - ./:/app
+      - ./media:/app/media
+    env_file:
+      - .env
+    environment:
+      - SECRET_KEY
+      - DATABASE_URL
+    depends_on:
+      - comfy
+      - rabbit
+      - beat
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8002:8080"
+
+
+volumes:
+  media:
+  db:
+  rabbitmq_data:

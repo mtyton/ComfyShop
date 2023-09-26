@@ -1,0 +1,21 @@
+steps:
+  build:
+    image: docker:24.0.6
+    secrets: []
+    commands:
+      - docker compose -f artel/docker-compose-test.yml build --no-cache
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+    when:
+      event: pull_request
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+  test:
+    image: docker:24.0.6
+    secrets: []
+    commands:
+      - docker compose -f artel/docker-compose-test.yml run --rm test_comfy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+    when:
+      event: pull_request
+      branch: ${CI_REPO_DEFAULT_BRANCH}

@@ -4,23 +4,35 @@ from django.views.generic import (
     TemplateView,
     View
 )
-from django.shortcuts import render
+from django.shortcuts import (
+    render,
+    get_object_or_404
+) 
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.contrib import messages
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from store.cart import SessionCart
+from store.tasks import send_produt_request_email
+from store.cart import (
+    SessionCart,
+    CustomerData
+)
 from store.serializers import (
-    CartProductSerializer, 
+    CartSerializer, 
     CartProductAddSerializer
 )
-from store.forms import CustomerDataForm
+from store.forms import (
+    CustomerDataForm,
+    ProductTemplateConfigForm
+)
 from store.models import (
-    CustomerData,
     Order,
-    OrderProduct
+    Product,
+    ProductTemplate,
+    ProductListPage
 )
 
 
@@ -41,12 +53,13 @@ class CartView(TemplateView):
 
 class CartActionView(ViewSet):
     
+    # NOTE - currently not in use
     @action(detail=False, methods=["get"], url_path="list-products")
     def list_products(self, request):
         # get cart items
         cart = SessionCart(self.request)
-        items = cart.get_items()
-        serializer = CartProductSerializer(instance=items, many=True)
+        items = cart.display_items
+        serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=["post"])
@@ -56,30 +69,86 @@ class CartActionView(ViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
         serializer.save(cart)
-
-        items = cart.get_items()
-        serializer = CartProductSerializer(instance=items, many=True)
+        items = cart.display_items
+        serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)
     
     @action(detail=False, methods=["post"])
     def remove_product(self, request):
         cart = SessionCart(self.request)
         product_id = request.POST.get("product_id")
-        cart.remove_item(product_id)
+        try:
+            cart.remove_item(product_id)
+        except Product.DoesNotExist:
+            return Response({"error": "Product does not exist"}, status=400)
 
-        items = cart.get_items()
-        serializer = CartProductSerializer(instance=items, many=True)
+        items = cart.display_items
+        serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)
 
     @action(detail=True, methods=["put"])
-    def update_product(self, request, product_id):
+    def update_product(self, request, pk):
         cart = SessionCart(self.request)
-        product_id = request.POST.get("product_id")
-        cart.update_item_quantity(product_id, request.PUT["quantity"])
-        items = cart.get_items()
-        serializer = CartProductSerializer(instance=items, many=True)
+        try:
+            cart.update_item_quantity(pk, int(request.data["quantity"]))
+        except Product.DoesNotExist:
+            return Response({"error": "Product does not exist"}, status=404)
+        items = cart.display_items
+        serializer = CartSerializer(instance=items, many=True)
         return Response(serializer.data, status=201)
+
+
+class ConfigureProductView(View):
+    template_name = "store/configure_product.html"
+
+    def get_context_data(self, pk: int, **kwargs: Any) -> Dict[str, Any]:
+        template = get_object_or_404(ProductTemplate, pk=pk)
+        form = ProductTemplateConfigForm(template=template)
+        context = {
+            "template": template,
+            "form": form
+        }
+        return context
+
+    def get(self, request, pk: int, *args, **kwargs):
+        context = self.get_context_data(pk)
+        return render(request, self.template_name, context)
+
+    def post(self, request, pk: int, *args, **kwargs):
+        # first select template
+        template = get_object_or_404(ProductTemplate, pk=pk)
+        form = ProductTemplateConfigForm(template=template, data=request.POST)
+        if not form.is_valid():
+            context = self.get_context_data(pk)
+            context["form"] = form
+            return render(request, self.template_name, context)
+        
+        product_variant = form.get_product()
+        return HttpResponseRedirect(reverse("configure-product-summary", args=[product_variant.pk]))
+
+class ConfigureProductSummaryView(View):
+    template_name = "store/configure_product_summary.html"
     
+    def get_context_data(self, variant_pk):
+        variant = get_object_or_404(Product, pk=variant_pk)
+        return {
+            "variant": variant,
+            "params_values": variant.params.all(),
+            "store_url": ProductListPage.objects.first().get_url()
+        }
+
+    def get(self, request, variant_pk: int, *args, **kwargs):
+        context = self.get_context_data(variant_pk)
+        return render(request, self.template_name, context)
+
+    def post(self, request, variant_pk: int, *args, **kwargs):
+        # Here just send the email with product request
+        variant = Product.objects.get(pk=variant_pk)
+        send_produt_request_email.apply_async(args=[variant.pk])
+        messages.success(request, "Zapytanie o produkt zostało wysłane")
+        context = self.get_context_data(variant_pk)
+        return HttpResponseRedirect(context["store_url"])
+
 
 class OrderView(View):
     template_name = "store/order.html"
@@ -92,24 +161,23 @@ class OrderView(View):
     def get(self, request, *args, **kwargs):
         cart = SessionCart(self.request)
         if cart.is_empty():
-            # TODO - messages
+            messages.error(request, "Twój koszyk jest pusty")
             return HttpResponseRedirect(reverse("cart"))
         return render(request, self.template_name, self.get_context_data())
 
     def post(self, request, *args, **kwargs):
-        # TODO - messages
         cart = SessionCart(self.request)
         if cart.is_empty():
+            messages.error(request, "Twój koszyk jest pusty")
             return HttpResponseRedirect(reverse("cart"))
+        
         form = CustomerDataForm(request.POST)
         if not form.is_valid():
-            print(form.errors)
             context = self.get_context_data()
             context["form"] = form
             return render(request, self.template_name, context)
-        customer_data = form.save()
-        request.session["customer_data_id"] = customer_data.id
-        # TODO - add this page
+        customer_data = CustomerData(data=form.serialize())
+        request.session["customer_data"] = customer_data.data
         return HttpResponseRedirect(reverse("order-confirm"))
 
 
@@ -117,28 +185,54 @@ class OrderConfirmView(View):
     template_name = "store/order_confirm.html"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        customer_data = CustomerData.objects.get(id=self.request.session["customer_data_id"])
+        
+        form = CustomerDataForm(
+            data=CustomerData(
+                encrypted_data=self.request.session["customer_data"]
+            ).decrypted_data
+        )
+        if not form.is_valid():
+            raise Exception("Customer data is not valid")
+        
+        customer_data = form.cleaned_data
         return {
-            "cart": SessionCart(self.request),
-            "customer_data": customer_data
+            "cart": SessionCart(self.request, delivery=customer_data["delivery_method"]),
+            "customer_data": customer_data 
         }
 
     def get(self, request, *args, **kwargs):
         cart = SessionCart(self.request)
         if cart.is_empty():
-            # TODO - messages
+            messages.error(request, "Twój koszyk jest pusty")
             return HttpResponseRedirect(reverse("cart"))
         return render(request, self.template_name, self.get_context_data())
 
     def post(self, request):
-        customer_data = CustomerData.objects.get(id=self.request.session["customer_data_id"])
+        customer_data = CustomerData(
+            encrypted_data=self.request.session["customer_data"]
+        ).decrypted_data
         cart = SessionCart(self.request)
-        order = Order.objects.create(
-            customer=customer_data,
+        order = Order.objects.create_from_cart(
+            cart.display_items, 
+            None, customer_data
         )
-        OrderProduct.objects.create_from_cart(order, cart)
+        request.session.pop("customer_data")
         cart.clear()
-        self.request.session.pop("customer_data_id")
-        # TODO - to be tested
-        # TODO - messages
-        return HttpResponseRedirect(reverse("cart"))
+        request.session["order_uuids"] = [str(elem) for elem in order.values_list("uuid", flat=True)]
+        return HttpResponseRedirect(reverse("order-success"))
+
+
+class OrderSuccessView(View):
+    template_name = "store/order_success.html"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        return {
+            "orders": Order.objects.filter(uuid__in=self.request.session.get("order_uuids")),
+            "store_url": ProductListPage.objects.first().get_url()
+        }
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.session.get("order_uuids"):
+            return HttpResponseRedirect(reverse("cart"))
+        
+        return render(request, self.template_name, self.get_context_data())

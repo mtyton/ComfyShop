@@ -9,8 +9,13 @@
                     <h3 class="fw-normal mb-0 text-black"> {% trans "Shopping Cart" %} </h3>
                 </div>
             </div>
-            {% for item in cart.get_items %}
-                {% include 'store/partials/cart_item.html' %}
+            {% for group in cart.display_items %}
+                {% if group.products %}
+                    <h4>Wykonawca: {{group.author.display_name}}</h4>
+                    {% for item in group.products %}
+                        {% include 'store/partials/cart_item.html' %}
+                    {% endfor %}
+                {% endif %}
             {% endfor %}
 
             <div class="card ">

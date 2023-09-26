@@ -9,25 +9,21 @@
             <div class="container pt-4">
                 <div class="row">
                     <div class="col-12 px-4">
-                        <h1>{% trans "Order Data" %}</h1>
-                        <span>{% trans "We won't share your data" %}</span>
+                        <h1>{% trans "Your Data" %}</h1>
                         <hr class="mt-1" />
                     </div>
+                    <hr class="mt-2" />
                 </div>
                 <div class="col-12">
                     <div class="row mx-4">
                         <div class="col-sm-6">
                             <label class="order-form-label">{{form.name.label}}</label>
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="order-form-label">{{form.surname.label}}</label>
-                        </div>
-                        <div class="col-sm-6">
                             <div class="form-outline">
                                 {{form.name}}
                             </div>
                         </div>
-                        <div class="col-sm-6 mt-2 mt-sm-0">
+                        <div class="col-sm-6">
+                            <label class="order-form-label">{{form.surname.label}}</label>
                             <div class="form-outline">
                                 {{form.surname}}
                             </div>
@@ -36,28 +32,25 @@
                     <div class="row mx-4">
                         <div class="col-sm-6">
                             <label class="order-form-label">{{form.email.label}}</label>
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="order-form-label">{{form.phone.label}}</label>
-                        </div>
-                        <div class="col-sm-6">
                             <div class="form-outline">
                                 {{form.email}}
                             </div>
                         </div>
-                        <div class="col-sm-6 mt-2 mt-sm-0">
+                        <div class="col-sm-6">
+                            <label class="order-form-label">{{form.phone.label}}</label>
                             <div class="form-outline">
                                 {{form.phone}}
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row mt-3 mx-4">
-
-                    <div class="col-12">
-                        <label class="order-form-label">{% trans "Contact Details" %}</label>
+                <div class="row mt-3">
+                    <div class="col-12 px-4">
+                        <h2>Dane do wysyłki</h2>
                     </div>
-                    <hr class="mt-1" />
+                    <hr class="mt-2" />
+                </div>
+                <div class="row mt-3 mx-4">
                     <div class="col-sm-6 mt-2 pe-sm-2">
                         <div class="form-outline">
                             <label class="form-label" for="{{form.street.id}}">{{form.street.label}}</label>
@@ -82,7 +75,30 @@
                             {{form.zip_code}}
                         </div>
                     </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12 px-4">
+                        <h2>Płatność i wysyłka</h2>
+                    </div>
+                    <hr class="mt-2" />
+                </div>
 
+                <div class="row mt-3 mx-4">
+                    <div class="col-sm-12 mt-2 pe-sm-2">
+                        <div class="form-outline">
+                            <label class="form-label" for="{{form.street.id}}">{{form.payment_method.label}}</label>
+                            {{form.payment_method}}
+                        </div>
+                    </div>
+                    <div class="col-sm-12 mt-2 pe-sm-2">
+                        <div class="form-outline">
+                            <label class="form-label" for="{{form.street.id}}">{{form.delivery_method.label}}</label>
+                            {{form.delivery_method}}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
                     <div class="col-12 text-end mt-3">
                         <div class="form-outline">
                             <input type="submit" value="{% trans "Confirm" %}" class="btn btn-success btn-lg">

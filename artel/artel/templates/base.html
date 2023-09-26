@@ -37,20 +37,37 @@
         {% wagtailuserbar %}
         <div class="container">
             <div class="row">
-                <div class="col-3">
+                {% if navbar_position == 'top' %}
+                <div class="col-md-12 mt-5 ml-2">
                     {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
-                </div>
-                <div class="col-9 mt-5 ml-2">
+                    </div>
+                {% endif %}
+
+                {% if navbar_position == 'left' %}
+                    <div class="col-md-3 mt-5 ml-2">
+                    {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
+                    </div>
+                {% endif %}
+                <div class="col-md-9 mt-5 ml-2">
+                    {% for message in messages %}
+                        <div class="alert alert-{{message.tags}}" role="alert">
+                            {{message}}
+                        </div>
+                    {% endfor %}
                     {% block content %}{% endblock %}
                 </div>
+                {% if navbar_position == 'right' %}
+                    <div class="col-md-3 mt-5 ml-2">
+                    {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
         {# Global javascript #}
-        <script type="text/javascript" src="{% static 'js/artel.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/jquery-3.6.4.min.js' %}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
         <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/artel.js' %}"></script>
         <script src="{% static 'js/cart.js' %}"></script>
         {% block extra_js %}
         {# Override this in templates to add extra javascript #}

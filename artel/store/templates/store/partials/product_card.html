@@ -1,24 +1,21 @@
 {% load static %}
+{% load thumbnail %}
+<div class="card h-100" >
+  <div class="card-header text-truncate">{{item.title}}</div>
+  <div class="card-body p-0">
+    <img src="{{ item.main_image.image|thumbnail_url:'image_40_60' }}" class="d-block d-sm-none img-fluid rounded mx-auto" alt="{{item.title}}">
 
-<div class="card h-100" style="width: 15rem;">
-    <div class="card-header">{{item.title}}</div>
-    <div class="card-body">
-      <img src="{{item.main_image.url}}" class="rounded mx-auto d-block" style="width: 10rem; height: 10 rem;">
+    <img src="{{ item.main_image.image|thumbnail_url:'image_60_90' }}" class="d-none d-sm-block d-md-none img-fluid rounded mx-auto" alt="{{item.title}}">
 
-      <div class="row d-flex mt-3">
-        <div class="col">
-          <input type="number" id="quantity{{item.id}}" name="quantity" min="1" value="1" class="form-control form-control-sm">
-        </div>
-        <div class="col text-end">
-          <button class="btn btn-outline-success add-to-cart-button"
-            data-product-id="{{item.id}}"
-            data-csrf-token="{{csrf_token}}"
-            data-add-to-cart-url={% url "cart-action-add-product" %}
-            data-bs-toggle="modal" data-bs-target="#addToCartModal"
-          >
-              <img src="{% static 'images/icons/cart.svg' %}" alt="Cart"/>
-          </button>
-        </div>
-      </div>
+    <img src="{{ item.main_image.image|thumbnail_url:'image_80_120' }}" class="d-none d-md-block d-lg-none img-fluid rounded mx-auto" alt="{{item.title}}">
+    
+    <img src="{{ item.main_image.image|thumbnail_url:'image_120_180' }}" class="d-none d-lg-block d-xl-none img-fluid rounded mx-auto" alt="{{item.title}}">
+
+    <img src="{{ item.main_image.image|thumbnail_url:'image_160_240' }}" class="d-none d-xl-block img-fluid rounded mx-auto" alt="{{item.title}}">
+  </div>
+  <div class="card-footer row d-flex m-0">
+    <div class="col text-center">
+          <a href="{% url 'product-configure' item.id %}" class="btn btn-primary">Konfiguruj</a>
     </div>
+  </div>
 </div>

@@ -1,0 +1,53 @@
+{% extends 'setup/setup_base.html' %}
+
+{% load static %}
+{% block form %}
+<form enctype="multipart/form-data" action="" method="POST">
+    {% csrf_token %}
+    <div class="card-body">
+        <h1 class="text-center">Your Config</h1>
+        <div class="row mb-3 mt-5">
+            <div class="col-2">
+                
+            </div>
+            <div class="col-4">
+                <h3>
+                    Logo: 
+                </h3>
+            </div>
+            <div class="col-6">
+                <img src="{{config.logo.url}}" alt="Logo" class="img-fluid">
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2">
+                
+            </div>
+            <div class="col-4">
+                <h3>
+                    <label for="id_navbar_position" class="form-label">Navbar Position:</label>
+                </h3>
+            </div>
+            <div class="col-6">
+                {{config.navbar_position}}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2">
+                
+            </div>
+            <div class="col-4">
+                <h3>
+                    <label for="id_shop_enabled" class="form-label">Shop Enabled:</label>
+                </h3>
+            </div>
+            <div class="col-2">
+                {% if config.shop_enabled %}yes{% else %}no{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="card-footer text-muted text-center">
+        <input type="submit" class="btn btn-primary" value="Submit">
+    </div>
+</form>
+{% endblock %}

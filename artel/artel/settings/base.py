@@ -16,6 +16,19 @@ import os
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+# -> GlitchTip error reporting 
+sentry_sdk.init(
+    dsn=os.environ.get("SENTRY_DSN", ''),
+    integrations=[DjangoIntegration()],
+    auto_session_tracking=False,
+    traces_sample_rate=0
+) 
+
+SENTRY_ENVIRONMENT = os.environ.get("SENTRY_ENVIRONMENT", '')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -26,8 +39,10 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 INSTALLED_APPS = [
     "home",
     "store",
+    "mailings",
     "blog",
     "search",
+    "setup",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.contrib.simple_translation",
@@ -53,9 +68,15 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "phonenumber_field",
+    "django_celery_results",
+    "django_celery_beat",
+    "easy_thumbnails",
 ]
 
+
 MIDDLEWARE = [
+    "setup.middleware.CheckSetupMiddleware",
+    "setup.middleware.CheckShopMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -78,6 +99,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                'setup.context_processors.config_context_processor',
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 'django.template.context_processors.i18n',
@@ -95,7 +117,6 @@ WSGI_APPLICATION = "artel.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 import dj_database_url as db_url
-
 
 DATABASES = {
     "default": db_url.parse(
@@ -185,10 +206,82 @@ WAGTAILSEARCH_BACKENDS = {
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
-WAGTAILADMIN_BASE_URL = "http://example.com"
+WAGTAILADMIN_BASE_URL = "https://artel.tepewu.pl"
+
+# Messages
+from django.contrib import messages
+
+MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+MESSAGE_TAGS = {
+    messages.DEBUG: "debug",
+    messages.INFO: "info",
+    messages.SUCCESS: "success",
+    messages.WARNING: "warning",
+    messages.ERROR: "danger",
+}
+
 
 # STORE SETTINGS
 PRODUCTS_PER_PAGE = 6
 
 # CART settings
 CART_SESSION_ID = 'cart'
+
+# EMAIL settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", '')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'artel-sklep@tepewu.pl')
+
+# CELERY settings
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
+CELERY_CACHE_BACKEND = os.environ.get("CELERY_CACHE_BACKEND")
+CELERY_TIMEZONE = os.environ.get("CELERY_TIMEZONE")
+CELERY_TASK_TRACK_STARTED = os.environ.get("CELERY_TASK_TRACK_STARTED")
+CELERY_TASK_TIME_LIMIT = os.environ.get("CELERY_TASK_TIME_LIMIT")
+# CELERY_RESULT_BACKEND_DB = f'db+mysql+pymysql://{os.environ.get("MYSQL_USER")}:{os.environ.get("MYSQL_PASSWORD")}@db/{os.environ.get("MYSQL_DATABASE")}'
+CELERY_BROKER_URL = f'amqp://{os.environ.get("RABBITMQ_DEFAULT_USER")}:{os.environ.get("RABBITMQ_DEFAULT_PASS")}@rabbit//'
+CELERY_TASK_RESULT_EXPIRES = os.environ.get("CELERY_TASK_RESULT_EXPIRES")
+CELERY_ACCEPT_CONTENT = ['pickle'] #add this to your env
+
+# EASY_THUMBNAILS settings
+
+THUMBNAIL_DEFAULT_STORAGE = 'django.core.files.storage.FileSystemStorage'
+THUMBNAIL_ALIASES = {
+    '': {
+        'image_40_60': {'size': (40, 60), 'crop': True},
+        'image_60_90': {'size': (60, 90), 'crop': True},
+        'image_80_120': {'size': (80, 120), 'crop': True},
+        'image_120_180': {'size': (120, 180), 'crop': True},
+        'image_160_240': {'size': (160, 240), 'crop': True},
+    },
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+}
+
+PRODUCTS_CSV_PATH = os.environ.get("PRODUCTS_CSV_PATH", "products.csv")
+
+
+WAGTAILEMBEDS_FINDERS = [
+    {
+        "class": "wagtail.embeds.finders.oembed",
+    },
+    {
+        "class": "blog.finders",
+    },
+]

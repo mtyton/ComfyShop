@@ -1,11 +1,11 @@
 {% load static %} 
 
-<div class="card rounded-3 mb-4">
+<div class="card rounded-3 mb-1">
     <div class="card-body p-4">
       <div class="row d-flex justify-content-between align-items-center">
         <div class="col-md-2 col-lg-2 col-xl-2">
           <img
-            src="{{item.product.main_image.url}}"
+            src="{{item.product.main_image.image.url}}"
             class="img-fluid rounded-3">
         </div>
         <div class="col-md-3 col-lg-3 col-xl-3">
@@ -15,7 +15,7 @@
             {{item.quantity}}
         </div>
         <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-          <h5 class="mb-0">{{item.product.price}} ZŁ</h5>
+          <h5 class="mb-0">{{item.product.price}} zł</h5>
         </div>
 
       </div>
