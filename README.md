@@ -7,7 +7,7 @@ ComfyShop is an open source project that combines a blog and shop using Django a
 [![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green)](https://www.djangoproject.com/)  
 
 
-[![Release Version](https://img.shields.io/badge/Release%20Version-v0.2-blue)](https://forge.citizen4.eu/mtyton/comfy)
+[![Release Version](https://img.shields.io/badge/Release%20Version-v0.2-blue)](https://forge.citizen4.eu/mtyton/comfy/releases/tag/0.2.0)
 ## Requirements
 
 - Docker
