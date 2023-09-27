@@ -38,27 +38,6 @@
         {% wagtailuserbar %}
         <div class="container">
             <div class="row">
-                <div class="col-md-11 mt-5 ml-2"></div>
-                <div class="col-md-1 mt-5 ml-2 text-center">
-                      
-                    <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          {% trans "Languages" %}
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            {% for translation in page.get_translations.live %}
-                                <a class="dropdown-item" href= {% pageurl translation.specific %}{{translation.locale.language_code }} rel="alternate" hreflang="{{ translation.locale.language_code }}">
-                                        {{translation.locale.language_code}}
-                                </a>
-                            {% endfor %}
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <a class="dropdown-item" href="#">Something else here</a>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div class="row">
                 {% if navbar_position == 'top' %}
                     <div class="col-md-12 mt-5 ml-2">
                         {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
@@ -83,6 +62,25 @@
                         {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
                     </div>
                 {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-md-11 mt-5 ml-2"></div>
+                <div class="col-md-1 mt-5 ml-2 text-center">
+                      
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          {% trans "Languages" %}
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            {% for translation in page.get_translations.live %}
+                                <a class="dropdown-item" href= {% pageurl translation.specific %}{{translation.locale.language_code }} rel="alternate" hreflang="{{ translation.locale.language_code }}">
+                                        {{translation.locale.language_code}}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
 
