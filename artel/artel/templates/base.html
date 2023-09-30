@@ -65,20 +65,22 @@
             </div>
             <div class="row">
                 <div class="col-md-11 mt-5 ml-2"></div>
-                <div class="col-md-1 mt-5 ml-2 text-center">
+                <div class="col-md-1 mt-5 ml-2">
                       
-                    <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          {% trans "Languages" %}
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            {% for translation in page.get_translations.live %}
-                                <a class="dropdown-item" href= {% pageurl translation.specific %}{{translation.locale.language_code }} rel="alternate" hreflang="{{ translation.locale.language_code }}">
-                                        {{translation.locale.language_code}}
-                                </a>
-                            {% endfor %}
+                    {% if page %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-lg" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img src="{% static 'images/icons/globe.svg' %}">
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                {% for translation in page.get_translations.live %}
+                                    <a class="dropdown-item text-center" href="{% pageurl translation.specific %}"" rel="alternate" hreflang="{{ translation.locale.language_code }}">
+                                            {{translation.locale.language_code | language_name}}
+                                    </a>
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
 
                 </div>
             </div>
