@@ -74,7 +74,7 @@
                             </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 {% for translation in page.get_translations.live %}
-                                    <a class="dropdown-item text-center" href="{% pageurl translation.specific %}"" rel="alternate" hreflang="{{ translation.locale.language_code }}">
+                                    <a class="dropdown-item text-center" href="{% pageurl translation %}"" rel="alternate" hreflang="{{ translation.locale.language_code }}">
                                             {{translation.locale.language_code | language_name}}
                                     </a>
                                 {% endfor %}

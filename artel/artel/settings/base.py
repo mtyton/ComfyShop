@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     "blog",
     "search",
     "setup",
+    "wagtail_localize",
+    "wagtail_localize.locales",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.contrib.simple_translation",
@@ -57,7 +59,6 @@ INSTALLED_APPS = [
     'wagtail.contrib.modeladmin',
     "wagtail",
     "wagtailmenus",
-    'wagtail.locales',
     "modelcluster",
     "taggit",
     "django.contrib.admin",
@@ -84,8 +85,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "wagtail.contrib.redirects.middleware.RedirectMiddleware",
-    'django.middleware.locale.LocaleMiddleware'
+    'django.middleware.locale.LocaleMiddleware',
+    "wagtail.contrib.redirects.middleware.RedirectMiddleware"
 ]
 
 ROOT_URLCONF = "artel.urls"
