@@ -21,7 +21,10 @@ RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-r
     libwebp-dev \
     wkhtmltopdf \
  && rm -rf /var/lib/apt/lists/*
- 
+
+# Install gettext
+RUN apt-get update && apt-get install -y gettext
+
 # Install the project requirements.
 COPY requirements.txt /
 COPY requirements_dev.txt /

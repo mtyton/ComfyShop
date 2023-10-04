@@ -13,7 +13,8 @@ steps:
     image: docker:24.0.6
     secrets: []
     commands:
-      - docker compose -f artel/docker-compose-test.yml run --rm test_comfy
+      - docker compose -f artel/docker-compose-test.yml run test_comfy
+      - docker compose -f ./artel/docker-compose-test.yml  down     
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock 
     when:

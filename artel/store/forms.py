@@ -11,41 +11,42 @@ from store.models import (
     DeliveryMethod
 )
 
-
+from django.utils.translation import gettext_lazy as _
 
 
 class CustomerDataForm(forms.Form):
 
     name = forms.CharField(
-        max_length=255, label="Imię", widget=forms.TextInput(attrs={"class": "form-control"})
+        max_length=255, label=_("Name"), widget=forms.TextInput(attrs={"class": "form-control"})
     )
 
     surname = forms.CharField(
-        max_length=255, label="Nazwisko", widget=forms.TextInput(attrs={"class": "form-control"})
+        max_length=255, label=_("Surname"), widget=forms.TextInput(attrs={"class": "form-control"})
     )
     street = forms.CharField(
-        max_length=255, label="Adres", widget=forms.TextInput(attrs={"class": "form-control"})
+        max_length=255, label=_("Address"), widget=forms.TextInput(attrs={"class": "form-control"})
     )
     city = forms.CharField(
-        max_length=255, label="Miasto", widget=forms.TextInput(attrs={"class": "form-control"})
+        max_length=255, label=_("City"), widget=forms.TextInput(attrs={"class": "form-control"})
     )
     zip_code = forms.CharField(
-        max_length=255, label="Kod pocztowy", widget=forms.TextInput(attrs={"class": "form-control"})
+        max_length=255, label=_("Zip-code"), widget=forms.TextInput(attrs={"class": "form-control"})
     )
     email = forms.EmailField(
-        max_length=255, label="E-mail", widget=forms.EmailInput(attrs={"class": "form-control"})
+        max_length=255, label=_("E-mail"), widget=forms.EmailInput(attrs={"class": "form-control"})
     )
     phone = PhoneNumberField(
-        region="PL", label="Numer telefonu", widget=forms.TextInput(attrs={"class": "form-control"})
+        region="PL", label=_("Phone number"), widget=forms.TextInput(attrs={"class": "form-control"})
     )
     country = forms.ChoiceField(
-        choices=(("PL", "Polska"), ), label="Kraj",
+        choices=(("PL", _("Polska")), ), label=_("Country"),
         widget=forms.Select(attrs={"class": "form-control"})
     )
     payment_method = forms.ModelChoiceField(
         queryset=PaymentMethod.objects.filter(active=True), label="Sposób płatności",
         widget=forms.Select(attrs={"class": "form-control"})
     )
+
     delivery_method = forms.ModelChoiceField(
         queryset=DeliveryMethod.objects.filter(active=True), label="Sposób dostawy",
         widget=forms.Select(attrs={"class": "form-control"})

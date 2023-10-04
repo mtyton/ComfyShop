@@ -115,7 +115,7 @@ class SessionCartTestCase(BaseComfyTestCaseMixin, APITestCase):
 
     def test_update_item_quantity_invalid_product_id(self):
         response = self.client.put(
-            reverse("cart-action-update-product", kwargs={"pk": 2137}),
-            {"quantity": 5},
+            f'en/{reverse("cart-action-update-product", kwargs={"pk": 2137})}',
+            {"quantity": 5}
         )
         self.assertEqual(response.status_code, 404)

@@ -43,8 +43,11 @@ INSTALLED_APPS = [
     "blog",
     "search",
     "setup",
+    "wagtail_localize",
+    "wagtail_localize.locales",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
+    "wagtail.contrib.simple_translation",
     "wagtail.embeds",
     "wagtail.sites",
     "wagtail.users",
@@ -82,7 +85,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "wagtail.contrib.redirects.middleware.RedirectMiddleware",
+    'django.middleware.locale.LocaleMiddleware',
+    "wagtail.contrib.redirects.middleware.RedirectMiddleware"
 ]
 
 ROOT_URLCONF = "artel.urls"
@@ -99,6 +103,7 @@ TEMPLATES = [
                 'setup.context_processors.config_context_processor',
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
+                'django.template.context_processors.i18n',
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 'wagtailmenus.context_processors.wagtailmenus',
@@ -153,6 +158,16 @@ USE_L10N = True
 
 USE_TZ = True
 
+WAGTAIL_I18N_ENABLED = True
+
+WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
+    ('en', "English"),
+    ('pl', "Polish"),
+ ]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/

@@ -1,5 +1,6 @@
 {% load static wagtailcore_tags wagtailuserbar %}
 {% load menu_tags %}
+{% load i18n %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -38,14 +39,14 @@
         <div class="container">
             <div class="row">
                 {% if navbar_position == 'top' %}
-                <div class="col-md-12 mt-5 ml-2">
-                    {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
+                    <div class="col-md-12 mt-5 ml-2">
+                        {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
                     </div>
                 {% endif %}
 
                 {% if navbar_position == 'left' %}
                     <div class="col-md-3 mt-5 ml-2">
-                    {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
+                        {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
                     </div>
                 {% endif %}
                 <div class="col-md-9 mt-5 ml-2">
@@ -58,9 +59,30 @@
                 </div>
                 {% if navbar_position == 'right' %}
                     <div class="col-md-3 mt-5 ml-2">
-                    {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
+                        {% main_menu max_levels=3 template="menu/custom_main_menu.html" %}
                     </div>
                 {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-md-11 mt-5 ml-2"></div>
+                <div class="col-md-1 mt-5 ml-2">
+                      
+                    {% if page %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-lg" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img src="{% static 'images/icons/globe.svg' %}">
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                {% for translation in page.get_translations.live %}
+                                    <a class="dropdown-item text-center" href="{% pageurl translation %}"" rel="alternate" hreflang="{{ translation.locale.language_code }}">
+                                            {{translation.locale.language_code | language_name}}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                </div>
             </div>
         </div>
 
