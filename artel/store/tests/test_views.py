@@ -56,7 +56,7 @@ class ConfigureProductViewTestCase(BaseComfyTestCaseMixin, TestCase):
 
     def test_get_failure_wrong_pk(self):
         response = self.client.get(
-            reverse("product-configure", args=[12312]),
+            f'en/{reverse("product-configure", args=[12312])}',
         )
         self.assertEqual(response.status_code, 404)
 
@@ -78,7 +78,7 @@ class ConfigureProductViewTestCase(BaseComfyTestCaseMixin, TestCase):
             self.param2.key: [str(self.param2_value1.pk)]
         }
         response = self.client.post(
-            reverse("product-configure", args=[2137]),
+            f"en/{reverse('product-configure', args=[123123])}",
             data=data
         )
         self.assertEqual(response.status_code, 404)
