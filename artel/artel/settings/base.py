@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "mailings",
     "blog",
     "search",
+    "dynamic_forms",
     "setup",
     "wagtail_localize",
     "wagtail_localize.locales",
@@ -72,7 +73,7 @@ INSTALLED_APPS = [
     "phonenumber_field",
     "django_celery_results",
     "django_celery_beat",
-    "easy_thumbnails",
+    "easy_thumbnails"
 ]
 
 

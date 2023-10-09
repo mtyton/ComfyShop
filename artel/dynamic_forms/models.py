@@ -1,6 +1,9 @@
 import datetime
 
 from django.db import models
+from django.conf import settings
+from django.utils.formats import date_format
+
 from modelcluster.fields import ParentalKey
 from wagtail.admin.panels import (
     FieldPanel, FieldRowPanel, 
@@ -8,70 +11,23 @@ from wagtail.admin.panels import (
 )
 from wagtail.fields import RichTextField
 from wagtail.contrib.forms.models import (
-    AbstractFormField, EmailFormMixin, 
-    FormMixin, Page
+    AbstractFormField,
+    AbstractForm,
+    Page,
+    AbstractFormSubmission
 )
 
 from mailings.models import send_mail
 
 
-class FormField(AbstractFormField):
-    page = ParentalKey(
-        "FormPage", related_name="form_fields", on_delete=models.CASCADE
-    )
 
+class FormPage(AbstractForm):
+    adapter = None
 
-class ComfyEmailFormMixin:
-
-    def process_form_submission(self, form):
-        submission = super().process_form_submission(form)
-        if self.to_address:
-            self.send_mail(form)
-        return submission
-    
-    def get_mail_subject(self):
-        ...
-
-    def send_mail(self, form):
-        addresses = [x.strip() for x in self.to_address]
-        send_mail(
-            addresses,
-            None,
-            self.get_mail_subject(),
-            self.render_email(form),
-        )
-
-    def render_email(self, form):
-        content = []
-
-        cleaned_data = form.cleaned_data
-        for field in form:
-            if field.name not in cleaned_data:
-                continue
-
-            value = cleaned_data.get(field.name)
-
-            if isinstance(value, list):
-                value = ", ".join(value)
-
-            # Format dates and datetime(s) with SHORT_DATE(TIME)_FORMAT
-            if isinstance(value, datetime.datetime):
-                value = date_format(value, settings.SHORT_DATETIME_FORMAT)
-            elif isinstance(value, datetime.date):
-                value = date_format(value, settings.SHORT_DATE_FORMAT)
-
-            content.append("{}: {}".format(field.label, value))
-
-        return "\n".join(content)
-
-
-
-class FormPage(FormMixin, Page):
-    
     intro = RichTextField(blank=True)
     thank_you_text = RichTextField(blank=True)
 
-    content_panels = FormMixin.content_panels + [
+    content_panels = Page.content_panels + [
         FieldPanel('intro'),
         InlinePanel('form_fields', label="Form fields"),
         FieldPanel('thank_you_text'),
@@ -88,5 +44,52 @@ class FormPage(FormMixin, Page):
         abstract = True
 
 
-class CustomEmailForm(ComfyEmailFormMixin, FormPage):
+class EmailFormSubmission(AbstractFormSubmission):
+    def render_email(self, data):
+        content = []
+        for field_name, value in data.items():
+            if isinstance(value, list):
+                value = ", ".join(value)
+
+            # Format dates and datetime(s) with SHORT_DATE(TIME)_FORMAT
+            if isinstance(value, datetime.datetime):
+                value = date_format(value, settings.SHORT_DATETIME_FORMAT)
+            elif isinstance(value, datetime.date):
+                value = date_format(value, settings.SHORT_DATE_FORMAT)
+
+            content.append("{}: {}".format(field_name.label, value))
+
+        return "\n".join(content)
+    
+    def send_mail(self, data):
+        addresses = [x.strip() for x in data["to_address"].split(",")]
+        send_mail(
+            addresses,
+            [],
+            data.pop("subject"),
+            self.render_email(data),
+            data.pop("from_address", settings.DEFAULT_FROM_EMAIL)
+        )
+
+
+class CustomEmailForm(FormPage):
+    from_address = models.EmailField(
+        blank=True,
+        help_text="Sender email address"
+    )
+    to_address = models.CharField(
+        max_length=255,
+        help_text="Comma separated list of recipients"
+    )
+    subject = models.CharField(
+        max_length=255,
+        help_text="Subject of the email with data"
+    )
+
     template = "forms/form_page.html"
+
+
+class EmailFormField(AbstractFormField):
+    page = ParentalKey(
+        CustomEmailForm, related_name="form_fields", on_delete=models.CASCADE
+    )
