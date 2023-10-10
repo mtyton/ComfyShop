@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils.formats import date_format
 
 from modelcluster.fields import ParentalKey
+from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import (
     FieldPanel, FieldRowPanel, 
     InlinePanel, MultiFieldPanel
@@ -12,7 +13,7 @@ from wagtail.admin.panels import (
 from wagtail.fields import RichTextField
 from wagtail.contrib.forms.models import (
     AbstractFormField,
-    AbstractForm,
+    FormMixin,
     Page,
     AbstractFormSubmission
 )
@@ -20,13 +21,11 @@ from wagtail.contrib.forms.models import (
 from mailings.models import send_mail
 
 
-
-class FormPage(AbstractForm):
-    adapter = None
-
+class Form(FormMixin, ClusterableModel):
     intro = RichTextField(blank=True)
     thank_you_text = RichTextField(blank=True)
-
+    allow_attachments = models.BooleanField(default=False)
+    
     content_panels = Page.content_panels + [
         FieldPanel('intro'),
         InlinePanel('form_fields', label="Form fields"),
@@ -72,7 +71,7 @@ class EmailFormSubmission(AbstractFormSubmission):
         )
 
 
-class CustomEmailForm(FormPage):
+class CustomEmailForm(Form):
     from_address = models.EmailField(
         blank=True,
         help_text="Sender email address"
@@ -86,10 +85,10 @@ class CustomEmailForm(FormPage):
         help_text="Subject of the email with data"
     )
 
-    template = "forms/form_page.html"
+    template = "forms/email_form_page.html"
 
 
 class EmailFormField(AbstractFormField):
-    page = ParentalKey(
-        CustomEmailForm, related_name="form_fields", on_delete=models.CASCADE
+    form = ParentalKey(
+        "CustomEmailForm", related_name="form_fields", on_delete=models.CASCADE
     )
