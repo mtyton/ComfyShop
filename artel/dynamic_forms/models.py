@@ -5,7 +5,6 @@ from django.conf import settings
 from django.utils.formats import date_format
 
 from modelcluster.fields import ParentalKey
-from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import (
     FieldPanel, FieldRowPanel, 
     InlinePanel, MultiFieldPanel
@@ -19,9 +18,10 @@ from wagtail.contrib.forms.models import (
 )
 
 from mailings.models import send_mail
+from dynamic_forms.forms import DynamicForm
 
 
-class Form(FormMixin, ClusterableModel):
+class Form(FormMixin, Page):
     intro = RichTextField(blank=True)
     thank_you_text = RichTextField(blank=True)
     allow_attachments = models.BooleanField(default=False)
@@ -38,6 +38,17 @@ class Form(FormMixin, ClusterableModel):
             FieldPanel('subject'),
         ], "Email"),
     ]
+
+    def get_form_class(self):
+        return DynamicForm
+    
+    def get_form(self, *args, **kwargs):
+        form_class = self.get_form_class()
+        form_params = self.get_form_parameters()
+        form_params.update(kwargs)
+        print(form_params)
+        fields = self.get_form_fields()
+        return form_class(field_list=fields, *args, **form_params)
 
     class Meta:
         abstract = True

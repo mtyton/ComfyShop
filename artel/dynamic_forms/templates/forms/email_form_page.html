@@ -5,14 +5,17 @@
 {% block content %}
     <h1>{{ page.title }}</h1>
     <p class="meta">{{ page.date }}</p>
+    {% if form %}
+        <div>{{ page.intro|richtext }}</div>
+        <form action="{% pageurl page %}" method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+                {{field.label}} {{field}}
 
-    <div class="body">{{ page.body|richtext }}</div>
-
-    {% for item in page.gallery_images.all %}
-        <div style="float: left; margin: 10px">
-            {% image item.image fill-320x240 %}
-            <p>{{ item.caption }}</p>
-        </div>
-    {% endfor %}
-
+            {% endfor %}
+            <input type="submit">
+        </form>
+    {% else %}
+        <div>You can fill in the from only one time.</div>
+    {% endif %}
 {% endblock %}
