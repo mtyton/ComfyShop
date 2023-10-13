@@ -17,7 +17,10 @@ from wagtail.contrib.forms.models import (
     AbstractFormSubmission
 )
 
-from mailings.models import send_mail
+from mailings.models import (
+    OutgoingEmail,
+    Attachment
+)
 from dynamic_forms.forms import DynamicForm
 
 
@@ -56,34 +59,27 @@ class Form(FormMixin, Page):
 
 
 class EmailFormSubmission(AbstractFormSubmission):
-    def render_email(self, data):
-        content = []
-        for field_name, value in data.items():
-            if isinstance(value, list):
-                value = ", ".join(value)
-
-            # Format dates and datetime(s) with SHORT_DATE(TIME)_FORMAT
-            if isinstance(value, datetime.datetime):
-                value = date_format(value, settings.SHORT_DATETIME_FORMAT)
-            elif isinstance(value, datetime.date):
-                value = date_format(value, settings.SHORT_DATE_FORMAT)
-
-            content.append("{}: {}".format(field_name, value))
-
-        return "\n".join(content)
     
     def send_mail(self, data):
+        # modify this, get proper template
         to_addresses = data.pop("to_address").split(",")
-        subject = data.pop("subject")
+        attachments = [
+            Attachment(
+                file.name, file.file.read(), file.content_type
+            )
+            for file in data.pop("attachments", [])
+        ]
+        subject = data.get("subject")
         from_address = data.pop("from_address", settings.DEFAULT_FROM_EMAIL)
-        addresses = [x.strip() for x in to_addresses]
-        send_mail(
-            addresses,
-            [],
-            subject,
-            self.render_email(data),
-            from_address
-        )
+        for address in to_addresses:
+            OutgoingEmail.objects.send(
+                subject=subject,
+                template_name="form_mail",
+                recipient=address,
+                sender=from_address,
+                context=data,
+                attachments=attachments
+            )
 
 
 class CustomEmailForm(Form):
@@ -106,6 +102,7 @@ class CustomEmailForm(Form):
         return EmailFormSubmission
 
     def process_form_submission(self, form):
+        attachments = form.cleaned_data.pop("attachments", [])
         submission = self.get_submission_class().objects.create(
             form_data=form.cleaned_data,
             page=self,
@@ -114,7 +111,8 @@ class CustomEmailForm(Form):
         mail_data.update({
             "from_address": self.from_address,
             "to_address": self.to_address,
-            "subject": self.subject
+            "subject": self.subject,
+            "attachments": attachments
         })
         submission.send_mail(data=mail_data)
         return submission

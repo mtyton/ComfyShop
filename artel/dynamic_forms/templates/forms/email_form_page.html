@@ -8,16 +8,16 @@
     <p class="meta">{{ page.date }}</p>
     {% if form %}
         <div>{{ page.intro|richtext }}</div>
-        <form action="{% pageurl page %}" method="POST">
+        <form enctype="multipart/form-data" action="{% pageurl page %}" method="POST">
             {% csrf_token %}
             {% for field in form %}
                 <div class="form-group mt-3">
                     <label for="{{field.id}}" class="form-label">
-                        {{field.label}}
+                        {% trans field.label %}
                     </label>
-                    {{field}}
+                        {{field}}
                     <small id="emailHelp" class="form-text text-muted">
-                        {{form.help_text}}
+                        {% trans field.help_text %}
                     </small>
 
                 </div>
