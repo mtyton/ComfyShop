@@ -30,16 +30,26 @@ class DynamicForm(forms.Form):
         "checkbox": forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={"class": "form-control"})),
         "checkboxes": forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple(attrs={"class": "form-control"})),
         "dropdown": forms.ChoiceField(widget=forms.Select(attrs={"class": "form-control"})),
+        "multiselect": forms.MultipleChoiceField(widget=forms.SelectMultiple(attrs={"class": "form-control"})),
+        "radio": forms.ChoiceField(widget=forms.RadioSelect(attrs={"class": "form-control"})),
+        "date": forms.DateField(widget=forms.DateInput(attrs={"class": "form-control"})),
+        "datetime": forms.DateTimeField(widget=forms.DateTimeInput(attrs={"class": "form-control"})),
+        "hidden": forms.CharField(widget=forms.HiddenInput()),
     }
 
     def __init__(self, *args, **kwargs) -> None:
-        self.page = kwargs.pop("page")
-        self.user = kwargs.pop("user")
+        kwargs.pop("page", "")
+        kwargs.pop("user", "")
         field_list = kwargs.pop("field_list")
         file_uploads = kwargs.pop("file_uploads", False)
         super().__init__(*args, **kwargs)
         for field in field_list:
-            self.fields[field.clean_name] = self.FIELD_TYPE_MAPPING[field.field_type]
+            f = self.FIELD_TYPE_MAPPING[field.field_type]
+            f.label = field.label
+            if hasattr(f, "choices"):
+                f.choices = [(v, v) for v in field.choices.split(",")]
+            f.required = field.required
+            self.fields[field.clean_name] = f
         if file_uploads:
             self.fields["attachments"] = MultipleFileField(
                 required=True, widget=MultipleFileInput(
