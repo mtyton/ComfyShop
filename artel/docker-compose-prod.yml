@@ -25,6 +25,9 @@ services:
     ports:
       - "5672:5672"  # We forward this port because it's useful for debugging
       - "15672:15672"  # Here, we can access RabbitMQ management plugin
+    networks:
+      - nginx_network
+
 
   comfy:
     build:
@@ -77,6 +80,9 @@ services:
     depends_on:
       - comfy
       - rabbit
+      - db
+    networks:
+      - nginx_network
 
   worker:
     build:
@@ -94,7 +100,10 @@ services:
     depends_on:
       - comfy
       - rabbit
+      - db
       - beat
+    networks:
+      - nginx_network
 
 networks:
   nginx_network:
