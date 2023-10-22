@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% load wagtailcore_tags wagtailimages_tags %}
+{% load i18n %}
+
+{% block content %}
+    <h1>{{ page.title }}</h1>
+    <p class="meta">{{ page.date }}</p>
+    {% if form %}
+        <div>{{ page.intro|richtext }}</div>
+        <form enctype="multipart/form-data" action="{% pageurl page %}" method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group mt-3">
+                    <label for="{{field.id}}" class="form-label">
+                        {% trans field.label %}
+                    </label>
+                        {{field}}
+                    <small id="emailHelp" class="form-text text-muted">
+                        {% trans field.help_text %}
+                    </small>
+
+                </div>
+            {% endfor %}
+            <div class="text-end mt-3">
+                <input class="btn btn-lg btn-success" type="submit" value='{% trans "Submit" %}'>
+            </div> 
+        </form>
+    {% else %}
+        <div>You can fill in the from only one time.</div>
+    {% endif %}
+{% endblock %}

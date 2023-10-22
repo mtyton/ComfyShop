@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load i18n %}
+{% load wagtailcore_tags wagtailimages_tags %}
 
 {% block content %}
 <div class="d-flex justify-content-center align-items-center">
@@ -12,21 +14,11 @@
             </svg>
         </div>
         <div class="text-center">
-            <h1>Dziękujemy za zakup!</h1>
             <div>
-                Twoje zamówienia zostały przekazane do realizacji.
-                Oczekuj maili z dokumentami to zamówień.<br/>
-
-                <b>Twoje numery zamówień:</b>
-                <div class="col-12 text-center">
-                    {% for order in orders %}
-                        {{order.order_number}}<br/>
-                    {% endfor %}
-                </div>
-
+                {{page.thank_you_text|richtext}}
             </div>
-            <a class="btn btn-outline-primary mt-3" href="{{store_url}}">
-                Powrót do sklepu
+            <a class="btn btn-outline-primary mt-3" href="/">
+                {% trans "Homepage" %}
             </a>
         </div>
     </div>
