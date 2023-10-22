@@ -201,14 +201,14 @@ class CustomEmailFormTestCase(WagtailPageTests):
         form = self.form.get_form(form_data)
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
-        self.assertFormError(form, "name", 'This field is required.')
+        self.assertEqual(form.errors["name"], ['This field is required.'])
 
         form_data.pop("url")
         form = self.form.get_form(form_data)
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 2)
-        self.assertFormError(form, "name", 'This field is required.')
-        self.assertFormError(form, "url", 'This field is required.')
+        self.assertEqual(form.errors["name"], ['This field is required.'])
+        self.assertEqual(form.errors["url"], ['This field is required.'])
         # make Field not required
         field = EmailFormField.objects.get(
             label="Hidden", form=self.form
@@ -220,8 +220,8 @@ class CustomEmailFormTestCase(WagtailPageTests):
         form = self.form.get_form(form_data)
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 2)
-        self.assertFormError(form, "name", 'This field is required.')
-        self.assertFormError(form, "url", 'This field is required.')
+        self.assertEqual(form.errors["name"], ['This field is required.'])
+        self.assertEqual(form.errors["url"], ['This field is required.'])
 
     def test_create_form_submission_failure_with_files_missing_data(self):
         self.form.allow_attachments = True
@@ -247,14 +247,14 @@ class CustomEmailFormTestCase(WagtailPageTests):
         form = self.form.get_form(form_data, files=files)
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1)
-        self.assertFormError(form, "name", 'This field is required.')
+        self.assertEqual(form.errors["name"], ['This field is required.'])
 
         form_data.pop("url")
         form = self.form.get_form(form_data, files=files)
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 2)
-        self.assertFormError(form, "name", 'This field is required.')
-        self.assertFormError(form, "url", 'This field is required.')
+        self.assertEqual(form.errors["name"], ['This field is required.'])
+        self.assertEqual(form.errors["url"], ['This field is required.'])
         # make Field not required
         field = EmailFormField.objects.get(
             label="Hidden", form=self.form
@@ -266,12 +266,12 @@ class CustomEmailFormTestCase(WagtailPageTests):
         form = self.form.get_form(form_data, files=files)
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 2)
-        self.assertFormError(form, "name", 'This field is required.')
-        self.assertFormError(form, "url", 'This field is required.')
+        self.assertEqual(form.errors["name"], ['This field is required.'])
+        self.assertEqual(form.errors["url"], ['This field is required.'])
         # Now try without files
         form = self.form.get_form(form_data, files={})
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 3)
-        self.assertFormError(form, "name", 'This field is required.')
-        self.assertFormError(form, "url", 'This field is required.')
-        self.assertFormError(form, "attachments", 'This field is required.')
+        self.assertEqual(form.errors["name"], ['This field is required.'])
+        self.assertEqual(form.errors["url"], ['This field is required.'])
+        self.assertEqual(form.errors["attachments"], ['This field is required.'])
