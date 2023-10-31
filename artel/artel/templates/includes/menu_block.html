@@ -1,0 +1,6 @@
+{% load menu_tags %}
+{% load i18n %}
+
+<div class="col-md-{{size}} mt-5 ml-2">
+    {% main_menu max_levels=3 template="menu/custom_main_menu.html" use_specific=3%}
+</div>

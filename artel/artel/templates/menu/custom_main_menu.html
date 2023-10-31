@@ -11,13 +11,13 @@
 
     {% for item in menu_items %}
         <li class="{{ item.active_class }}">
-            <a href="{{ item.href }}">{{ item.text }}</a>
+            <a href="{% pageurl item.link_page.localized %}">{{ item.link_page.localized }}</a>
             {% if item.has_children_in_menu %}
                 <button class="btn btn-toggle" data-bs-target="#ddtoggle_{{ item.link_page.pk }}" data-bs-toggle="collapse"
                     aria-expanded={% if item.active_class %}"true" {% else %} "false" {% endif %}
                     aria-controls="#ddtoggle_{{ item.link_page.pk }}">
                     <img src = "{% static 'images/icons/caret-down.svg' %}" alt="&or;"/>                </button>
-                {% sub_menu item  template="menu/custom_submenu.html" %}
+                {% sub_menu item.link_page template="menu/custom_submenu.html" use_specific=3 %}
             {% endif %}
         </li>
     {% endfor %}

@@ -2,6 +2,6 @@
 <ul class={% if item.active_class %} "sub-menu collapse show fw-normal pb-1 small"  {% else %} "sub-menu collapse fw-normal pb-1 small"  {% endif %}
     id="ddtoggle_{{ item.link_page.pk }}">
     {% for sub_item in menu_items %}
-        <li><a href="{{ sub_item.href }}" class="{{ sub_item.active_class }}">{{ sub_item.text }}</a></li>
+        <li><a href="{{ sub_item.localized.url }}" class="{{ sub_item.active_class }}">{{sub_item.localized}}</a></li>
     {% endfor %}
 </ul> 
