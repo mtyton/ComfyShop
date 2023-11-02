@@ -1,4 +1,9 @@
 from django import forms
+from dynamic_forms.widgets import (
+    CheckboxSelectMultiple,
+    CheckboxInput,
+    RadioSelect
+)
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -27,11 +32,11 @@ class DynamicForm(forms.Form):
         "email": forms.EmailField(max_length=255, widget=forms.EmailInput(attrs={"class": "form-control"})),
         "number": forms.IntegerField(widget=forms.NumberInput(attrs={"class": "form-control"})),
         "url": forms.URLField(max_length=255, widget=forms.URLInput(attrs={"class": "form-control"})),
-        "checkbox": forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={"class": "form-control"})),
-        "checkboxes": forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple(attrs={"class": "form-control"})),
+        "checkbox": forms.BooleanField(required=False, widget=CheckboxInput(attrs={"class": "form-check"})),
+        "checkboxes": forms.MultipleChoiceField(required=False, widget=CheckboxSelectMultiple(attrs={"class": "form-check"})),
         "dropdown": forms.ChoiceField(widget=forms.Select(attrs={"class": "form-control"})),
         "multiselect": forms.MultipleChoiceField(widget=forms.SelectMultiple(attrs={"class": "form-control"})),
-        "radio": forms.ChoiceField(widget=forms.RadioSelect(attrs={"class": "form-control"})),
+        "radio": forms.ChoiceField(widget=RadioSelect(attrs={"class": "form-control"})),
         "date": forms.DateField(widget=forms.DateInput(attrs={"class": "form-control"})),
         "datetime": forms.DateTimeField(widget=forms.DateTimeInput(attrs={"class": "form-control"})),
         "hidden": forms.CharField(widget=forms.HiddenInput()),

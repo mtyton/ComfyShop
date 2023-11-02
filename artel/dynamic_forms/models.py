@@ -77,7 +77,7 @@ class EmailFormSubmission(AbstractFormSubmission):
                 template_name="form_mail",
                 recipient=address,
                 sender=from_address,
-                context=data,
+                context={"form_data": data},
                 attachments=attachments
             )
 
