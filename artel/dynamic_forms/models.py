@@ -59,7 +59,7 @@ class Form(FormMixin, Page):
 
 
 class EmailFormSubmission(AbstractFormSubmission):
-    
+
     def send_mail(self, data):
         # modify this, get proper template
         to_addresses = data.pop("to_address").split(",")
@@ -77,7 +77,7 @@ class EmailFormSubmission(AbstractFormSubmission):
                 template_name="form_mail",
                 recipient=address,
                 sender=from_address,
-                context={"form_data": data},
+                context={"form_data": data, "submission_id": self.id},
                 attachments=attachments
             )
 
