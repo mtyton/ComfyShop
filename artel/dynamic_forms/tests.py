@@ -275,3 +275,30 @@ class CustomEmailFormTestCase(WagtailPageTests):
         self.assertEqual(form.errors["name"], ['This field is required.'])
         self.assertEqual(form.errors["url"], ['This field is required.'])
         self.assertEqual(form.errors["attachments"], ['This field is required.'])
+
+    def test_no_hidden_field_in_clean_data_success(self):
+        form_data = {
+            # generate data for this class self.form.get_form()
+            "name": "Test",
+            "message": "Test message",
+            "email": "test@test.com",
+            "number": 1,
+            "url": "http://example.com",
+            "checkbox": True,
+            "checkboxes": ["a", "b"],
+            "dropdown": "a",
+            "multiselect": ["a", "b"],
+            "radio": "a",
+            "date": "2020-01-01",
+            "datetime": "2020-01-01 00:00:00",
+            "hidden": "hidden",
+        }
+        form = self.form.get_form(form_data)
+        self.assertTrue(form.is_valid())
+        cleaned_data = form.cleaned_data
+        self.assertIn("hidden", cleaned_data)
+        self.assertNotIn("secret_honey", cleaned_data)
+        self.assertIn("hidden", form.fields)
+        self.assertIn("secret_honey", form.fields)
+
+

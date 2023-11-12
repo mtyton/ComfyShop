@@ -60,6 +60,11 @@ class Form(FormMixin, Page):
 
 class EmailFormSubmission(AbstractFormSubmission):
 
+    # TODO - make this optional, allow to set pattern in admin
+    def get_submission_id(self, form_slug):
+        case_number_daily = EmailFormSubmission.objects.filter(submit_time__date=datetime.date.today()).count()
+        return f"{form_slug}-{datetime.date.today()}-{case_number_daily}"
+
     def send_mail(self, data):
         # modify this, get proper template
         to_addresses = data.pop("to_address").split(",")
@@ -69,7 +74,8 @@ class EmailFormSubmission(AbstractFormSubmission):
             )
             for file in data.pop("attachments", [])
         ]
-        subject = data.get("subject")
+        subject = data.pop("subject")
+        form_slug = data.pop("form_slug")
         from_address = data.pop("from_address", settings.DEFAULT_FROM_EMAIL)
         for address in to_addresses:
             OutgoingEmail.objects.send(
@@ -77,7 +83,7 @@ class EmailFormSubmission(AbstractFormSubmission):
                 template_name="form_mail",
                 recipient=address,
                 sender=from_address,
-                context={"form_data": data, "submission_id": self.id},
+                context={"form_data": data, "submission_id": self.get_submission_id(form_slug)},
                 attachments=attachments
             )
 
@@ -112,7 +118,8 @@ class CustomEmailForm(Form):
             "from_address": self.from_address,
             "to_address": self.to_address,
             "subject": self.subject,
-            "attachments": attachments
+            "attachments": attachments,
+            "form_slug": self.slug
         })
         submission.send_mail(data=mail_data)
         return submission

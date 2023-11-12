@@ -24,6 +24,23 @@ class MultipleFileField(forms.FileField):
         return result
 
 
+class HoneypotField(forms.BooleanField):
+    default_widget = forms.HiddenInput(
+        {'style': 'display:none !important;', 'tabindex': '-1', 'autocomplete': 'off'}
+    )
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('widget', HoneypotField.default_widget)
+        kwargs['required'] = False
+        super().__init__(*args, **kwargs)
+    
+    def clean(self, value):
+        if cleaned_value := super().clean(value):
+            raise forms.ValidationError('')
+        else:
+            return cleaned_value
+
+
 class DynamicForm(forms.Form):
 
     FIELD_TYPE_MAPPING = {
@@ -54,6 +71,7 @@ class DynamicForm(forms.Form):
             if hasattr(f, "choices"):
                 f.choices = [(v, v) for v in field.choices.split(",")]
             f.required = field.required
+            f.help_text = field.help_text or ""
             self.fields[field.clean_name] = f
         if file_uploads:
             self.fields["attachments"] = MultipleFileField(
@@ -61,3 +79,21 @@ class DynamicForm(forms.Form):
                     attrs={"class": "form-control"}
                 )
             )
+        # add honeypot field
+        self.fields["secret_honey"] = HoneypotField()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_cleaned_data = {}
+        for key, value in cleaned_data.items():
+            if isinstance(value, list):
+                if isinstance(self.fields[key], MultipleFileField):
+                    continue
+
+                cleaned_data[key] = ",".join(value)
+            if key=="secret_honey":
+                continue
+            
+            new_cleaned_data[key] = value
+
+        return new_cleaned_data
