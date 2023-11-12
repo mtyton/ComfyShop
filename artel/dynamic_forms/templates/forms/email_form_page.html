@@ -12,18 +12,23 @@
         <form enctype="multipart/form-data" action="{% pageurl page %}" method="POST">
             {% csrf_token %}
             {% for field in form %}
-                <div class="form-group mt-3">
-                    <label for="{{field.id}}" class="form-label">
-                        {% trans field.label %}
-                    </label>
-                        {{field}}
-                    <small id="emailHelp" class="form-text text-muted">
-                        {% trans field.help_text %}
-                    </small>
-                    {% if field.error %}
-                        {{error}}
-                    {% endif %}
-                </div>
+                {% if field.is_hidden %}
+                    <!--Empty space for reason, we don't want to show anything on empty fields-->
+                    {{field}}
+                {% else %}
+                    <div class="form-group mt-3">
+                        <label for="{{field.id}}" class="form-label">
+                            {% trans field.label %}
+                        </label>
+                            {{field}}
+                        <small id="emailHelp" class="form-text text-muted">
+                            {% trans field.help_text %}
+                        </small>
+                        {% if field.error %}
+                            {{error}}
+                        {% endif %}
+                    </div>
+                {% endif %}
             {% endfor %}
             <div class="text-end mt-3">
                 <input class="btn btn-lg btn-success" type="submit" value='{% trans "Submit" %}'>
