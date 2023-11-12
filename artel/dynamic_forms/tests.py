@@ -104,7 +104,7 @@ class CustomEmailFormTestCase(WagtailPageTests):
     def test_generate_html_form_from_model(self):
         html_form = self.form.get_form()
         self.assertIsInstance(html_form, DynamicForm)
-        self.assertEqual(len(html_form.fields), 13)
+        self.assertEqual(len(html_form.fields), 14)
         self.assertEqual(html_form.fields["name"].label, "Name")
         self.assertEqual(html_form.fields["name"].required, True)
         self.assertEqual(html_form.fields["name"].widget.attrs["class"], "form-control")
