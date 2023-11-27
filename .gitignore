@@ -139,8 +139,8 @@ GitHub.sublime-settings
 #postgres pass files
 *.my_pgpass
 *.sql
-artel/static/
+wagtail_store/static/
 
 # media
-artel/media/*
-artel/store/data/*
+wagtail_store/media/*
+wagtail_store/store/data/*

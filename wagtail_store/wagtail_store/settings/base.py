@@ -91,7 +91,7 @@ MIDDLEWARE = [
     "wagtail.contrib.redirects.middleware.RedirectMiddleware"
 ]
 
-ROOT_URLCONF = "artel.urls"
+ROOT_URLCONF = "wagtail_store.urls"
 
 TEMPLATES = [
     {
@@ -114,7 +114,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "artel.wsgi.application"
+WSGI_APPLICATION = "wagtail_store.wsgi.application"
 
 
 # Database
@@ -197,7 +197,7 @@ MEDIA_URL = "/media/"
 
 # Wagtail settings
 
-WAGTAIL_SITE_NAME = "artel"
+WAGTAIL_SITE_NAME = "wagtail_store"
 
 # Search
 # https://docs.wagtail.org/en/stable/topics/search/backends.html
