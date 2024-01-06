@@ -47,7 +47,6 @@ class BaseCart(ABC):
 
 class SessionCart(BaseCart):
 
-
     def _get_author_total_price(self, author_id: int):
         author_cart = self._cart[str(author_id)]
         author_price = 0

@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.conf import settings
 
 from store.tests import factories
-from artel.tests import BaseComfyTestCaseMixin
+from wagtail_store.tests import BaseComfyTestCaseMixin
 
 
 

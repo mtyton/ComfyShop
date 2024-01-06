@@ -26,7 +26,7 @@ services:
     environment:
       - SECRET_KEY=RandomKey
       - DATABASE_URL=postgres://comfy:password@test_db/comfy_shop
-      - DJANGO_SETTINGS_MODULE=artel.settings.tests
+      - DJANGO_SETTINGS_MODULE=wagtail_store.settings.tests
       - RABBITMQ_DEFAULT_USER=rabbitmq
       - RABBITMQ_DEFAULT_PASS=rabbitmq
     command:
@@ -36,11 +36,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.local
-    command: celery -A artel beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A wagtail_store beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - SECRET_KEY=RandomKey
       - DATABASE_URL=postgres://comfy:password@test_db/comfy_shop
-      - DJANGO_SETTINGS_MODULE=artel.settings.tests
+      - DJANGO_SETTINGS_MODULE=wagtail_store.settings.tests
     depends_on:
       - test_comfy
       - test_rabbit
@@ -49,11 +49,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.local
-    command: celery -A artel worker -l info
+    command: celery -A wagtail_store worker -l info
     environment:
       - SECRET_KEY=RandomKey
       - DATABASE_URL=postgres://comfy:password@test_db/comfy_shop
-      - DJANGO_SETTINGS_MODULE=artel.settings.tests
+      - DJANGO_SETTINGS_MODULE=wagtail_store.settings.tests
     depends_on:
       - test_comfy
       - test_rabbit

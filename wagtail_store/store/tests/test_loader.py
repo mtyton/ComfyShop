@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from store.tests import factories
 from store.loader import ProductLoader
-from artel.tests import BaseComfyTestCaseMixin
+from wagtail_store.tests import BaseComfyTestCaseMixin
 
 
 class TestProductLoader(BaseComfyTestCaseMixin, TestCase):

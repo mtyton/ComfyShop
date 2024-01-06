@@ -12,7 +12,7 @@ from store.tests.factories import (
     ProductFactory,
     ProductTemplateParamValueFactory
 )
-from artel.tests import BaseComfyTestCaseMixin
+from wagtail_store.tests import BaseComfyTestCaseMixin
 
 
 class ConfigureProductViewTestCase(BaseComfyTestCaseMixin, TestCase):

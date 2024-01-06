@@ -73,11 +73,11 @@ services:
        labels:
         - "traefik.enable=true"
         - "traefik.docker.network=web"          
-        - "traefik.http.routers.artel.rule=Host(`${NGINX_HOST}`)"        
-        - "traefik.http.routers.artel.entrypoints=websecure"    
-        - "traefik.http.services.artel.loadbalancer.server.port=80"                 
-        - "traefik.http.routers.artel.tls=true"    
-        - "traefik.http.routers.artel.tls.certresolver=ovh"    
+        - "traefik.http.routers.wagtail_store.rule=Host(`${NGINX_HOST}`)"        
+        - "traefik.http.routers.wagtail_store.entrypoints=websecure"    
+        - "traefik.http.services.wagtail_store.loadbalancer.server.port=80"                 
+        - "traefik.http.routers.wagtail_store.tls=true"    
+        - "traefik.http.routers.wagtail_store.tls.certresolver=ovh"    
 
 volumes:
   db:

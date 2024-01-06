@@ -43,7 +43,7 @@ from mailings.models import (
     OutgoingEmail,
     Attachment
 )
-from artel.tasks import generate_thumbnails
+from wagtail_store.tasks import generate_thumbnails
 
 
 logger = logging.getLogger(__name__)

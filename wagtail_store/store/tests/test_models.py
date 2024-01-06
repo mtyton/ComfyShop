@@ -9,7 +9,7 @@ from django.db import transaction
 from store.tests import factories
 from store import models as store_models
 from mailings.tests.factories import MailTemplateFactory
-from artel.tests import BaseComfyTestCaseMixin
+from wagtail_store.tests import BaseComfyTestCaseMixin
 
 
 class ProductCategoryParamTestCase(BaseComfyTestCaseMixin, TestCase):

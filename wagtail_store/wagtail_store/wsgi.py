@@ -1,5 +1,5 @@
 """
-WSGI config for artel project.
+WSGI config for wagtail_store project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
