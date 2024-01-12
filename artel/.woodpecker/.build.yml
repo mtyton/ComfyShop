@@ -1,0 +1,22 @@
+
+steps:
+  build:
+    image: debian:
+    secrets: []
+    commands:
+      - docker-compose -f artel/docker-compose-test.yml build
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+    when:
+      event: pull_request
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+  test:
+    image: debian:
+    secrets: []
+    commands:
+      - docker-compose -f artel/docker-compose-test.yml run --rm test_comfy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+    when:
+      event: pull_request
+      branch: ${CI_REPO_DEFAULT_BRANCH}
