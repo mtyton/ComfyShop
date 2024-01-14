@@ -39,6 +39,7 @@ SENTRY_ENVIRONMENT = os.environ.get("SENTRY_ENVIRONMENT", '')
 INSTALLED_APPS = [
     "home",
     "store",
+    "store_api",
     "mailings",
     "blog",
     "search",

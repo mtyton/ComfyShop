@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
 from wagtail.models import Page
+from django.dispatch import receiver
+from easy_thumbnails.signals import saved_file
+from wagtail_store.tasks import generate_thumbnails
 
 
 class PersonalData(models.Model):
@@ -28,10 +31,6 @@ class PersonalData(models.Model):
 
 
 class StoreUser(PersonalData, models.Model):
-
-    class Meta:
-        abstract = True
-
     auth_user = models.OneToOneField(User, on_delete=models.CASCADE)
 
 
@@ -57,8 +56,7 @@ class ProductGroup(models.Model):
 # Products
 class Product(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
-    
-
+    group = models.ForeignKey(ProductGroup, on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
 
@@ -83,3 +81,11 @@ class ProductVariant(models.Model):
 
     def __str__(self):
         return self.name
+
+
+@receiver(saved_file)
+def generate_thumbnails_async(sender, fieldfile, **kwargs):
+    generate_thumbnails.delay(
+        model=sender, pk=fieldfile.instance.pk,
+        field=fieldfile.field.name
+    )

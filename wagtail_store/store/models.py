@@ -539,9 +539,17 @@ class OrderDocument(models.Model):
         return pdfkit.from_string(content, False)
 
 
-@receiver(saved_file)
-def generate_thumbnails_async(sender, fieldfile, **kwargs):
-    generate_thumbnails.delay(
-        model=sender, pk=fieldfile.instance.pk,
-        field=fieldfile.field.name
-    )
+# Consider ordering
+class StorePage(Page):
+    store = models.OneToOneField("store_api.Store", on_delete=models.CASCADE, related_name="page")
+    description = wagtail_fields.RichTextField(blank=True)
+    tags = TaggableManager(blank=True)
+
+
+class AllProductsListPage(Page):
+    store = models.OneToOneField("store_api.Store", on_delete=models.CASCADE, related_name="all_products_list")
+    
+
+class GroupListPage(Page):
+    store = models.ForeignKey("store_api.Store", on_delete=models.CASCADE, related_name="product_lists")
+    group = models.OneToOneField("store_api.ProductGroup", on_delete=models.CASCADE, related_name="page")
