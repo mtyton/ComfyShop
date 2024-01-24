@@ -1,37 +1,25 @@
 import logging
-
-from abc import (
-    ABC,
-    abstractmethod,
-    abstractproperty
-)
-from typing import (
-    List,
-    Any
-)
+from abc import ABC, abstractmethod, abstractproperty
 from dataclasses import dataclass
-from django.http.request import HttpRequest
+from typing import Any, List
+
 from django.conf import settings
 from django.core import signing
+from django.http.request import HttpRequest
 
-from store.models import (
-    Product,
-    ProductAuthor,
-    DeliveryMethod
-)
+from store.models import DeliveryMethod, Product, ProductAuthor
 
 logger = logging.getLogger("cart_logger")
 
 
 class BaseCart(ABC):
-
     def validate_and_get_product(self, item_id):
         return Product.objects.get(id=item_id)
 
     @abstractmethod
     def add_item(self, item_id, quantity):
         ...
-    
+
     @abstractmethod
     def remove_item(self, item_id):
         ...
@@ -39,14 +27,13 @@ class BaseCart(ABC):
     @abstractmethod
     def update_item_quantity(self, item_id, change):
         ...
-    
+
     @abstractproperty
     def display_items(self):
         ...
 
 
 class SessionCart(BaseCart):
-
     def _get_author_total_price(self, author_id: int):
         author_cart = self._cart[str(author_id)]
         author_price = 0
@@ -57,25 +44,23 @@ class SessionCart(BaseCart):
 
         if self._delivery_info:
             author_price += self._delivery_info.price
-        
+
         return author_price
 
-    def _prepare_display_items(self)-> List[dict[str, dict|str]]:
-        items: List[dict[str, dict|str]] = []
+    def _prepare_display_items(self) -> List[dict[str, dict | str]]:
+        items: List[dict[str, dict | str]] = []
         for author_id, cart_items in self._cart.items():
             author = ProductAuthor.objects.get(id=int(author_id))
             products = []
             for item_id, quantity in cart_items.items():
-                product=Product.objects.get(id=int(item_id))
+                product = Product.objects.get(id=int(item_id))
                 products.append({"product": product, "quantity": quantity})
-            items.append({
-                "author": author, 
-                "products": products, 
-                "group_price": self._get_author_total_price(author_id)
-            })
+            items.append(
+                {"author": author, "products": products, "group_price": self._get_author_total_price(author_id)}
+            )
         return items
 
-    def __init__(self, request: HttpRequest, delivery: DeliveryMethod=None) -> None:
+    def __init__(self, request: HttpRequest, delivery: DeliveryMethod = None) -> None:
         super().__init__()
         self.session = request.session
         self._cart = self.session.get(settings.CART_SESSION_ID, None)
@@ -84,7 +69,7 @@ class SessionCart(BaseCart):
             self.session[settings.CART_SESSION_ID] = self._cart
         self._delivery_info = delivery
         self._display_items = self._prepare_display_items()
-    
+
     def save_cart(self):
         self._display_items = self._prepare_display_items()
         self.session[settings.CART_SESSION_ID] = self._cart
@@ -113,7 +98,7 @@ class SessionCart(BaseCart):
             self.save_cart()
         except KeyError:
             logger.exception(f"Item {item_id} not found in cart")
-    
+
     def update_item_quantity(self, item_id: int, new_quantity: int) -> None:
         product = self.validate_and_get_product(item_id)
         author = product.author
@@ -131,9 +116,9 @@ class SessionCart(BaseCart):
         return self._delivery_info
 
     @property
-    def display_items(self) -> List[dict[str, dict|str]]:
+    def display_items(self) -> List[dict[str, dict | str]]:
         return self._display_items
-        
+
     @property
     def total_price(self):
         total = 0
@@ -144,7 +129,7 @@ class SessionCart(BaseCart):
         if self._delivery_info:
             total += self._delivery_info.price * len(self._cart.keys())
         return total
-    
+
     def is_empty(self) -> bool:
         return not bool(self._cart.items())
 
@@ -154,7 +139,6 @@ class SessionCart(BaseCart):
 
 
 class CustomerData:
-    
     def _encrypt_data(self, data: dict[str, Any]) -> str:
         signer = signing.Signer()
         return signer.sign_object(data)
@@ -163,13 +147,13 @@ class CustomerData:
         signer = signing.Signer()
         return signer.unsign_object(data)
 
-    def __init__(self, data: dict[str, Any]=None, encrypted_data: str=None) -> None:
+    def __init__(self, data: dict[str, Any] = None, encrypted_data: str = None) -> None:
         self._data = self._encrypt_data(data) if data else encrypted_data
-    
+
     @property
     def data(self) -> dict[str, Any]:
         return self._data
-    
+
     @property
     def decrypted_data(self) -> dict[str, Any]:
         return self._decrypt_data(self._data)

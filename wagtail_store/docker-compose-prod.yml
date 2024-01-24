@@ -56,7 +56,7 @@ services:
     volumes:
       - ../nginx/conf.d/:/etc/nginx/conf.d/
       - ./static/:/opt/services/comfy/static
-      - ./media/:/opt/services/comfy/media 
+      - ./media/:/opt/services/comfy/media
     ports:
       - "8000:80"
     environment:

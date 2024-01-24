@@ -1,24 +1,20 @@
 from django import forms
+from django.db.models import Model
+from django.utils.translation import gettext_lazy as _
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.phonenumber import PhoneNumber
-from django.db.models import Model
 
 from store.models import (
+    DeliveryMethod,
+    PaymentMethod,
+    Product,
     ProductTemplate,
     ProductTemplateParamValue,
-    Product,
-    PaymentMethod,
-    DeliveryMethod
 )
-
-from django.utils.translation import gettext_lazy as _
 
 
 class CustomerDataForm(forms.Form):
-
-    name = forms.CharField(
-        max_length=255, label=_("Name"), widget=forms.TextInput(attrs={"class": "form-control"})
-    )
+    name = forms.CharField(max_length=255, label=_("Name"), widget=forms.TextInput(attrs={"class": "form-control"}))
 
     surname = forms.CharField(
         max_length=255, label=_("Surname"), widget=forms.TextInput(attrs={"class": "form-control"})
@@ -26,9 +22,7 @@ class CustomerDataForm(forms.Form):
     street = forms.CharField(
         max_length=255, label=_("Address"), widget=forms.TextInput(attrs={"class": "form-control"})
     )
-    city = forms.CharField(
-        max_length=255, label=_("City"), widget=forms.TextInput(attrs={"class": "form-control"})
-    )
+    city = forms.CharField(max_length=255, label=_("City"), widget=forms.TextInput(attrs={"class": "form-control"}))
     zip_code = forms.CharField(
         max_length=255, label=_("Zip-code"), widget=forms.TextInput(attrs={"class": "form-control"})
     )
@@ -39,17 +33,18 @@ class CustomerDataForm(forms.Form):
         region="PL", label=_("Phone number"), widget=forms.TextInput(attrs={"class": "form-control"})
     )
     country = forms.ChoiceField(
-        choices=(("PL", _("Polska")), ), label=_("Country"),
-        widget=forms.Select(attrs={"class": "form-control"})
+        choices=(("PL", _("Polska")),), label=_("Country"), widget=forms.Select(attrs={"class": "form-control"})
     )
     payment_method = forms.ModelChoiceField(
-        queryset=PaymentMethod.objects.filter(active=True), label="Sposób płatności",
-        widget=forms.Select(attrs={"class": "form-control"})
+        queryset=PaymentMethod.objects.filter(active=True),
+        label="Sposób płatności",
+        widget=forms.Select(attrs={"class": "form-control"}),
     )
 
     delivery_method = forms.ModelChoiceField(
-        queryset=DeliveryMethod.objects.filter(active=True), label="Sposób dostawy",
-        widget=forms.Select(attrs={"class": "form-control"})
+        queryset=DeliveryMethod.objects.filter(active=True),
+        label="Sposób dostawy",
+        widget=forms.Select(attrs={"class": "form-control"}),
     )
 
     def serialize(self):
@@ -70,7 +65,6 @@ class ButtonToggleSelect(forms.RadioSelect):
 
 
 class ProductTemplateConfigForm(forms.Form):
-    
     def _create_dynamic_fields(self, template: ProductTemplate):
         template_params = template.template_params.all()
         for param in template_params:
@@ -83,10 +77,8 @@ class ProductTemplateConfigForm(forms.Form):
                 queryset=queryset,
                 widget=widget,
             )
-    
-    def __init__(
-            self, template: ProductTemplate, *args, **kwargs
-        ):
+
+    def __init__(self, template: ProductTemplate, *args, **kwargs):
         self.template = template
         super().__init__(*args, **kwargs)
         self._create_dynamic_fields(template)

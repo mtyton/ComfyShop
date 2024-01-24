@@ -1,9 +1,8 @@
 from django.forms import fields
-
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
-    modeladmin_register
+    modeladmin_register,
 )
 
 from mailings import models
@@ -12,19 +11,13 @@ from mailings import models
 class MailTemplateAdmin(ModelAdmin):
     model = models.MailTemplate
     menu_label = "Mail templates"
-    menu_icon = 'mail'
+    menu_icon = "mail"
     menu_order = 100
     add_to_settings_menu = False
     exclude_from_explorer = False
-    list_display = (
-        "template_name",
-    )
-    search_fields = (
-        "template_name",
-    )
-    list_filter = (
-        "template_name",
-    )
+    list_display = ("template_name",)
+    search_fields = ("template_name",)
+    list_filter = ("template_name",)
     form_fields = (
         "template_name",
         "template",
@@ -34,7 +27,7 @@ class MailTemplateAdmin(ModelAdmin):
 class OutgoingMailAdmin(ModelAdmin):
     model = models.OutgoingEmail
     menu_label = "Outgoing mails"
-    menu_icon = 'mail'
+    menu_icon = "mail"
     menu_order = 100
     add_to_settings_menu = False
     exclude_from_explorer = False
@@ -42,9 +35,7 @@ class OutgoingMailAdmin(ModelAdmin):
         "subject",
         "sent",
     )
-    search_fields = (
-        "subject",
-    )
+    search_fields = ("subject",)
     list_filter = (
         "subject",
         "sender",
@@ -52,22 +43,14 @@ class OutgoingMailAdmin(ModelAdmin):
         "template__template_name",
         "sent",
     )
-    readonly_fields = (
-        "subject",
-        "sender",
-        "recipient",
-        "sent"
-    )
+    readonly_fields = ("subject", "sender", "recipient", "sent")
 
 
 class MailingGroup(ModelAdminGroup):
     menu_label = "Mailings"
-    menu_icon = 'mail'
+    menu_icon = "mail"
     menu_order = 200
-    items = (
-        MailTemplateAdmin,
-        OutgoingMailAdmin
-    )
+    items = (MailTemplateAdmin, OutgoingMailAdmin)
 
 
 modeladmin_register(MailingGroup)

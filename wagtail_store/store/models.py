@@ -1,50 +1,33 @@
-import pdfkit
-import datetime
 import builtins
-import uuid
+import datetime
 import logging
-
+import uuid
 from decimal import Decimal
-from typing import (
-    Any,
-    Iterator
-)
-from django.db import models
-from django.core.paginator import (
-    Paginator,
-    EmptyPage
-)
-from django.conf import settings
-from django.core.validators import MinValueValidator
-from django.template import (
-    Template,
-    Context
-)
-from django.core.exceptions import ValidationError
-from django.db.models.signals import m2m_changed
-from django.forms import CheckboxSelectMultiple
-from django.dispatch import receiver
+from typing import Any, Iterator
 
-from modelcluster.models import ClusterableModel
-from modelcluster.fields import ParentalKey
-from wagtail.admin.panels import (
-    FieldPanel,
-    InlinePanel
-)
-from wagtail.models import Page
-from wagtail import fields as wagtail_fields
-from taggit.managers import TaggableManager
-from phonenumber_field.modelfields import PhoneNumberField
-from num2words import num2words
+import pdfkit
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.paginator import EmptyPage, Paginator
+from django.core.validators import MinValueValidator
+from django.db import models
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
+from django.forms import CheckboxSelectMultiple
+from django.template import Context, Template
 from easy_thumbnails.fields import ThumbnailerImageField
 from easy_thumbnails.signals import saved_file
+from modelcluster.fields import ParentalKey
+from modelcluster.models import ClusterableModel
+from num2words import num2words
+from phonenumber_field.modelfields import PhoneNumberField
+from taggit.managers import TaggableManager
+from wagtail import fields as wagtail_fields
+from wagtail.admin.panels import FieldPanel, InlinePanel
+from wagtail.models import Page
 
-from mailings.models import (
-    OutgoingEmail,
-    Attachment
-)
+from mailings.models import Attachment, OutgoingEmail
 from wagtail_store.tasks import generate_thumbnails
-
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +41,6 @@ class BaseImageModel(models.Model):
 
 
 class PersonalData(models.Model):
-
     class Meta:
         abstract = True
 
@@ -74,7 +56,7 @@ class PersonalData(models.Model):
     @property
     def full_name(self):
         return f"{self.name} {self.surname}"
-    
+
     @property
     def full_address(self):
         return f"{self.street}, {self.zip_code} {self.city}, {self.country}"
@@ -93,9 +75,7 @@ class ProductCategory(ClusterableModel):
     def __str__(self):
         return self.name
 
-    panels = [
-        FieldPanel("name")
-    ]
+    panels = [FieldPanel("name")]
 
 
 class ProductTemplate(ClusterableModel):
@@ -106,7 +86,7 @@ class ProductTemplate(ClusterableModel):
     description = models.TextField(blank=True)
 
     tags = TaggableManager()
-    
+
     def __str__(self):
         return self.title
 
@@ -120,19 +100,17 @@ class ProductTemplate(ClusterableModel):
     panels = [
         FieldPanel("category"),
         FieldPanel("author"),
-        FieldPanel('title'),
-        FieldPanel('code'),
-        FieldPanel('description'),
+        FieldPanel("title"),
+        FieldPanel("code"),
+        FieldPanel("description"),
         InlinePanel("template_images", label="Template Images"),
         FieldPanel("tags"),
-        InlinePanel("template_params")
+        InlinePanel("template_params"),
     ]
 
 
 class ProductTemplateImage(BaseImageModel):
-    template = ParentalKey(
-        ProductTemplate, on_delete=models.CASCADE, related_name="template_images"
-    )
+    template = ParentalKey(ProductTemplate, on_delete=models.CASCADE, related_name="template_images")
     image = ThumbnailerImageField()
     is_main = models.BooleanField(default=False)
 
@@ -150,13 +128,8 @@ class ProductTemplateParam(ClusterableModel):
 
     def __str__(self):
         return self.key
-    
-    panels = [
-        FieldPanel("template"),
-        FieldPanel("key"),
-        FieldPanel("param_type"),
-        InlinePanel("param_values")
-    ]
+
+    panels = [FieldPanel("template"), FieldPanel("key"), FieldPanel("param_type"), InlinePanel("param_values")]
 
     def get_available_values(self) -> Iterator[any]:
         for elem in self.param_values.all():
@@ -166,7 +139,7 @@ class ProductTemplateParam(ClusterableModel):
 class ProductTemplateParamValue(ClusterableModel):
     param = ParentalKey(ProductTemplateParam, on_delete=models.CASCADE, related_name="param_values")
     value = models.CharField(max_length=255)
-    
+
     def get_value(self):
         try:
             func = getattr(builtins, self.param.param_type)
@@ -179,31 +152,25 @@ class ProductTemplateParamValue(ClusterableModel):
 
 
 class ProductManager(models.Manager):
-    
     def get_or_create_by_params(self, params: list[ProductTemplateParam], template: ProductTemplate):
         products = self.filter(template=template)
 
         for param in params:
             products = products.filter(params__pk=param.pk)
-            
+
         # There should be only one
         if not products.count() <= 1:
             logger.exception(
-                f"There should be only one product with given set of params, detected: " +
-                f"{products.count()}, params: {params}, template: {template}"
+                f"There should be only one product with given set of params, detected: "
+                + f"{products.count()}, params: {params}, template: {template}"
             )
-        
+
         product = products.first()
         if not product:
-            product = self.create(
-                name=f"{template.title} - AUTOGENERATED",
-                template=template,
-                price=0,
-                available=False
-            )
+            product = self.create(name=f"{template.title} - AUTOGENERATED", template=template, price=0, available=False)
             for param in params:
                 product.params.add(param)
-                
+
         return product
 
 
@@ -211,13 +178,15 @@ class Product(ClusterableModel):
     name = models.CharField(max_length=255, blank=True)
     template = models.ForeignKey(ProductTemplate, on_delete=models.CASCADE, related_name="products")
     params = models.ManyToManyField(
-        ProductTemplateParamValue, blank=True, through="ProductParam",
-        limit_choices_to=models.Q(param__template=models.F("product__template"))
+        ProductTemplateParamValue,
+        blank=True,
+        through="ProductParam",
+        limit_choices_to=models.Q(param__template=models.F("product__template")),
     )
     price = models.FloatField()
     available = models.BooleanField(default=True)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
-    
+
     objects = ProductManager()
 
     panels = [
@@ -256,9 +225,7 @@ class Product(ClusterableModel):
 
 
 class ProductImage(BaseImageModel):
-    product = ParentalKey(
-        "Product", on_delete=models.CASCADE, related_name="product_images"
-    )
+    product = ParentalKey("Product", on_delete=models.CASCADE, related_name="product_images")
 
 
 class ProductParam(models.Model):
@@ -286,10 +253,10 @@ def validate_param(sender, **kwargs):
         count = product_instance.params.filter(productparam__param_value__param=param).count()
         if count >= 1:
             errors.append(ValueError("Product param with this key already exists."))
-    
+
     if errors:
         raise ValidationError(errors)
-    
+
 
 m2m_changed.connect(validate_param, Product.params.through)
 
@@ -306,13 +273,13 @@ class ProductListPage(Page):
         if self.tags.all():
             return ProductTemplate.objects.filter(tags__in=self.tags.all())
         return ProductTemplate.objects.all()
-    
+
     def get_context(self, request):
         context = super().get_context(request)
         items = self._get_items()
         if not items:
             return context
-        
+
         paginator = Paginator(items, settings.PRODUCTS_PER_PAGE)
         page_number = request.GET.get("page", 1)
         try:
@@ -323,33 +290,25 @@ class ProductListPage(Page):
         context["page"] = page
         return context
 
-    content_panels = Page.content_panels + [
-        FieldPanel("description"),
-        FieldPanel("tags")
-    ]
+    content_panels = Page.content_panels + [FieldPanel("description"), FieldPanel("tags")]
 
 
 class OrderProductManager(models.Manager):
-    def create_from_cart(self, items: dict[str, Product|int], order: models.Model):
+    def create_from_cart(self, items: dict[str, Product | int], order: models.Model):
         pks = []
         for item in items:
             if item["quantity"] < 1:
                 logger.exception(
-                    f"This is not possible to add less than one item to Order, omitting item: "+
-                    f"{item['product']}"
+                    f"This is not possible to add less than one item to Order, omitting item: " + f"{item['product']}"
                 )
                 continue
-            
-            pk = self.create(
-                product=item["product"],
-                order=order,
-                quantity=item["quantity"]
-            ).pk
+
+            pk = self.create(product=item["product"], order=order, quantity=item["quantity"]).pk
             pks.append(pk)
         return self.filter(pk__in=pks)
 
 
-class OrderProduct(models.Model):   
+class OrderProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="products")
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
@@ -358,58 +317,60 @@ class OrderProduct(models.Model):
 
 
 class OrderManager(models.Manager):
-
     def _get_order_number(self, author: ProductAuthor):
-        number_of_prev_orders = OrderProduct.objects.filter(
-            product__template__author=author
-        ).values("order").distinct().count()
+        number_of_prev_orders = (
+            OrderProduct.objects.filter(product__template__author=author).values("order").distinct().count()
+        )
         number_of_prev_orders += 1
         year = datetime.datetime.now().year
         return f"{author.id}/{number_of_prev_orders:06}/{year}"
 
     def _send_notifications(
-            self, order: models.Model, author: ProductAuthor, 
-            customer_data: dict[str, Any], docs: list[models.Model]
-        ):
+        self, order: models.Model, author: ProductAuthor, customer_data: dict[str, Any], docs: list[models.Model]
+    ):
         # for user
         attachments = [
             Attachment(
-                content=doc.generate_document({"customer_data": customer_data}), 
-                contenttype="application/pdf", 
-                name=f"{doc.template.doc_type}_{order.order_number}.pdf"
-            ) for doc in docs
+                content=doc.generate_document({"customer_data": customer_data}),
+                contenttype="application/pdf",
+                name=f"{doc.template.doc_type}_{order.order_number}.pdf",
+            )
+            for doc in docs
         ]
         mail_subject = f"Wygenerowano umowę numer {order.order_number} z dnia {order.created_at.strftime('%d.%m.%Y')}"
         user_mail = OutgoingEmail.objects.send(
             recipient=customer_data["email"],
             subject=mail_subject,
-            context = {
+            context={
                 "docs": docs,
                 "order_number": order.order_number,
                 "customer_email": customer_data["email"],
-            }, sender=settings.DEFAULT_FROM_EMAIL,
+            },
+            sender=settings.DEFAULT_FROM_EMAIL,
             template_name="order_created_user",
-            attachments=attachments
+            attachments=attachments,
         )
         # for author
         author_mail = OutgoingEmail.objects.send(
             recipient=author.email,
             subject=mail_subject,
-            context = {
+            context={
                 "docs": docs,
                 "order_number": order.order_number,
                 "manufacturer_email": author.email,
-            }, sender=settings.DEFAULT_FROM_EMAIL,
+            },
+            sender=settings.DEFAULT_FROM_EMAIL,
             template_name="order_created_author",
-            attachments=attachments
+            attachments=attachments,
         )
         return user_mail is not None and author_mail is not None
 
     def create_from_cart(
-            self, cart_items: list[dict[str, str|dict]], 
-            payment_method: models.Model| None, 
-            customer_data: dict[str, Any]
-        ) -> models.QuerySet:
+        self,
+        cart_items: list[dict[str, str | dict]],
+        payment_method: models.Model | None,
+        customer_data: dict[str, Any],
+    ) -> models.QuerySet:
         # split cart
         orders_pks = []
 
@@ -422,25 +383,18 @@ class OrderManager(models.Manager):
         for item in cart_items:
             author = item["author"]
             author_products = item["products"]
-            
-            order = self.create(
-                payment_method=payment_method, 
-                order_number=self._get_order_number(author)
-            )
+
+            order = self.create(payment_method=payment_method, order_number=self._get_order_number(author))
             OrderProduct.objects.create_from_cart(author_products, order)
             orders_pks.append(order.pk)
             docs = []
             for template in doc_templates:
-                doc = OrderDocument.objects.create(
-                    order=order, template=template
-                )
+                doc = OrderDocument.objects.create(order=order, template=template)
                 docs.append(doc)
             sent = self._send_notifications(order, author, customer_data, docs)
-            
+
             if not sent:
-                logger.exception(
-                    f"Error while sending emails, for order: {order.order_number}"
-                )
+                logger.exception(f"Error while sending emails, for order: {order.order_number}")
 
         return Order.objects.filter(pk__in=orders_pks)
 
@@ -472,7 +426,7 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     sent = models.BooleanField(default=False)
     order_number = models.CharField(max_length=255, null=True)
-    
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     objects = OrderManager()
 
@@ -482,10 +436,7 @@ class Order(models.Model):
 
     @property
     def total_price(self) -> Decimal:
-        price = sum(
-            [order_product.product.price * order_product.quantity 
-             for order_product in self.products.all()]
-        )
+        price = sum([order_product.product.price * order_product.quantity for order_product in self.products.all()])
         delivery_price = self.delivery_method.price if self.delivery_method else 5.0
         return price + delivery_price
 
@@ -548,7 +499,7 @@ class StorePage(Page):
 
 class AllProductsListPage(Page):
     store = models.OneToOneField("store_api.Store", on_delete=models.CASCADE, related_name="all_products_list")
-    
+
 
 class GroupListPage(Page):
     store = models.ForeignKey("store_api.Store", on_delete=models.CASCADE, related_name="product_lists")

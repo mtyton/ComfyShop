@@ -1,9 +1,6 @@
 from django import forms
-from dynamic_forms.widgets import (
-    CheckboxSelectMultiple,
-    CheckboxInput,
-    RadioSelect
-)
+
+from dynamic_forms.widgets import CheckboxInput, CheckboxSelectMultiple, RadioSelect
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -25,24 +22,21 @@ class MultipleFileField(forms.FileField):
 
 
 class HoneypotField(forms.BooleanField):
-    default_widget = forms.HiddenInput(
-        {'style': 'display:none !important;', 'tabindex': '-1', 'autocomplete': 'off'}
-    )
+    default_widget = forms.HiddenInput({"style": "display:none !important;", "tabindex": "-1", "autocomplete": "off"})
 
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('widget', HoneypotField.default_widget)
-        kwargs['required'] = False
+        kwargs.setdefault("widget", HoneypotField.default_widget)
+        kwargs["required"] = False
         super().__init__(*args, **kwargs)
-    
+
     def clean(self, value):
         if cleaned_value := super().clean(value):
-            raise forms.ValidationError('')
+            raise forms.ValidationError("")
         else:
             return cleaned_value
 
 
 class DynamicForm(forms.Form):
-
     FIELD_TYPE_MAPPING = {
         "singleline": forms.CharField(max_length=50, widget=forms.TextInput(attrs={"class": "form-control"})),
         "multiline": forms.CharField(max_length=255, widget=forms.Textarea(attrs={"class": "form-control"})),
@@ -50,7 +44,9 @@ class DynamicForm(forms.Form):
         "number": forms.IntegerField(widget=forms.NumberInput(attrs={"class": "form-control"})),
         "url": forms.URLField(max_length=255, widget=forms.URLInput(attrs={"class": "form-control"})),
         "checkbox": forms.BooleanField(required=False, widget=CheckboxInput(attrs={"class": "form-check"})),
-        "checkboxes": forms.MultipleChoiceField(required=False, widget=CheckboxSelectMultiple(attrs={"class": "form-check"})),
+        "checkboxes": forms.MultipleChoiceField(
+            required=False, widget=CheckboxSelectMultiple(attrs={"class": "form-check"})
+        ),
         "dropdown": forms.ChoiceField(widget=forms.Select(attrs={"class": "form-control"})),
         "multiselect": forms.MultipleChoiceField(widget=forms.SelectMultiple(attrs={"class": "form-control"})),
         "radio": forms.ChoiceField(widget=RadioSelect(attrs={"class": "form-control"})),
@@ -75,9 +71,7 @@ class DynamicForm(forms.Form):
             self.fields[field.clean_name] = f
         if file_uploads:
             self.fields["attachments"] = MultipleFileField(
-                required=True, widget=MultipleFileInput(
-                    attrs={"class": "form-control"}
-                )
+                required=True, widget=MultipleFileInput(attrs={"class": "form-control"})
             )
         # add honeypot field
         self.fields["secret_honey"] = HoneypotField()
@@ -91,9 +85,9 @@ class DynamicForm(forms.Form):
                     continue
 
                 cleaned_data[key] = ",".join(value)
-            if key=="secret_honey":
+            if key == "secret_honey":
                 continue
-            
+
             new_cleaned_data[key] = value
 
         return new_cleaned_data

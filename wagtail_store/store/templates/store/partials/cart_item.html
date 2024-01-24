@@ -1,4 +1,4 @@
-{% load static %} 
+{% load static %}
 
 <div class="card rounded-3 mb-4">
     <div class="card-body p-4">
@@ -18,8 +18,8 @@
           </button>
 
           <input id="form1" min="0" name="quantity" value="{{item.quantity}}" type="number"
-            class="form-control form-control-sm quantity-input" 
-            data-product-id="{{item.product.id}}"  
+            class="form-control form-control-sm quantity-input"
+            data-product-id="{{item.product.id}}"
             data-csrf-token="{{csrf_token}}"
             data-update-cart-url="{% url 'cart-action-update-product' item.product.id %}"/>
 
@@ -33,7 +33,7 @@
         </div>
         <div class="col-md-1 col-lg-1 col-xl-1 text-end">
           <a href="#!" class="text-danger remove-from-cart-button"
-          data-product-id="{{item.product.id}}"  
+          data-product-id="{{item.product.id}}"
           data-csrf-token="{{csrf_token}}"
           data-remove-from-cart-url={% url "cart-action-remove-product" %}>
             <img src="{% static 'images/icons/trash.svg'%}" />

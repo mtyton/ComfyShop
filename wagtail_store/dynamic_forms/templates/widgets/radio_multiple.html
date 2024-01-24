@@ -4,8 +4,8 @@
     {% endif %}
     {% for option in options %}
         <div class="form-check">
-            <input class="form-check-input" type="radio" 
-            value="{{ option.value }}" id="{{ option.attrs.id }}" 
+            <input class="form-check-input" type="radio"
+            value="{{ option.value }}" id="{{ option.attrs.id }}"
             name="{{ option.name }}">
             <label class="form-check-label" for="{{ option.attrs.id }}">
                 {{ option.value }}

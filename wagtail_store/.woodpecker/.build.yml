@@ -5,7 +5,7 @@ steps:
     commands:
       - docker compose -f wagtail_store/docker-compose-test.yml build --no-cache
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock 
+      - /var/run/docker.sock:/var/run/docker.sock
     when:
       event: pull_request
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -14,9 +14,9 @@ steps:
     secrets: []
     commands:
       - docker compose -f wagtail_store/docker-compose-test.yml run test_comfy
-      - docker compose -f ./wagtail_store/docker-compose-test.yml  down     
+      - docker compose -f ./wagtail_store/docker-compose-test.yml  down
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock 
+      - /var/run/docker.sock:/var/run/docker.sock
     when:
       event: pull_request
       branch: ${CI_REPO_DEFAULT_BRANCH}

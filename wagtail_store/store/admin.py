@@ -1,23 +1,22 @@
 from django.forms import fields
-
+from wagtail.admin.forms.models import WagtailAdminModelForm
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
-    modeladmin_register
+    modeladmin_register,
 )
-from wagtail.admin.forms.models import WagtailAdminModelForm
 
 from store import models
 
 
 class ProductAuthorAdmin(ModelAdmin):
     model = models.ProductAuthor
-    list_display = ("name", )
+    list_display = ("name",)
 
 
 class ProductCategoryAdmin(ModelAdmin):
     model = models.ProductCategory
-    list_display = ("name", )
+    list_display = ("name",)
 
 
 class ProductTemplateParamAdmin(ModelAdmin):
@@ -49,22 +48,22 @@ class DeliveryMethodAdmin(ModelAdmin):
 
 class DocumentTemplateAdmin(ModelAdmin):
     model = models.DocumentTemplate
-    list_display = ("name", )
+    list_display = ("name",)
 
 
 class StoreAdminGroup(ModelAdminGroup):
     menu_label = "Store"
-    menu_icon = 'folder-open-inverse'
+    menu_icon = "folder-open-inverse"
     menu_order = 200
     items = (
-        ProductAuthorAdmin, 
-        ProductCategoryAdmin, 
+        ProductAuthorAdmin,
+        ProductCategoryAdmin,
         ProductTemplateParamAdmin,
         ProductTemplateAdmin,
         ProductAdmin,
         DocumentTemplateAdmin,
         PaymentMethodAdmin,
-        DeliveryMethodAdmin
+        DeliveryMethodAdmin,
     )
 
 

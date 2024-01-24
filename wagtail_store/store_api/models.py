@@ -1,14 +1,14 @@
-from django.db import models
 from django.contrib.auth.models import User
-from phonenumber_field.modelfields import PhoneNumberField
-from wagtail.models import Page
+from django.db import models
 from django.dispatch import receiver
 from easy_thumbnails.signals import saved_file
+from phonenumber_field.modelfields import PhoneNumberField
+from wagtail.models import Page
+
 from wagtail_store.tasks import generate_thumbnails
 
 
 class PersonalData(models.Model):
-
     class Meta:
         abstract = True
 
@@ -24,7 +24,7 @@ class PersonalData(models.Model):
     @property
     def full_name(self):
         return f"{self.name} {self.surname}"
-    
+
     @property
     def full_address(self):
         return f"{self.street}, {self.zip_code} {self.city}, {self.country}"
@@ -35,23 +35,20 @@ class StoreUser(PersonalData, models.Model):
 
 
 class StoreMembership(models.Model):
-    store = models.ForeignKey('Store', on_delete=models.CASCADE)
-    user = models.ForeignKey('StoreUser', on_delete=models.CASCADE)
+    store = models.ForeignKey("Store", on_delete=models.CASCADE)
+    user = models.ForeignKey("StoreUser", on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
 
 
 class Store(models.Model):
     owner = models.ForeignKey(StoreUser, on_delete=models.CASCADE)
-    members = models.ManyToManyField(
-        StoreUser, related_name='stores', blank=True, through=StoreMembership
-    )
+    members = models.ManyToManyField(StoreUser, related_name="stores", blank=True, through=StoreMembership)
 
 
 class ProductGroup(models.Model):
-    
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    
+
 
 # Products
 class Product(models.Model):
@@ -65,12 +62,12 @@ class Product(models.Model):
 
 
 class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='products', blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to="products", blank=True)
 
 
 class ProductVariant(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variants")
 
     name = models.CharField(max_length=255, blank=True)
     sku = models.CharField(max_length=255, blank=True)
@@ -85,7 +82,4 @@ class ProductVariant(models.Model):
 
 @receiver(saved_file)
 def generate_thumbnails_async(sender, fieldfile, **kwargs):
-    generate_thumbnails.delay(
-        model=sender, pk=fieldfile.instance.pk,
-        field=fieldfile.field.name
-    )
+    generate_thumbnails.delay(model=sender, pk=fieldfile.instance.pk, field=fieldfile.field.name)

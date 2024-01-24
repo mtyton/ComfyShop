@@ -1,22 +1,16 @@
-from django.test import TestCase
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 
-from mailings.models import (
-    MailTemplate,
-    OutgoingEmail,
-)
+from mailings.models import MailTemplate, OutgoingEmail
 
 
 class TestMailTemplate(TestCase):
-
     def setUp(self) -> None:
         super().setUp()
         self.mail_template = MailTemplate.objects.create(
             template_name="test_template",
-            template=SimpleUploadedFile(
-                "test_template.html", b"<html>{{test_var}}</html>"
-            )
+            template=SimpleUploadedFile("test_template.html", b"<html>{{test_var}}</html>"),
         )
 
     def test_load_and_process_template_success(self):
@@ -36,22 +30,20 @@ class TestMailTemplate(TestCase):
 
 
 class TestOutgoingEmail(TestCase):
-    
     def setUp(self) -> None:
         super().setUp()
         self.mail_template = MailTemplate.objects.create(
             template_name="test_template",
-            template=SimpleUploadedFile(
-                "test_template.html", b"<html>{{test_var}}</html>"
-            )
+            template=SimpleUploadedFile("test_template.html", b"<html>{{test_var}}</html>"),
         )
 
     def test_send_success(self):
         email = OutgoingEmail.objects.send(
             template_name="test_template",
-            recipient="test@stardust.io", context={},
+            recipient="test@stardust.io",
+            context={},
             sender="sklep-test@stardust.io",
-            subject="Test subject"
+            subject="Test subject",
         )
         self.assertEqual(email.sent, True)
         self.assertEqual(mail.outbox[0].subject, "Test subject")
@@ -59,8 +51,6 @@ class TestOutgoingEmail(TestCase):
     def test_send_missing_template_failure(self):
         with self.assertRaises(MailTemplate.DoesNotExist):
             OutgoingEmail.objects.send(
-                template_name="missing_template",
-                recipient="", sender="", context={},
-                subject="Test subject"
+                template_name="missing_template", recipient="", sender="", context={}, subject="Test subject"
             )
         self.assertEqual(len(mail.outbox), 0)
