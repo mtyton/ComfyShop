@@ -2,11 +2,11 @@
 
 ComfyShop is an open source project that combines a blog and shop using Django and Wagtail. It provides an easy-to-use interface for managing blog posts and products.
 
-  
-[![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)](https://www.python.org)
-[![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green)](https://www.djangoproject.com/)  
 
-[![Woodpecker CI](https://ci.citizen4.eu/api/badges/21/status.svg)](https://ci.citizen4.eu/repos/21)  
+[![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)](https://www.python.org)
+[![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green)](https://www.djangoproject.com/)
+
+[![Woodpecker CI](https://ci.citizen4.eu/api/badges/21/status.svg)](https://ci.citizen4.eu/repos/21)
 [![Release Version](https://img.shields.io/badge/Release%20Version-v0.2-blue)](https://forge.citizen4.eu/mtyton/comfy/releases/tag/0.2.0)
 ## Requirements
 
@@ -15,15 +15,15 @@ ComfyShop is an open source project that combines a blog and shop using Django a
 
 ## Installation
 
-1. Clone the repository using the following command:  
+1. Clone the repository using the following command:
 ```git clone https://forge.citizen4.eu/mtyton/comfy.git```
-3. Build the Docker image:  
+3. Build the Docker image:
 ```docker-compose build```
-4. Run the Docker container for development:  
+4. Run the Docker container for development:
 ```docker-compose up```
 
 
-For production, use the following command to run the Docker container:  
+For production, use the following command to run the Docker container:
 ```docker-compose -f docker-compose-prod.yml up -d```
 
 

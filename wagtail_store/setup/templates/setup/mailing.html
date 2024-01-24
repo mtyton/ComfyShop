@@ -9,13 +9,13 @@
         {% for field in form %}
             <div class="row mb-3 mt-5">
                 <div class="col-1">
-                    
+
                 </div>
                 <div class="col-6">
                     <h3>
                         <label for="id_logo" class="form-label">{{field.label}}</label>
-                        <img src = "{% static 'images/icons/question-circle.svg' %}" alt="?" 
-                        data-bs-toggle="tooltip" data-bs-placement="top" title="{{field.help_text}}"/>  
+                        <img src = "{% static 'images/icons/question-circle.svg' %}" alt="?"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="{{field.help_text}}"/>
                     </h3>
                 </div>
                 <div class="col-4">

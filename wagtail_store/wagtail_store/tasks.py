@@ -1,8 +1,7 @@
-import celery
 import logging
 
+import celery
 from easy_thumbnails.files import generate_all_aliases
-
 
 logger = logging.getLogger(__name__)
 

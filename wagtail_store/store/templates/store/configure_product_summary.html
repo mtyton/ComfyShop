@@ -22,7 +22,7 @@
     <div class="container">
         <div class="row">
             <div class="col-6">
-                <img src="{{variant.main_image.image.url}}" 
+                <img src="{{variant.main_image.image.url}}"
                     class="img-fluid img-thumbnail h-80" alt="Responsive image">
             </div>
             <div class="col-6">
@@ -59,10 +59,10 @@
                 <a class="btn btn-outline-primary btn-lg" href="{% url 'product-configure' variant.template.pk %}">Wróć do konfiguratora</a>
             </div>
             <div class="col-6 text-end">
-                
+
                 {% if variant.available %}
-                    <button class="btn btn-outline-success btn-lg add-to-cart-button" data-product-id="{{variant.id}}" 
-                    data-add-to-cart-url="{% url 'cart-action-add-product' %}" data-csrf-token='{{ csrf_token }}' 
+                    <button class="btn btn-outline-success btn-lg add-to-cart-button" data-product-id="{{variant.id}}"
+                    data-add-to-cart-url="{% url 'cart-action-add-product' %}" data-csrf-token='{{ csrf_token }}'
                     data-bs-toggle="modal" data-bs-target="#addToCartModal">
                         Zamów produkt
                     </button>

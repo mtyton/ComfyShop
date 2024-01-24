@@ -1,17 +1,17 @@
 
 $(document).on('click', '.add-to-cart-button', function(event) {
-    
+
     event.preventDefault();
     const button = $(this);
     const formData = new FormData();
     const productID = parseInt($(this).data('product-id'));
-    const quantity = parseInt($('#quantity'+productID).val()); 
+    const quantity = parseInt($('#quantity'+productID).val());
     const addToCartURL = $(this).data('add-to-cart-url');
     const csrfToken = $(this).data('csrf-token');
     console.log(productID);
     formData.append('product_id', productID);
     formData.append('quantity', 1); // Serialize the form data correctly
-    button.prop('disabled', true); 
+    button.prop('disabled', true);
     $.ajax({
         type: 'POST',
         url: addToCartURL,
@@ -22,7 +22,7 @@ $(document).on('click', '.add-to-cart-button', function(event) {
         contentType: false, // Let the browser set the content type
         success: function(data) {
           // Show the options block
-          
+
           //$('#addToCartModal').show();
           //createShadedOverlay()
           button.prop('disabled', false);
@@ -42,14 +42,14 @@ $(document).on('click', '.add-to-cart-button', function(event) {
       optionsdiv.classList.add('unshaded-overlay');
       body.appendChild(optionsdiv);
     }
-    
+
     function removeShadedOverlay() {
       const overlay = document.querySelector('.shaded-overlay');
       if (overlay) {
         overlay.remove();
       }
     }
-    
+
     const cartButton = document.getElementById('cart-button');
     const cartDropdown = document.getElementById('cart-dropdown');
 
@@ -62,11 +62,11 @@ $(document).on('click', '.add-to-cart-button', function(event) {
           const cartItemsList = document.getElementById('cart-items');
           const csrf_token = xcsrf_token
           cartItemsList.innerHTML = ''; // Clear existing cart items
-    
+
           cartItems.forEach(item => {
             const li = document.createElement('li');
             li.textContent = `Product ID: ${item.product_id}, Quantity: `;
-            
+
             const quantityInput = document.createElement('input');
             quantityInput.type = 'number';
             quantityInput.classList.add('quantity-input');
@@ -76,7 +76,7 @@ $(document).on('click', '.add-to-cart-button', function(event) {
             quantityInput.dataset.productId = item.product_id;
             quantityInput.dataset.csrfToken = csrf_token;
             li.appendChild(quantityInput);
-            
+
             li.appendChild(document.createTextNode(' '));
 
             const removeButton = document.createElement('a');
@@ -102,7 +102,7 @@ $(document).on('click', '.add-to-cart-button', function(event) {
           type: 'POST',
           url: url,
           data: {"product_id": productId},
-          headers: { 'X-CSRFToken': csrfToken },          
+          headers: { 'X-CSRFToken': csrfToken },
             dataType: 'json',
             success: function(data) {
                 alert("Item has been removed");
@@ -126,7 +126,7 @@ $(document).on('click', '.add-to-cart-button', function(event) {
       formData.append('product_id', productID);
       formData.append('quantity', newQuantity);
       console.log(input.val())
-    
+
       $.ajax({
         type: 'PUT',
         url: url,
@@ -137,6 +137,6 @@ $(document).on('click', '.add-to-cart-button', function(event) {
           setTimeout(location.reload(), 500)
         },
         processData: false, // Prevent jQuery from processing the data
-        contentType: false, // Let the browser set the content type        
+        contentType: false, // Let the browser set the content type
       });
     });

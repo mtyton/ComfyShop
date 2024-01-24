@@ -1,12 +1,12 @@
 import logging
+
 import celery
 from django.conf import settings
 from easy_thumbnails.files import generate_all_aliases
 
 from mailings.models import OutgoingEmail
-from store.models import Product
 from store.admin import ProductAdmin
-
+from store.models import Product
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +25,10 @@ def send_produt_request_email(variant_pk: int):
             subject="Złożono zapytanie ofertowe",
             recipient=variant.template.author.email,
             context={"product": variant, "admin_url": admin_url},
-            sender=settings.DEFAULT_FROM_EMAIL
+            sender=settings.DEFAULT_FROM_EMAIL,
         )
     except Exception as e:
         logger.exception(f"Could not send email for variant pk={variant_pk}, exception: {e} has occured")
-    else:    
+    else:
         if not send:
             logger.exception(f"Could not send email for variant pk={variant_pk}")

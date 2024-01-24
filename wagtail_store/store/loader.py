@@ -1,18 +1,18 @@
 import logging
 import time
-import requests
-import pandas as pd
 
-from django.core.files.base import ContentFile
+import pandas as pd
+import requests
 from django.conf import settings
+from django.core.files.base import ContentFile
+
 from store.models import (
+    Product,
+    ProductImage,
     ProductTemplate,
     ProductTemplateParam,
     ProductTemplateParamValue,
-    Product, 
-    ProductImage
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,6 @@ class TemplateLoader(BaseLoader):
 
 
 class ProductLoader(BaseLoader):
-    
     def _clear(self):
         Product.objects.all().delete()
 
@@ -43,9 +42,7 @@ class ProductLoader(BaseLoader):
     def _get_images(self, row) -> list[ContentFile]:
         url = row["images"]
         images = []
-        response = requests.get(
-            url+"/preview", stream=True
-        )
+        response = requests.get(url + "/preview", stream=True)
         if response.status_code == 200:
             data = response.content
             image = ContentFile(data, name=row["template"])

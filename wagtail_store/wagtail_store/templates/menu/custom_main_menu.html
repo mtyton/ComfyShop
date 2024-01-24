@@ -10,7 +10,7 @@
     <ul class="nav navbar-nav">
 
     {% for item in menu_items %}
-        
+
         {% if item.link_page %}
             <li class="{{ item.active_class }}">
                 <a href="{% pageurl item.link_page.localized %}">{{ item.link_page.localized }}</a>

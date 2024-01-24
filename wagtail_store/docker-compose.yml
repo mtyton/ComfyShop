@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  
+
   db:
     image: postgres
     restart: always
@@ -29,7 +29,7 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
-      
+
   comfy:
     restart: always
     depends_on:

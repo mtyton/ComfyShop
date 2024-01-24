@@ -1,10 +1,11 @@
 import logging
-from django.shortcuts import redirect
+
 from django.conf import settings
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
-from store.models import ProductListPage
 from setup.models import ComfyConfig
+from store.models import ProductListPage
 
 logger = logging.getLogger(__name__)
 
@@ -18,16 +19,20 @@ class CheckSetupMiddleware(object):
         try:
             config = ComfyConfig.objects.get(active=True)
         except ComfyConfig.DoesNotExist:
-            if (not request.path_info.startswith('/setup') and not request.path_info.startswith('/admin')
-                and not request.path_info.startswith('/media') and not request.path_info.startswith('/static')):
-                return redirect('/setup/')
+            if (
+                not request.path_info.startswith("/setup")
+                and not request.path_info.startswith("/admin")
+                and not request.path_info.startswith("/media")
+                and not request.path_info.startswith("/static")
+            ):
+                return redirect("/setup/")
         except ComfyConfig.MultipleObjectsReturned:
             config = ComfyConfig.objects.first()
             logger.exception("Multiple ComfyConfig objects found. Using first one.")
-        
-        if config and request.path_info.startswith('/setup'):
-            return redirect('/')
-        
+
+        if config and request.path_info.startswith("/setup"):
+            return redirect("/")
+
         response = self.get_response(request)
         return response
 
@@ -37,7 +42,7 @@ class CheckShopMiddleware(object):
         self.get_response = get_response
 
     def _check_if_store_request(self, request):
-        if request.path_info.startswith('/store-app/'):
+        if request.path_info.startswith("/store-app/"):
             return True
         if request.path_info == "/":
             return False
@@ -47,11 +52,9 @@ class CheckShopMiddleware(object):
         config = ComfyConfig.objects.filter(active=True).first()
         if config and not config.shop_enabled and self._check_if_store_request(request):
             if settings.DEBUG:
-                return HttpResponse(
-                    status=500, content="Store is not enabled please turn it on in admin panel"
-                )
+                return HttpResponse(status=500, content="Store is not enabled please turn it on in admin panel")
             else:
-                return redirect('/')
-        
+                return redirect("/")
+
         response = self.get_response(request)
         return response

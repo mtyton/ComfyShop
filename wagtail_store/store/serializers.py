@@ -1,9 +1,6 @@
 from rest_framework import serializers
 
-from store.models import (
-    Product,
-    ProductAuthor
-)
+from store.models import Product, ProductAuthor
 
 
 class TagSerializer(serializers.Serializer):
@@ -36,7 +33,6 @@ class CartSerializer(serializers.Serializer):
 
 
 class CartProductAddSerializer(serializers.Serializer):
-
     product_id = serializers.IntegerField()
     quantity = serializers.IntegerField()
 
